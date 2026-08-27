@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>I.E. La Victoria 2026</title>
+    <title>2026 I.E.La Victoria</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -3935,7 +3935,7 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
     <script>
-        const URL_API = "https://script.google.com/macros/s/AKfycby8U59rxq5e1ZwUQuzxVvorl1ky532cPXlxoSejES6JIGrLdaDcQ0GW7gFvGuEY08rC/exec";
+        const URL_API = "https://script.google.com/macros/s/AKfycbzxdKwwcnsq4TUgZ4_RxnPBa2yygE7NJRL2QBeHPJNdaOXpPWs8mRlpahQ_rEIaBoCL/exec";
 
         let datosMemoria = {}; let fotosCache = {}; let qrsCache = {}; let editandoID = null; let reporteGlobalData = {}; let rolActual = ''; let usuarioDniActual = '';
         window.colaSincronizarAuxiliar = JSON.parse(localStorage.getItem('colaSincronizarAuxiliar') || '[]');
@@ -4909,8 +4909,8 @@
                 }
             }
 
-            // 2. Intentar iniciar sesión
-            let r = await fetchAPI({ accion: 'login', dni: dni, password: pass, tipo: tipo });
+            // 2. Intentar iniciar sesión (con solo 1 reintento para que sea súper rápido)
+            let r = await fetchAPI({ accion: 'login', dni: dni, password: pass, tipo: tipo }, 1);
 
             if(r.exito) {
                 sessionToken = r.sessionToken || '';
@@ -9384,114 +9384,156 @@
                     countTotalMonth += arr.length;
                 });
                 
+                let safeMonthId = grupoMes.mesAnio.replace(/[^a-zA-Z0-9]/g, '-');
+                
                 let monthHeader = document.createElement('div');
                 monthHeader.className = 'month-header bg-success text-white px-3 py-2 rounded-top fw-bold d-flex align-items-center justify-content-between shadow-sm';
+                monthHeader.style.cursor = 'pointer';
+                monthHeader.setAttribute('onclick', `toggleCollapseMonthAux('${safeMonthId}')`);
                 monthHeader.innerHTML = `
                     <span><i class="fa-solid fa-calendar-check me-2"></i>${grupoMes.mesAnio}</span>
-                    <span class="badge bg-white text-success fw-bold" style="font-size: 12px;">${countTotalMonth} Marcaciones</span>
+                    <div class="d-flex align-items-center gap-2">
+                        <span class="badge bg-white text-success fw-bold" style="font-size: 12px;">${countTotalMonth} Marcaciones</span>
+                        <i class="fa-solid fa-chevron-down transition-icon text-white" id="icon-month-aux-${safeMonthId}" style="transform: rotate(0deg);"></i>
+                    </div>
                 `;
                 
                 let monthBody = document.createElement('div');
-                monthBody.className = 'month-body bg-white border border-top-0 rounded-bottom p-3 shadow-sm';
+                monthBody.id = 'collapse-month-aux-' + safeMonthId;
+                monthBody.className = 'month-body bg-white border border-top-0 rounded-bottom p-3 shadow-sm collapse';
                 
-                // Sort Grado/Seccion naturally
                 let gradosOrdenados = Object.keys(grupoMes.grados).sort((a, b) => a.localeCompare(b));
                 
                 gradosOrdenados.forEach(gradoKey => {
                     let registrosGrado = grupoMes.grados[gradoKey];
-                    let totalGrado = registrosGrado.length;
-                    
-                    // Sort student list: Faltas at the bottom
-                    registrosGrado.sort((a, b) => {
-                        let stateA = String(a[7] || "").trim().toLowerCase();
-                        let stateB = String(b[7] || "").trim().toLowerCase();
-                        let isFaltaA = (stateA === 'falta');
-                        let isFaltaB = (stateB === 'falta');
-                        
-                        if (isFaltaA && !isFaltaB) return 1;
-                        if (!isFaltaA && isFaltaB) return -1;
-                        
-                        // Sort by date descending
-                        let dateComp = String(b[1] || "").localeCompare(String(a[1] || ""));
-                        if (dateComp !== 0) return dateComp;
-                        
-                        // Sort by name
-                        return String(a[4] || "").localeCompare(String(b[4] || ""));
-                    });
-                    
-                    // Compute statistics
-                    let asistioCount = 0;
-                    let tardeCount = 0;
-                    let faltaCount = 0;
-                    registrosGrado.forEach(f => {
-                        let st = String(f[7] || "").trim().toLowerCase();
-                        if (st === 'asistió' || st === 'asistio') asistioCount++;
-                        else if (st === 'falta') faltaCount++;
-                        else tardeCount++;
-                    });
-                    
-                    let asistPercent = totalGrado > 0 ? Math.round((asistioCount / totalGrado) * 100) : 0;
-                    let tardePercent = totalGrado > 0 ? Math.round((tardeCount / totalGrado) * 100) : 0;
-                    let faltaPercent = totalGrado > 0 ? Math.round((faltaCount / totalGrado) * 100) : 0;
-                    
-                    // Generate safe id for collapse
                     let safeGradoId = (grupoMes.mesAnio + '-' + gradoKey).replace(/[^a-zA-Z0-9]/g, '-');
                     
-                    let rowsHtml = '';
-                    registrosGrado.forEach(fila => {
-                        let id = fila[0];
-                        let fecha = String(fila[1] || '').trim();
-                        if (fecha.includes('T')) {
-                            let p = fecha.split('T')[0].split('-');
-                            fecha = p[2] + '/' + p[1] + '/' + p[0];
-                        } else if (fecha.includes('-')) {
-                            let p = fecha.split('-');
-                            if (p.length === 3 && p[0].length === 4) {
-                                fecha = p[2] + '/' + p[1] + '/' + p[0];
-                            }
-                        }
+                    let agrupadoPorFecha = {};
+                    registrosGrado.forEach(f => {
+                        let fecha = String(f[1] || '').trim();
+                        if (fecha.includes('T')) { let p = fecha.split('T')[0].split('-'); fecha = p[2] + '/' + p[1] + '/' + p[0]; }
+                        else if (fecha.includes('-')) { let p = fecha.split('-'); if (p.length === 3 && p[0].length === 4) fecha = p[2] + '/' + p[1] + '/' + p[0]; }
+                        if(!agrupadoPorFecha[fecha]) agrupadoPorFecha[fecha] = [];
+                        agrupadoPorFecha[fecha].push(f);
+                    });
+                    
+                    let fechasKeys = Object.keys(agrupadoPorFecha).sort((a,b) => {
+                        let pA = a.split('/'); let pB = b.split('/');
+                        if(pA.length===3 && pB.length===3) return (pB[2]+pB[1]+pB[0]).localeCompare(pA[2]+pA[1]+pA[0]);
+                        return 0;
+                    });
+                    
+                    let contenidoFechasHtml = '';
+                    
+                    fechasKeys.forEach((fk, idx) => {
+                        let registrosDia = agrupadoPorFecha[fk];
+                        let totalDia = registrosDia.length;
                         
-                        let bClass = fila[7] === 'Asistió' ? 'bg-success' : (fila[7] === 'Falta' ? 'bg-danger' : 'bg-warning text-dark');
-                        let registradoPor = fila[8] ? fila[8] : 'Manual';
+                        registrosDia.sort((a, b) => {
+                            let stateA = String(a[7] || "").trim().toLowerCase();
+                            let stateB = String(b[7] || "").trim().toLowerCase();
+                            let isFaltaA = (stateA === 'falta');
+                            let isFaltaB = (stateB === 'falta');
+                            if (isFaltaA && !isFaltaB) return 1;
+                            if (!isFaltaA && isFaltaB) return -1;
+                            return String(a[4] || "").localeCompare(String(b[4] || ""));
+                        });
                         
-                        let estadoFmt = fila[7] || "";
-                        if (estadoFmt.toLowerCase().includes('tarde') || estadoFmt.toLowerCase().includes('tardanza')) {
-                            let matchMin = estadoFmt.match(/\((\d+)\s*min\)/);
-                            if (matchMin) {
-                                let tardanzaMin = parseInt(matchMin[1], 10);
-                                if (tardanzaMin >= 1440) {
-                                    tardanzaMin = Math.floor(tardanzaMin / 60);
+                        let asistioCount = 0, tardeCount = 0, faltaCount = 0;
+                        registrosDia.forEach(f => {
+                            let st = String(f[7] || "").trim().toLowerCase();
+                            if (st === 'asistió' || st === 'asistio') asistioCount++;
+                            else if (st === 'falta') faltaCount++;
+                            else tardeCount++;
+                        });
+                        
+                        let asistPercent = totalDia > 0 ? Math.round((asistioCount / totalDia) * 100) : 0;
+                        let tardePercent = totalDia > 0 ? Math.round((tardeCount / totalDia) * 100) : 0;
+                        let faltaPercent = totalDia > 0 ? Math.round((faltaCount / totalDia) * 100) : 0;
+                        
+                        let rowsHtml = '';
+                        registrosDia.forEach(fila => {
+                            let id = fila[0];
+                            let fecha = fk;
+                            
+                            let bClass = fila[7] === 'Asistió' ? 'bg-success' : (fila[7] === 'Falta' ? 'bg-danger' : 'bg-warning text-dark');
+                            let registradoPor = fila[8] ? fila[8] : 'Manual';
+                            
+                            let estadoFmt = fila[7] || "";
+                            if (estadoFmt.toLowerCase().includes('tarde') || estadoFmt.toLowerCase().includes('tardanza')) {
+                                let matchMin = estadoFmt.match(/\((\d+)\s*min\)/);
+                                if (matchMin) {
+                                    let tardanzaMin = parseInt(matchMin[1], 10);
+                                    if (tardanzaMin >= 1440) tardanzaMin = Math.floor(tardanzaMin / 60);
+                                    let h = Math.floor(tardanzaMin / 60); let m = tardanzaMin % 60;
+                                    let tiempoFormateado = h > 0 ? (h + (h===1?" hora":" horas") + (m>0?" y "+m+(m===1?" minuto":" minutos"):"")) : (m + (m===1?" minuto":" minutos"));
+                                    estadoFmt = `Tarde (${tiempoFormateado})`;
                                 }
-                                let h = Math.floor(tardanzaMin / 60);
-                                let m = tardanzaMin % 60;
-                                let tiempoFormateado = "";
-                                if (h > 0) {
-                                    tiempoFormateado = h + (h === 1 ? " hora" : " horas") + (m > 0 ? " y " + m + (m === 1 ? " minuto" : " minutos") : "");
-                                } else {
-                                    tiempoFormateado = m + (m === 1 ? " minuto" : " minutos");
-                                }
-                                estadoFmt = `Tarde (${tiempoFormateado})`;
                             }
-                        }
+                            
+                            let cellCheckbox = canEditDelete ? `<td class="text-center"><input type="checkbox" class="chk-eliminar-Asistencia_Auxiliar form-check-input" value="${id}" onchange="actualizarBotonEliminarSeleccionados('Asistencia_Auxiliar')"></td>` : '';
+                            let btnEdit = canEditDelete ? `<button class="btn btn-sm btn-outline-primary mx-1 shadow-sm" onclick="prepararEdicion('Asistencia_Auxiliar', '${id}')" title="Editar"><i class="fa-solid fa-pen"></i></button>` : '';
+                            let btnDel = canEditDelete ? `<button class="btn btn-sm btn-outline-danger mx-1 shadow-sm" onclick="eliminarRegistro('Asistencia_Auxiliar', '${id}')" title="Eliminar"><i class="fa-solid fa-trash"></i></button>` : '';
+                            let cellAcciones = canEditDelete ? `<td class="text-center"><div class="d-flex justify-content-center align-items-center">${btnEdit}${btnDel}</div></td>` : '';
+                            
+                            rowsHtml += `
+                                <tr class="student-attendance-row" data-dni="${fila[3]}" data-docente="${fila[4]}" data-fecha="${fecha}">
+                                    ${cellCheckbox}
+                                    <td class="fw-bold">${fecha}</td>
+                                    <td>${fila[2]}</td>
+                                    <td>${fila[3]}</td>
+                                    <td>${fila[4]}</td>
+                                    <td><span class="badge ${bClass} p-2 shadow-sm">${estadoFmt}</span></td>
+                                    <td><span class="badge bg-info text-dark" style="font-size: 10px;">${registradoPor}</span></td>
+                                    ${cellAcciones}
+                                </tr>
+                            `;
+                        });
                         
-                        let cellCheckbox = canEditDelete ? `<td class="text-center"><input type="checkbox" class="chk-eliminar-Asistencia_Auxiliar form-check-input" value="${id}" onchange="actualizarBotonEliminarSeleccionados('Asistencia_Auxiliar')"></td>` : '';
-                        let btnEdit = canEditDelete ? `<button class="btn btn-sm btn-outline-primary mx-1 shadow-sm" onclick="prepararEdicion('Asistencia_Auxiliar', '${id}')" title="Editar"><i class="fa-solid fa-pen"></i></button>` : '';
-                        let btnDel = canEditDelete ? `<button class="btn btn-sm btn-outline-danger mx-1 shadow-sm" onclick="eliminarRegistro('Asistencia_Auxiliar', '${id}')" title="Eliminar"><i class="fa-solid fa-trash"></i></button>` : '';
-                        let cellAcciones = canEditDelete ? `<td class="text-center"><div class="d-flex justify-content-center align-items-center">${btnEdit}${btnDel}</div></td>` : '';
-                        
-                        rowsHtml += `
-                            <tr class="student-attendance-row" data-dni="${fila[3]}" data-docente="${fila[4]}" data-fecha="${fecha}">
-                                ${cellCheckbox}
-                                <td class="fw-bold">${fecha}</td>
-                                <td>${fila[2]}</td>
-                                <td>${fila[3]}</td>
-                                <td>${fila[4]}</td>
-                                <td><span class="badge ${bClass} p-2 shadow-sm">${estadoFmt}</span></td>
-                                <td><span class="badge bg-info text-dark" style="font-size: 10px;">${registradoPor}</span></td>
-                                ${cellAcciones}
-                            </tr>
+                        contenidoFechasHtml += `
+                            <div id="tabla-fecha-${safeGradoId}-${idx}" class="tabla-fecha-item ${idx === 0 ? '' : 'd-none'}">
+                                <div class="mb-3 px-1">
+                                    <div class="d-flex justify-content-between text-muted small mb-1">
+                                        <span class="fw-bold">Resumen del Día (${fk})</span>
+                                        <span class="fw-bold text-dark">${asistPercent}% Asistieron / ${tardePercent}% Tardanza / ${faltaPercent}% Faltas</span>
+                                    </div>
+                                    <div class="progress" style="height: 10px; border-radius: 5px; overflow: hidden;">
+                                        <div class="progress-bar bg-success" role="progressbar" style="width: ${asistPercent}%" aria-valuenow="${asistPercent}" aria-valuemin="0" aria-valuemax="100"></div>
+                                        <div class="progress-bar bg-warning" role="progressbar" style="width: ${tardePercent}%" aria-valuenow="${tardePercent}" aria-valuemin="0" aria-valuemax="100"></div>
+                                        <div class="progress-bar bg-danger" role="progressbar" style="width: ${faltaPercent}%" aria-valuenow="${faltaPercent}" aria-valuemin="0" aria-valuemax="100"></div>
+                                    </div>
+                                </div>
+                                <div class="table-responsive">
+                                    <table class="table table-hover table-striped align-middle mb-0" style="font-size: 13px;">
+                                        <thead class="table-light">
+                                            <tr>
+                                                ${canEditDelete ? '<th style="width: 40px;" class="text-center">#</th>' : ''}
+                                                <th>Fecha</th>
+                                                <th>Hora</th>
+                                                <th>DNI</th>
+                                                <th>Nombres</th>
+                                                <th>Estado</th>
+                                                <th>Registrado Por</th>
+                                                ${canEditDelete ? '<th class="text-center">Acciones</th>' : ''}
+                                            </tr>
+                                        </thead>
+                                        <tbody>${rowsHtml}</tbody>
+                                    </table>
+                                </div>
+                            </div>
                         `;
                     });
+                    
+                    let navFechasHtml = '';
+                    if (fechasKeys.length > 0) {
+                        navFechasHtml = `
+                        <div class="d-flex justify-content-center align-items-center mb-3 bg-light p-2 rounded shadow-sm border mx-2 mt-2">
+                            <button class="btn btn-sm btn-outline-secondary" onclick="navegarFechaAuxiliar('${safeGradoId}', 1)" ${fechasKeys.length <= 1 ? 'disabled' : ''}><i class="fa-solid fa-chevron-left"></i> Ant.</button>
+                            <span class="mx-3 fw-bold text-primary" id="lbl-fecha-${safeGradoId}" style="min-width: 120px; text-align: center; font-size: 15px;">${fechasKeys[0]}</span>
+                            <button class="btn btn-sm btn-outline-secondary" onclick="navegarFechaAuxiliar('${safeGradoId}', -1)" ${fechasKeys.length <= 1 ? 'disabled' : ''}>Sig. <i class="fa-solid fa-chevron-right"></i></button>
+                        </div>
+                        `;
+                    }
                     
                     let gradeBlock = document.createElement('div');
                     gradeBlock.className = 'date-block card mb-3 border-light shadow-sm';
@@ -9513,59 +9555,59 @@
                             </span>
                             <div class="d-flex align-items-center gap-1">
                                 ${checkboxTodosGrade}
-                                <span class="badge bg-success rounded-pill px-3 py-2 fw-semibold me-2" style="font-size: 11px;">${totalGrado} Estudiantes</span>
-                                <i class="fa-solid fa-chevron-down transition-icon text-muted" id="icon-aux-grade-${safeGradoId}" style="transform: rotate(180deg);"></i>
+                                <span class="badge bg-success rounded-pill px-3 py-2 fw-semibold me-2" style="font-size: 11px;">${registrosGrado.length} Marc.</span>
+                                <i class="fa-solid fa-chevron-down transition-icon text-muted" id="icon-aux-grade-${safeGradoId}" style="transform: rotate(0deg);"></i>
                             </div>
                         </div>
-                        <div id="collapse-aux-grade-${safeGradoId}" class="collapse show">
-                            <div class="card-body pt-3 px-3 pb-3">
-                                <div class="mb-3 px-1">
-                                    <div class="d-flex justify-content-between text-muted small mb-1">
-                                        <span class="fw-bold">Resumen de Asistencia</span>
-                                        <span class="fw-bold text-dark">${asistPercent}% Asistieron / ${tardePercent}% Tardanza / ${faltaPercent}% Faltas</span>
-                                    </div>
-                                    <div class="progress" style="height: 10px; border-radius: 5px; overflow: hidden;">
-                                        <div class="progress-bar bg-success" role="progressbar" style="width: ${asistPercent}%" aria-valuenow="${asistPercent}" aria-valuemin="0" aria-valuemax="100" title="Asistió: ${asistioCount}"></div>
-                                        <div class="progress-bar bg-warning text-dark" role="progressbar" style="width: ${tardePercent}%" aria-valuenow="${tardePercent}" aria-valuemin="0" aria-valuemax="100" title="Tarde: ${tardeCount}"></div>
-                                        <div class="progress-bar bg-danger" role="progressbar" style="width: ${faltaPercent}%" aria-valuenow="${faltaPercent}" aria-valuemin="0" aria-valuemax="100" title="Falta: ${faltaCount}"></div>
-                                    </div>
-                                    <div class="d-flex gap-3 mt-2 small justify-content-center">
-                                        <span class="d-flex align-items-center gap-1"><span class="badge bg-success rounded-circle p-1" style="width:8px; height:8px; display:inline-block;"></span> Asistió: ${asistioCount}</span>
-                                        <span class="d-flex align-items-center gap-1"><span class="badge bg-warning rounded-circle p-1" style="width:8px; height:8px; display:inline-block;"></span> Tarde: ${tardeCount}</span>
-                                        <span class="d-flex align-items-center gap-1"><span class="badge bg-danger rounded-circle p-1" style="width:8px; height:8px; display:inline-block;"></span> Falta: ${faltaCount}</span>
-                                    </div>
-                                </div>
-                                
-                                <div class="table-responsive border rounded-3 mt-2">
-                                    <table class="table table-hover align-middle mb-0" style="font-size: 13px;">
-                                        <thead class="table-light">
-                                            <tr>
-                                                ${canEditDelete ? '<th style="width: 40px;" class="text-center"><i class="fa-solid fa-check-square"></i></th>' : ''}
-                                                <th>Fecha</th>
-                                                <th>Hora</th>
-                                                <th>DNI</th>
-                                                <th>Nombres Completos</th>
-                                                <th>Estado</th>
-                                                <th>Responsable</th>
-                                                ${canEditDelete ? '<th style="width: 120px;" class="text-center">Acciones</th>' : ''}
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            ${rowsHtml}
-                                        </tbody>
-                                    </table>
-                                </div>
+                        <div id="collapse-aux-grade-${safeGradoId}" class="collapse">
+                            ${navFechasHtml}
+                            <div class="card-body pt-1 px-3 pb-3" id="contenedor-fechas-${safeGradoId}" data-fechas='${JSON.stringify(fechasKeys)}' data-index="0">
+                                ${contenidoFechasHtml}
                             </div>
                         </div>
                     `;
-                    
                     monthBody.appendChild(gradeBlock);
                 });
-                
+
                 monthBlock.appendChild(monthHeader);
                 monthBlock.appendChild(monthBody);
                 tb.appendChild(monthBlock);
             });
+        }
+
+        function toggleCollapseMonthAux(idMes) {
+            let el = document.getElementById('collapse-month-aux-' + idMes);
+            let icon = document.getElementById('icon-month-aux-' + idMes);
+            if (el) {
+                let bsCollapse = bootstrap.Collapse.getOrCreateInstance(el, {toggle: false});
+                if (el.classList.contains('show')) {
+                    bsCollapse.hide();
+                    if(icon) icon.style.transform = 'rotate(0deg)';
+                } else {
+                    bsCollapse.show();
+                    if(icon) icon.style.transform = 'rotate(180deg)';
+                }
+            }
+        }
+
+        function navegarFechaAuxiliar(idGrado, dir) {
+            let cont = document.getElementById('contenedor-fechas-' + idGrado);
+            if (!cont) return;
+            let fechas = JSON.parse(cont.getAttribute('data-fechas'));
+            if(fechas.length <= 1) return;
+            
+            let currIdx = parseInt(cont.getAttribute('data-index'), 10);
+            let newIdx = currIdx + dir;
+            if (newIdx < 0) newIdx = fechas.length - 1;
+            if (newIdx >= fechas.length) newIdx = 0;
+            
+            let currentTab = document.getElementById('tabla-fecha-' + idGrado + '-' + currIdx);
+            let newTab = document.getElementById('tabla-fecha-' + idGrado + '-' + newIdx);
+            if(currentTab) currentTab.classList.add('d-none');
+            if(newTab) newTab.classList.remove('d-none');
+            
+            cont.setAttribute('data-index', newIdx);
+            document.getElementById('lbl-fecha-' + idGrado).innerText = fechas[newIdx];
         }
 
         function toggleCollapseAuxGrade(safeGradoId) {
