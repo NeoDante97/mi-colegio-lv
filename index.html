@@ -3,13 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>I.E. La Victoria</title>
+    <title>I.E. La Victoria 2026</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11">
+</script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/blueimp-md5/2.19.0/js/md5.min.js"></script>
     
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
@@ -1339,7 +1340,7 @@
     
     
     <!-- Modal Permisos -->
-    <div class="modal fade" id="modal-Permisos" tabindex="-1">
+    <div class="modal fade" data-bs-backdrop="static" data-bs-keyboard="false" id="modal-Permisos" tabindex="-1">
         <div class="modal-dialog modal-lg modal-dialog-scrollable modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-header bg-info text-dark">
@@ -1438,7 +1439,7 @@
     </div>
 
     <!-- Modal Permisos Docentes -->
-    <div class="modal fade" id="modal-Permisos-Docentes" tabindex="-1">
+    <div class="modal fade" data-bs-backdrop="static" data-bs-keyboard="false" id="modal-Permisos-Docentes" tabindex="-1">
         <div class="modal-dialog modal-lg modal-dialog-scrollable modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-header bg-info text-dark">
@@ -1550,7 +1551,7 @@
 
     
     <!-- Modal Control de Accesos -->
-    <div class="modal fade" id="modal-Accesos" tabindex="-1">
+    <div class="modal fade" data-bs-backdrop="static" data-bs-keyboard="false" id="modal-Accesos" tabindex="-1">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-header bg-dark text-white">
@@ -1700,7 +1701,7 @@
         </div>
     </div>
 
-    <div class="modal fade" id="modal-Login-Docente" tabindex="-1">
+    <div class="modal fade" data-bs-backdrop="static" data-bs-keyboard="false" id="modal-Login-Docente" tabindex="-1">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content border-success" style="border-width: 3px;">
                 <div class="modal-header bg-success text-white">
@@ -1719,7 +1720,7 @@
 
     
     <!-- Modal Consulta Incidencias -->
-    <div class="modal fade" id="modal-Consulta-Incidencias" tabindex="-1">
+    <div class="modal fade" data-bs-backdrop="static" data-bs-keyboard="false" id="modal-Consulta-Incidencias" tabindex="-1">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content border-danger" style="border-width: 3px;">
                 <div class="modal-header bg-danger text-white">
@@ -1832,10 +1833,10 @@
                 </a>
 
                 <a class="nav-link menu-admin menu-docente menu-auxiliar d-none w-100 mt-2" id="link-vacaciones" onclick="cambiarVista('v-vacaciones', this, 'Vacaciones')">
-                    <i class="fa-solid fa-umbrella-beach icon-main me-1"></i> Vacaciones
+                    <i class="fa-solid fa-umbrella-beach icon-main me-1"></i> Vacaciones/Virtual Docentes
                 </a>
-                <a class="nav-link menu-admin d-none w-100 mt-2" id="link-retirados" onclick="cambiarVista('v-retirados', this, 'Retirados')">
-                    <i class="fa-solid fa-user-minus icon-main me-1"></i> Retirado
+                <a class="nav-link menu-admin d-none w-100 mt-2" id="link-retirados" onclick="cambiarVista('v-retirados', this, 'TRASLADO/TERMINO')">
+                    <i class="fa-solid fa-user-minus icon-main me-1"></i> Traslado/T.CONTRATA
                 </a>
 
                 <a class="nav-link menu-admin menu-docente menu-auxiliar d-none w-100 mt-2" id="link-nomina" href="https://nominalv.netlify.app" target="_blank">
@@ -2787,56 +2788,82 @@
 
             <!-- VISTA RETIRADOS -->
     <div id="v-retirados" class="vista-modulo d-none">
-        <div class="d-flex justify-content-between mb-3 align-items-center flex-wrap gap-2">
-            <h5 class="mb-0 fw-bold"><i class="fa-solid fa-user-minus text-danger"></i> Gestión de Retirados y Contratos</h5>
+        <style>
+            #ttTabs .nav-link.active#est-tab { background-color: #0d6efd; color: white !important; border-color: #0d6efd; }
+            #ttTabs .nav-link.active#doc-tab { background-color: #198754; color: white !important; border-color: #198754; }
+        </style>
+        <div class="d-flex justify-content-between mb-2 align-items-center flex-wrap gap-2">
+            <h5 class="mb-0 fw-bold"><i class="fa-solid fa-user-minus text-danger"></i> Gesti&oacute;n de Traslado / T&eacute;rmino / Renuncia</h5>
         </div>
+        <p class="text-muted small mb-4">En este m&oacute;dulo puede registrar y gestionar a los estudiantes que han sido trasladados a otra instituci&oacute;n y al personal docente/auxiliar que ha finalizado su contrato o renunciado. Los registros agregados aqu&iacute; justificar&aacute;n la inasistencia en los reportes (apareciendo como TC o Trasladado).</p>
+        <div class="card shadow-sm border-primary mb-4">
+            <div class="card-header bg-primary text-white fw-bold">Registrar Traslado / T&eacute;rmino</div>
+            <div class="card-body">
+                <div class="row g-3 align-items-end">
+                    <div class="col-md-2">
+                        <label class="form-label small fw-bold">A&ntilde;o</label>
+                        <select id="tt-anio" class="form-select" onchange="cambiarGrupoTT(); renderTablasTT();">
+                            <option value="">Cargando...</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label small fw-bold">Grupo</label>
+                        <select id="tt-grupo" class="form-select" onchange="cambiarGrupoTT()">
+                            <option value="Estudiante">Estudiante</option>
+                            <option value="Docente">Docente</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2" id="tt-grado-div">
+                        <label class="form-label small fw-bold">Grado y Secci&oacute;n</label>
+                        <select id="tt-grado" class="form-select" onchange="filtrarPersonasTT()">
+                            <option value="">Seleccione...</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3" id="tt-persona-div">
+                        <label class="form-label small fw-bold">Persona</label>
+                        <select id="tt-persona" class="form-select">
+                            <option value="">Seleccione...</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label small fw-bold">Fecha</label>
+                        <input type="date" id="tt-fecha" class="form-control">
+                    </div>
+                    <div class="col-md-12">
+                        <label class="form-label small fw-bold"><i class="fa-solid fa-align-left text-secondary me-1"></i> Descripci&oacute;n / Motivo (Opcional)</label>
+                        <input type="text" id="tt-descripcion" class="form-control" placeholder="Ej: Cambio de residencia, Renuncia voluntaria, etc.">
+                    </div>
+                    <div class="col-md-12 text-end mt-3">
+                        <button class="btn btn-primary fw-bold" id="btn-registrar-tt" onclick="registrarTT()">Guardar Registro</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <div class="row g-3">
-            <div class="col-md-6">
-                <div class="card shadow-sm border-danger">
-                    <div class="card-header bg-danger text-white fw-bold">Registrar Retiro - Estudiante</div>
-                    <div class="card-body">
-                        <select id="ret-est-select" class="form-select mb-3"><option value="">Cargando Estudiantes...</option></select>
-                        <label class="form-label small fw-bold">Fecha de Retiro</label>
-                        <input type="date" id="ret-est-fecha" class="form-control mb-3">
-                        <button class="btn btn-danger w-100 fw-bold" onclick="registrarRetiro('Estudiantes')">Registrar Retiro</button>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-6">
-                <div class="card shadow-sm border-secondary">
-                    <div class="card-header bg-secondary text-white fw-bold">Registrar Retiro - Docente</div>
-                    <div class="card-body">
-                        <select id="ret-doc-select" class="form-select mb-3"><option value="">Cargando Docentes...</option></select>
-                        <label class="form-label small fw-bold">Fecha de Retiro</label>
-                        <input type="date" id="ret-doc-fecha" class="form-control mb-3">
-                        <button class="btn btn-secondary w-100 fw-bold" onclick="registrarRetiro('Docentes')">Registrar Retiro</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-        
-        <div class="row g-3 mt-3">
-            <div class="col-md-6">
-                <div class="card shadow-sm border-danger">
-                    <div class="card-header bg-danger text-white fw-bold small">Estudiantes Retirados</div>
-                    <div class="card-body p-0">
+            <div class="col-md-12">
+                <ul class="nav nav-tabs" id="ttTabs" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active fw-bold text-dark" id="est-tab" data-bs-toggle="tab" data-bs-target="#tt-est" type="button" role="tab">Estudiantes (Traslados)</button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link fw-bold text-dark" id="doc-tab" data-bs-toggle="tab" data-bs-target="#tt-doc" type="button" role="tab">Docentes (T&eacute;rmino Contrato)</button>
+                    </li>
+                </ul>
+                <div class="tab-content border border-top-0 p-3 bg-white" id="ttTabsContent">
+                    <div class="tab-pane fade show active" id="tt-est" role="tabpanel">
                         <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
                             <table class="table table-sm table-bordered table-striped mb-0 text-center" style="font-size: 0.85rem;">
-                                <thead class="table-light position-sticky top-0"><tr><th>DNI</th><th>Nombres</th><th>Grado y Sec</th><th>Fecha Retiro</th></tr></thead>
-                                <tbody id="tb-retirados-est"></tbody>
+                                <thead class="table-light position-sticky top-0"><tr><th>A&Ntilde;O</th><th>DNI</th><th>GRADO Y SECCI&Oacute;N</th><th>NOMBRE COMPLETO</th><th>FECHA DE TRASLADO</th><th>DESCRIPCI&Oacute;N</th><th>ACCI&Oacute;N</th></tr></thead>
+                                <tbody id="tb-tt-est"></tbody>
                             </table>
                         </div>
                     </div>
-                </div>
-            </div>
-            <div class="col-md-6">
-                <div class="card shadow-sm border-secondary">
-                    <div class="card-header bg-secondary text-white fw-bold small">Docentes con Contrato Terminado</div>
-                    <div class="card-body p-0">
+                    <div class="tab-pane fade" id="tt-doc" role="tabpanel">
                         <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
                             <table class="table table-sm table-bordered table-striped mb-0 text-center" style="font-size: 0.85rem;">
-                                <thead class="table-light position-sticky top-0"><tr><th>DNI</th><th>Nombres</th><th>Fecha Fin</th></tr></thead>
-                                <tbody id="tb-retirados-doc"></tbody>
+                                <thead class="table-light position-sticky top-0"><tr><th>A&Ntilde;O</th><th>DNI</th><th>NOMBRE COMPLETO</th><th>FECHA TERMINO CONTRATA</th><th>DESCRIPCI&Oacute;N</th><th>ACCI&Oacute;N</th></tr></thead>
+                                <tbody id="tb-tt-doc"></tbody>
                             </table>
                         </div>
                     </div>
@@ -2851,7 +2878,7 @@
                 </div>
 
                 <!-- SELECTOR ESTUDIANTES / DOCENTES Y CAMPOS COMUNES -->
-                <div class="card p-3 shadow-sm mb-4 border-warning border-2" style="background: rgba(255, 248, 225, 0.4);">
+                <div class="card p-3 shadow-sm mb-4 border-warning border-2" style="background: rgba(255, 248, 225, 0.4);" id="card-registrar-vacaciones">
                     <div class="row g-3">
                         <div class="col-12 col-md-4">
                             <label class="form-label fw-bold"><i class="fa-solid fa-layer-group text-warning me-1"></i> Tipo de Personal / Estudiantes:</label>
@@ -2870,14 +2897,26 @@
                         </div>
                         <div class="col-12 col-md-12">
                             <label class="form-label fw-bold"><i class="fa-solid fa-comment-dots text-info me-1"></i> Motivo / Detalle de Vacaciones:</label>
-                            <input type="text" id="vac-motivo" class="form-control" placeholder="Ej: Vacaciones Programadas" value="Vacaciones Programadas">
+                            <div id="vac-motivo-wrapper">
+                                <input type="text" id="vac-motivo" class="form-control" placeholder="Ej: Vacaciones Programadas" value="Vacaciones Programadas">
+                            </div>
                         </div>
                     </div>
                 </div>
 
                 <!-- PANEL ESTUDIANTES -->
                 <div id="vac-panel-estudiantes">
-                    <div class="card p-3 shadow-sm mb-4">
+                    <div class="mb-3 text-center">
+                        <div class="btn-group" role="group">
+                            <input type="radio" class="btn-check" name="vac-est-mode" id="vac-est-mode-grupo" value="grupo" autocomplete="off" checked onchange="toggleVacEstMode()">
+                            <label class="btn btn-outline-primary fw-bold" for="vac-est-mode-grupo"><i class="fa-solid fa-users me-1"></i> Por Grupo</label>
+
+                            <input type="radio" class="btn-check" name="vac-est-mode" id="vac-est-mode-indiv" value="indiv" autocomplete="off" onchange="toggleVacEstMode()">
+                            <label class="btn btn-outline-primary fw-bold" for="vac-est-mode-indiv"><i class="fa-solid fa-user me-1"></i> Individual</label>
+                        </div>
+                    </div>
+
+                    <div id="vac-est-grupo-container" class="card p-3 shadow-sm mb-4">
                         <div class="d-flex justify-content-between align-items-center mb-3 border-bottom pb-2 flex-wrap gap-2">
                             <h6 class="fw-bold mb-0 text-dark"><i class="fa-solid fa-users text-primary me-2"></i> Grados y Secciones Unificados</h6>
                             <div class="form-check form-switch">
@@ -2886,6 +2925,22 @@
                             </div>
                         </div>
                         <div id="vac-grid-grados" class="row g-2 max-vh-50 overflow-auto p-1">
+                            <!-- dinámico -->
+                        </div>
+                    </div>
+
+                    <div id="vac-est-indiv-container" class="card p-3 shadow-sm mb-4 d-none">
+                        <div class="d-flex justify-content-between align-items-center mb-3 border-bottom pb-2 flex-wrap gap-2">
+                            <h6 class="fw-bold mb-0 text-dark"><i class="fa-solid fa-user-graduate text-primary me-2"></i> Selección de Estudiantes</h6>
+                            <div class="d-flex align-items-center gap-3 flex-wrap">
+                                <input type="text" id="vac-buscar-estudiante-indiv" class="form-control form-control-sm" placeholder="Buscar Estudiante..." onkeyup="filtrarEstudiantesIndivVacaciones(this.value)" style="width: 220px;">
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" id="chk-vac-all-est-indiv" onchange="toggleAllEstIndivVacaciones(this)">
+                                    <label class="form-check-label fw-bold text-primary" for="chk-vac-all-est-indiv" style="cursor: pointer;">Seleccionar Todos</label>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="vac-grid-est-indiv" class="row g-2 max-vh-50 overflow-auto p-1" style="max-height: 400px;">
                             <!-- dinámico -->
                         </div>
                     </div>
@@ -2982,10 +3037,6 @@
                         <span class="fw-bold me-2 text-dark text-center ms-3" style="font-size: 10px; line-height: 1;">GRADO Y<br>SEC.</span>
                         <select id="rep-aux-grado" class="form-select fw-bold text-dark" style="border-radius: 20px; width: auto; min-width: 120px; border: 1px solid #ccc; font-size: 0.9rem;"><option value="">Seleccionar</option></select>
                     </div>
-                    <div class="d-flex align-items-center">
-                        <span class="text-danger fw-bold me-2 ms-3" style="font-size: 0.95rem;">Año:</span>
-                        <select id="rep-aux-ano" class="form-select fw-bold text-dark" style="border-radius: 20px; width: auto; min-width: 90px; border: 1px solid #ccc; font-size: 0.9rem;"><option value="">Todos</option></select>
-                    </div>
                     <button class="btn fw-bold text-dark ms-2 me-1" style="background-color: #ffc107; border-radius: 20px; padding: 6px 35px; font-size: 0.95rem;" onclick="generarReporteMatricial('auxiliar')">Buscar</button>
                 </div>
 
@@ -3014,6 +3065,8 @@
                         <div class="d-flex align-items-center"><span class="badge bg-warning text-dark me-2" style="font-size: 0.95rem; width: 24px; height: 24px; display: inline-flex; align-items: center; justify-content: center; border-radius: 4px; border: 1px solid #ccc;">T</span> tardanza</div>
                         <div class="d-flex align-items-center"><span class="badge text-white me-2" style="background-color: #0d6efd; font-size: 0.95rem; width: 24px; height: 24px; display: inline-flex; align-items: center; justify-content: center; border-radius: 4px;">T</span> se registró manualmente debido a que no trajo carnet</div>
                         <div class="d-flex align-items-center"><span class="badge bg-danger text-white me-2" style="font-size: 0.95rem; width: 24px; height: 24px; display: inline-flex; align-items: center; justify-content: center; border-radius: 4px;">F</span> inasistencia / falta</div>
+                        <div class="d-flex align-items-center"><span class="badge bg-secondary text-white me-2" style="font-size: 0.95rem; width: 24px; height: 24px; display: inline-flex; align-items: center; justify-content: center; border-radius: 4px;">TR</span> traslado</div>
+                        <div class="d-flex align-items-center"><span class="badge bg-secondary text-white me-2" style="font-size: 0.95rem; width: 24px; height: 24px; display: inline-flex; align-items: center; justify-content: center; border-radius: 4px;">TC</span> término de contrato</div>
                         <div class="d-flex align-items-center"><span class="badge text-white me-2" style="background-color: #fd7e14; font-size: 0.95rem; width: 24px; height: 24px; display: inline-flex; align-items: center; justify-content: center; border-radius: 4px;">V</span> vacaciones</div>
                     </div>
                 </div>
@@ -3071,7 +3124,7 @@
                         </thead>
                         <tbody id="tb-ReporteFaltas">
                             <tr>
-                                <td colspan="5" class="text-muted py-5 fw-bold border border-dark">Seleccione Rango de Fechas y Grado/Sección, luego presiona "Buscar".</td>
+                                <td colspan="6" class="text-muted py-5 fw-bold border border-dark">Seleccione Rango de Fechas y Grado/Sección, luego presiona "Buscar".</td>
                             </tr>
                         </tbody>
                     </table>
@@ -3261,10 +3314,6 @@
                         <span class="fw-bold me-2 text-dark text-center ms-3" style="font-size: 10px; line-height: 1;">SELECCIONE<br>DOCENTE</span>
                         <select id="rep-doc-docente" class="form-select fw-bold text-dark" style="border-radius: 20px; width: auto; min-width: 180px; border: 1px solid #ccc; font-size: 0.9rem;"><option value="">Todos los Docentes</option></select>
                     </div>
-                    <div class="d-flex align-items-center">
-                        <span class="text-info fw-bold me-2 ms-3" style="font-size: 0.95rem;">Año:</span>
-                        <select id="rep-doc-ano" class="form-select fw-bold text-dark" style="border-radius: 20px; width: auto; min-width: 90px; border: 1px solid #ccc; font-size: 0.9rem;"><option value="">Todos</option></select>
-                    </div>
                     <button class="btn fw-bold text-dark ms-2 me-1" style="background-color: #0dcaf0; border-radius: 20px; padding: 6px 35px; font-size: 0.95rem;" onclick="generarReporteDocente()">Buscar</button>
                 </div>
 
@@ -3327,6 +3376,7 @@
                 </div>
 
                 <div id="msg-filtro-reporte-doc" class="text-center text-primary fw-bold mb-3 d-print-none"></div>
+                <div id="horario-fijo-docente-container" class="mb-4"></div>
                 
                 <div class="table-responsive">
                     <table class="table text-center align-middle tabla-matricial" id="tabla-imprimir-doc">
@@ -3334,20 +3384,31 @@
                         <tbody id="tb-ReporteMatricialDoc"><tr><td colspan="9" class="text-muted py-5 fw-bold border border-dark">Selecciona Rango de Fechas y Docente, luego presiona "Buscar".</td></tr></tbody>
                     </table>
                 </div>
+                <!-- LEYENDA DEL REPORTE DOCENTE -->
+                <div id="leyenda-reporte-doc" class="mt-4 p-3 border border-dark text-dark fw-bold d-block" style="font-size: 0.9rem; border-radius: 8px; background-color: #f8f9fa;">
+                    <div class="mb-2 text-uppercase border-bottom border-dark pb-1" style="font-size: 0.95rem;"><i class="fa-solid fa-circle-info me-1"></i> Leyenda de Asistencia</div>
+                    <div class="d-flex flex-wrap gap-4">
+                        <div class="d-flex align-items-center"><span class="badge bg-success text-white me-2" style="font-size: 0.95rem; width: 24px; height: 24px; display: inline-flex; align-items: center; justify-content: center; border-radius: 4px;">P</span> permiso docente</div>
+                        <div class="d-flex align-items-center"><span class="badge bg-danger text-white me-2" style="font-size: 0.95rem; width: 24px; height: 24px; display: inline-flex; align-items: center; justify-content: center; border-radius: 4px;">F</span> inasistencia / falta</div>
+                        <div class="d-flex align-items-center"><span class="badge text-white me-2" style="background-color: #ffc10744; color: #666 !important; font-size: 0.95rem; width: 24px; height: 24px; display: inline-flex; align-items: center; justify-content: center; border-radius: 4px;">DOM</span>/<span class="badge text-white me-2 ms-1" style="background-color: #ffc10744; color: #666 !important; font-size: 0.95rem; width: 24px; height: 24px; display: inline-flex; align-items: center; justify-content: center; border-radius: 4px;">SAB</span> fin de semana</div>
+                        <div class="d-flex align-items-center"><span class="badge text-dark me-2" style="background-color: #f8f9fa; border: 1px solid #ccc; font-size: 0.95rem; padding: 0 5px; height: 24px; display: inline-flex; align-items: center; justify-content: center; border-radius: 4px;">TC</span> t&eacute;rmino de contrato</div>
+                        <div class="d-flex align-items-center"><span class="badge text-warning me-2 border border-warning" style="background-color: #fff3cd; font-size: 0.95rem; width: 24px; height: 24px; display: inline-flex; align-items: center; justify-content: center; border-radius: 4px;">W</span> trabajo virtual</div>
+                    </div>
+                </div>
             </div>
             
         </div>
     </div>
 
-    <div class="modal fade" id="modal-Administradores" tabindex="-1"><div class="modal-dialog"><div class="modal-content"><div class="modal-header bg-primary text-white"><h5 class="modal-title"><i class="fa-solid fa-user-shield"></i> Administrador</h5><button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button></div><div class="modal-body"><input type="text" id="adm-0" class="form-control mb-2" placeholder="DNI (8 dígitos)" maxlength="8" oninput="this.value = this.value.replace(/[^0-9]/g, '');"><input type="text" id="adm-1" class="form-control mb-2" placeholder="Nombres"><input type="text" id="adm-2" class="form-control mb-2" placeholder="Contraseña"><input type="text" id="adm-3" class="form-control mb-2" value="Administrador" disabled><select id="adm-4" class="form-select mb-3"><option value="">Estado</option><option value="Activo">Activo</option><option value="Inactivo">Inactivo</option></select><div id="msg-Administradores" class="text-center fw-bold"></div></div><div class="modal-footer"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button><button id="btn-form-Administradores" class="btn btn-primary" onclick="guardarDato('Administradores', ['adm-0','adm-1','adm-2','adm-3','adm-4'])">Guardar</button></div></div></div></div>
+    <div class="modal fade" data-bs-backdrop="static" data-bs-keyboard="false" id="modal-Administradores" tabindex="-1"><div class="modal-dialog"><div class="modal-content"><div class="modal-header bg-primary text-white"><h5 class="modal-title"><i class="fa-solid fa-user-shield"></i> Administrador</h5><button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button></div><div class="modal-body"><input type="text" id="adm-0" class="form-control mb-2" placeholder="DNI (8 dígitos)" maxlength="8" oninput="this.value = this.value.replace(/[^0-9]/g, '');"><input type="text" id="adm-1" class="form-control mb-2" placeholder="Nombres"><input type="text" id="adm-2" class="form-control mb-2" placeholder="Contraseña"><input type="text" id="adm-3" class="form-control mb-2" value="Administrador" disabled><select id="adm-4" class="form-select mb-3"><option value="">Estado</option><option value="Activo">Activo</option><option value="Inactivo">Inactivo</option></select><div id="msg-Administradores" class="text-center fw-bold"></div></div><div class="modal-footer"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button><button id="btn-form-Administradores" class="btn btn-primary" onclick="guardarDato('Administradores', ['adm-0','adm-1','adm-2','adm-3','adm-4'])">Guardar</button></div></div></div></div>
     
-    <div class="modal fade" id="modal-Docentes" tabindex="-1"><div class="modal-dialog"><div class="modal-content"><div class="modal-header bg-primary text-white"><h5 class="modal-title"><i class="fa-solid fa-chalkboard-user"></i> Docente</h5><button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button></div><div class="modal-body"><input type="text" id="doc-0" class="form-control mb-2" placeholder="DNI (8 dígitos)" maxlength="8" oninput="this.value = this.value.replace(/[^0-9]/g, '');"><input type="text" id="doc-1" class="form-control mb-2" placeholder="Nombres Completos"><input type="text" id="doc-2" class="form-control mb-2" placeholder="Contraseña"><select id="doc-3" class="form-select mb-2"><option value="">Nivel</option><option value="Secundaria">Secundaria</option><option value="Primaria">Primaria</option></select><select id="doc-4" class="form-select mb-2"><option value="">Cargando áreas...</option></select><input type="text" id="doc-8" class="form-control mb-2" placeholder="Celular (Opcional, 9 dígitos)" maxlength="9" oninput="this.value = this.value.replace(/[^0-9]/g, '');"><input type="number" id="doc-6" class="form-control mb-2" placeholder="Año (Ej: 2026)" value="2026">
+    <div class="modal fade" data-bs-backdrop="static" data-bs-keyboard="false" id="modal-Docentes" tabindex="-1"><div class="modal-dialog"><div class="modal-content"><div class="modal-header bg-primary text-white"><h5 class="modal-title"><i class="fa-solid fa-chalkboard-user"></i> Docente</h5><button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button></div><div class="modal-body"><input type="text" id="doc-0" class="form-control mb-2" placeholder="DNI (8 dígitos)" maxlength="8" oninput="this.value = this.value.replace(/[^0-9]/g, '');"><input type="text" id="doc-1" class="form-control mb-2" placeholder="Nombres Completos"><input type="text" id="doc-2" class="form-control mb-2" placeholder="Contraseña"><select id="doc-3" class="form-select mb-2"><option value="">Nivel</option><option value="Secundaria">Secundaria</option><option value="Primaria">Primaria</option></select><select id="doc-4" class="form-select mb-2"><option value="">Cargando áreas...</option></select><input type="text" id="doc-8" class="form-control mb-2" placeholder="Celular (Opcional, 9 dígitos)" maxlength="9" oninput="this.value = this.value.replace(/[^0-9]/g, '');"><input type="number" id="doc-6" class="form-control mb-2" placeholder="Año (Ej: 2026)" value="2026">
     <div class="row g-2 mb-2">
         <div class="col"><label class="small text-muted fw-bold">Fecha de Inicio (asistencia)</label><input type="date" id="doc-fecha-inicio" class="form-control"></div>
         <div class="col"><label class="small text-muted fw-bold">Fecha de Fin (término contrato)</label><input type="date" id="doc-fecha-fin" class="form-control"></div>
     </div><div class="border rounded p-2 mb-2 bg-light"><label class="form-label fw-bold text-muted small mb-1 d-block"><i class="fa-solid fa-user-graduate"></i> ¿Es Tutor / CoTutor?</label><div class="d-flex gap-4 mb-2"><div class="form-check"><input class="form-check-input" type="radio" name="doc-tutor-opt" id="doc-tutor-no" value="No" checked onchange="toggleTutorSeccion()"><label class="form-check-label small" for="doc-tutor-no">No</label></div><div class="form-check"><input class="form-check-input" type="radio" name="doc-tutor-opt" id="doc-tutor-tutor" value="Tutor" onchange="toggleTutorSeccion()"><label class="form-check-label small" for="doc-tutor-tutor">Tutor</label></div><div class="form-check"><input class="form-check-input" type="radio" name="doc-tutor-opt" id="doc-tutor-cotutor" value="CoTutor" onchange="toggleTutorSeccion()"><label class="form-check-label small" for="doc-tutor-cotutor">CoTutor</label></div></div><div id="seccion-tutor-container" class="d-none mt-2"><label class="form-label fw-bold text-muted small mb-1">Seleccionar Grado y Sección:</label><div id="tutor-grados-secciones" class="d-flex flex-wrap gap-2 border p-2 bg-white rounded" style="max-height: 180px; overflow-y: auto;"></div></div></div><select id="doc-5" class="form-select mb-3"><option value="">Estado</option><option value="Activo">Activo</option><option value="Inactivo">Inactivo</option></select><div id="msg-Docentes" class="text-center fw-bold"></div></div><div class="modal-footer"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button><button id="btn-form-Docentes" class="btn btn-primary" onclick="guardarDocenteCompleto()">Guardar</button></div></div></div></div>
     
-    <div class="modal fade" id="modal-Horario_Docentes" tabindex="-1"><div class="modal-dialog"><div class="modal-content"><div class="modal-header bg-dark text-white"><h5 class="modal-title"><i class="fa-solid fa-business-time"></i> Horario Docente</h5><button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button></div><div class="modal-body"><input type="hidden" id="hdc-0"><label class="text-muted small mb-1">Día(s) de la Semana</label>
+    <div class="modal fade" data-bs-backdrop="static" data-bs-keyboard="false" id="modal-Horario_Docentes" tabindex="-1"><div class="modal-dialog"><div class="modal-content"><div class="modal-header bg-dark text-white"><h5 class="modal-title"><i class="fa-solid fa-business-time"></i> Horario Docente</h5><button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button></div><div class="modal-body"><input type="hidden" id="hdc-0"><label class="text-muted small mb-1">Día(s) de la Semana</label>
                     <div id="hdc-dias-container" class="d-flex flex-wrap gap-2 mb-2 p-2 border rounded bg-light">
                         <div class="form-check"><input class="form-check-input chk-dia-hdoc" type="checkbox" value="Lunes" id="hdoc-lun"><label class="form-check-label small" for="hdoc-lun">Lun</label></div>
                         <div class="form-check"><input class="form-check-input chk-dia-hdoc" type="checkbox" value="Martes" id="hdoc-mar"><label class="form-check-label small" for="hdoc-mar">Mar</label></div>
@@ -3378,9 +3439,9 @@
                     </div>
                     <div class="row g-2 mb-3"><div class="col"><label class="text-muted small mb-1">Hora Ingreso</label><input type="time" id="hdc-4" class="form-control"></div><div class="col"><label class="text-muted small mb-1">Hora Salida</label><input type="time" id="hdc-5" class="form-control"></div></div><div id="msg-Horario_Docentes" class="text-center fw-bold"></div></div><div class="modal-footer"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button><button id="btn-form-Horario_Docentes" class="btn btn-primary" onclick="guardarHorarioDocenteMultiple()">Guardar</button></div></div></div></div>
 
-    <div class="modal fade" id="modal-Asistencia_Docentes" tabindex="-1"><div class="modal-dialog"><div class="modal-content"><div class="modal-header bg-dark text-white"><h5 class="modal-title"><i class="fa-solid fa-user-check"></i> Asistencia Docente Manual</h5><button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button></div><div class="modal-body"><input type="hidden" id="adc-0"><div class="row g-2 mb-2"><div class="col"><label class="text-muted small mb-1">Fecha</label><input type="text" id="adc-1" class="form-control" placeholder="DD/MM/AAAA" onchange="recalcularTardanzaManualDocente()"></div><div class="col"><label class="text-muted small mb-1">Hora</label><input type="time" id="adc-2" class="form-control" onchange="recalcularTardanzaManualDocente()" oninput="recalcularTardanzaManualDocente()"></div></div><input type="text" id="adc-3" class="form-control mb-2" placeholder="DNI Docente" maxlength="8" oninput="this.value = this.value.replace(/[^0-9]/g, ''); recalcularTardanzaManualDocente();" onchange="recalcularTardanzaManualDocente()"><input type="text" id="adc-4" class="form-control mb-2" placeholder="Nombre Docente"><select id="adc-5" class="form-select mb-2" onchange="recalcularTardanzaManualDocente()"><option value="">Seleccionar...</option><option value="Ingreso">Ingreso</option><option value="Salida">Salida</option></select><div class="row g-2 mb-2"><div class="col"><label class="text-muted small mb-1">Tardanza</label><input type="text" id="adc-6" class="form-control" value="0"></div><div class="col"><label class="text-muted small mb-1">Salida Temprano</label><input type="text" id="adc-7" class="form-control" value="0"></div></div><input type="text" id="adc-8" class="form-control mb-2" placeholder="Registrado Por (Manual)"><div class="row g-2 mb-3"><div class="col"><label class="text-muted small mb-1">Ing. Fijo (Ref)</label><input type="text" id="adc-9" class="form-control" placeholder="Ej: 08:00 AM"></div><div class="col"><label class="text-muted small mb-1">Sal. Fijo (Ref)</label><input type="text" id="adc-10" class="form-control" placeholder="Ej: 01:00 PM"></div></div><div id="msg-Asistencia_Docentes" class="text-center fw-bold"></div></div><div class="modal-footer"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button><button id="btn-form-Asistencia_Docentes" class="btn btn-primary" onclick="guardarDato('Asistencia_Docentes', ['adc-0','adc-1','adc-2','adc-3','adc-4','adc-5','adc-6','adc-7','adc-8','adc-9','adc-10'])">Guardar</button></div></div></div></div>
+    <div class="modal fade" data-bs-backdrop="static" data-bs-keyboard="false" id="modal-Asistencia_Docentes" tabindex="-1"><div class="modal-dialog"><div class="modal-content"><div class="modal-header bg-dark text-white"><h5 class="modal-title"><i class="fa-solid fa-user-check"></i> Asistencia Docente Manual</h5><button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button></div><div class="modal-body"><input type="hidden" id="adc-0"><div class="row g-2 mb-2"><div class="col"><label class="text-muted small mb-1">Fecha</label><input type="text" id="adc-1" class="form-control" placeholder="DD/MM/AAAA" onchange="recalcularTardanzaManualDocente()"></div><div class="col"><label class="text-muted small mb-1">Hora</label><input type="time" id="adc-2" class="form-control" onchange="recalcularTardanzaManualDocente()" oninput="recalcularTardanzaManualDocente()"></div></div><input type="text" id="adc-3" class="form-control mb-2" placeholder="DNI Docente" maxlength="8" oninput="this.value = this.value.replace(/[^0-9]/g, ''); recalcularTardanzaManualDocente();" onchange="recalcularTardanzaManualDocente()"><input type="text" id="adc-4" class="form-control mb-2" placeholder="Nombre Docente"><select id="adc-5" class="form-select mb-2" onchange="recalcularTardanzaManualDocente()"><option value="">Seleccionar...</option><option value="Ingreso">Ingreso</option><option value="Salida">Salida</option></select><div class="row g-2 mb-2"><div class="col"><label class="text-muted small mb-1">Tardanza</label><input type="text" id="adc-6" class="form-control" value="0"></div><div class="col"><label class="text-muted small mb-1">Salida Temprano</label><input type="text" id="adc-7" class="form-control" value="0"></div></div><input type="text" id="adc-8" class="form-control mb-2" placeholder="Registrado Por (Manual)"><div class="row g-2 mb-3"><div class="col"><label class="text-muted small mb-1">Ing. Fijo (Ref)</label><input type="text" id="adc-9" class="form-control" placeholder="Ej: 08:00 AM"></div><div class="col"><label class="text-muted small mb-1">Sal. Fijo (Ref)</label><input type="text" id="adc-10" class="form-control" placeholder="Ej: 01:00 PM"></div></div><div id="msg-Asistencia_Docentes" class="text-center fw-bold"></div></div><div class="modal-footer"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button><button id="btn-form-Asistencia_Docentes" class="btn btn-primary" onclick="guardarDato('Asistencia_Docentes', ['adc-0','adc-1','adc-2','adc-3','adc-4','adc-5','adc-6','adc-7','adc-8','adc-9','adc-10'])">Guardar</button></div></div></div></div>
 
-    <div class="modal fade" id="modal-Auxiliares" tabindex="-1"><div class="modal-dialog"><div class="modal-content"><div class="modal-header bg-primary text-white"><h5 class="modal-title"><i class="fa-solid fa-id-badge"></i> Registrar Auxiliar</h5><button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button></div><div class="modal-body">
+    <div class="modal fade" data-bs-backdrop="static" data-bs-keyboard="false" id="modal-Auxiliares" tabindex="-1"><div class="modal-dialog"><div class="modal-content"><div class="modal-header bg-primary text-white"><h5 class="modal-title"><i class="fa-solid fa-id-badge"></i> Registrar Auxiliar</h5><button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button></div><div class="modal-body">
         <input type="text" id="aux-0" class="form-control mb-2" placeholder="DNI (8 dígitos)" maxlength="8" oninput="this.value = this.value.replace(/[^0-9]/g, '');">
         <input type="text" id="aux-1" class="form-control mb-2" placeholder="Nombres y Apellidos">
         <input type="text" id="aux-2" class="form-control mb-2" placeholder="Contraseña">
@@ -3391,7 +3452,7 @@
         </div>
         <div class="row g-2 mb-2"><div class="col"><label class="text-muted small mb-1">Hora Inicio de Escaneo</label><input type="time" id="aux-4" class="form-control"></div><div class="col"><label class="text-muted small mb-1">Hora Fin de Escaneo</label><input type="time" id="aux-5" class="form-control"></div></div><select id="aux-6" class="form-select mb-3"><option value="">Estado</option><option value="Activo">Activo</option><option value="Inactivo">Inactivo</option></select><div id="msg-Auxiliares" class="text-center fw-bold"></div></div><div class="modal-footer"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button><button id="btn-form-Auxiliares" class="btn btn-primary" onclick="guardarDato('Auxiliares', ['aux-0','aux-1','aux-2','aux-3','aux-4','aux-5','aux-6'])">Guardar</button></div></div></div></div>
 
-    <div class="modal fade" id="modal-Apoderados" tabindex="-1">
+    <div class="modal fade" data-bs-backdrop="static" data-bs-keyboard="false" id="modal-Apoderados" tabindex="-1">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header bg-primary text-white">
@@ -3411,15 +3472,15 @@
         </div>
     </div>
 
-    <div class="modal fade" id="modal-Areas" tabindex="-1"><div class="modal-dialog"><div class="modal-content"><div class="modal-header bg-primary text-white"><h5 class="modal-title"><i class="fa-solid fa-book"></i> Área</h5><button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button></div><div class="modal-body"><input type="text" id="are-0" class="form-control mb-3" placeholder="Nombre del Área"><div id="msg-Areas" class="text-center fw-bold"></div></div><div class="modal-footer"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button><button id="btn-form-Areas" class="btn btn-primary" onclick="guardarDato('Areas', ['are-0'])">Guardar</button></div></div></div></div>
+    <div class="modal fade" data-bs-backdrop="static" data-bs-keyboard="false" id="modal-Areas" tabindex="-1"><div class="modal-dialog"><div class="modal-content"><div class="modal-header bg-primary text-white"><h5 class="modal-title"><i class="fa-solid fa-book"></i> Área</h5><button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button></div><div class="modal-body"><input type="text" id="are-0" class="form-control mb-3" placeholder="Nombre del Área"><div id="msg-Areas" class="text-center fw-bold"></div></div><div class="modal-footer"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button><button id="btn-form-Areas" class="btn btn-primary" onclick="guardarDato('Areas', ['are-0'])">Guardar</button></div></div></div></div>
     
-    <div class="modal fade" id="modal-Horarios" tabindex="-1"><div class="modal-dialog"><div class="modal-content"><div class="modal-header bg-primary text-white"><h5 class="modal-title"><i class="fa-regular fa-clock"></i> Horario de Alumnos (AM/PM)</h5><button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button></div><div class="modal-body"><input type="hidden" id="hor-0"><label class="text-muted small mb-1">Día de la Semana</label><select id="hor-1" class="form-select mb-2"><option value="">Seleccionar...</option><option value="Lunes">Lunes</option><option value="Martes">Martes</option><option value="Miércoles">Miércoles</option><option value="Jueves">Jueves</option><option value="Viernes">Viernes</option></select><div class="row g-2 mb-2">
+    <div class="modal fade" data-bs-backdrop="static" data-bs-keyboard="false" id="modal-Horarios" tabindex="-1"><div class="modal-dialog"><div class="modal-content"><div class="modal-header bg-primary text-white"><h5 class="modal-title"><i class="fa-regular fa-clock"></i> Horario de Alumnos (AM/PM)</h5><button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button></div><div class="modal-body"><input type="hidden" id="hor-0"><label class="text-muted small mb-1">Día de la Semana</label><select id="hor-1" class="form-select mb-2"><option value="">Seleccionar...</option><option value="Lunes">Lunes</option><option value="Martes">Martes</option><option value="Miércoles">Miércoles</option><option value="Jueves">Jueves</option><option value="Viernes">Viernes</option></select><div class="row g-2 mb-2">
     <div class="col"><label class="text-muted small mb-1">Grado</label><select id="hor-2" class="form-select" onchange="actualizarSeccionesHorarios()"><option value="">Grado...</option></select></div>
     <div class="col"><label class="text-muted small mb-1">Sección</label><select id="hor-3" class="form-select"><option value="">Sección...</option></select></div>
 </div><label class="text-muted small mb-1">Área</label><select id="hor-4" class="form-select mb-2"><option value="">Cargando áreas...</option></select><label class="text-muted small mb-1">Docente Asignado</label><select id="hor-5" class="form-select mb-2"><option value="">Cargando docentes...</option></select><div class="row g-2 mb-3"><div class="col"><label class="text-muted small mb-1">Hora Inicio</label><input type="time" id="hor-6" class="form-control"></div><div class="col"><label class="text-muted small mb-1">Hora Fin</label><input type="time" id="hor-7" class="form-control"></div></div><label class="text-muted small mb-1">Estado</label><select id="hor-8" class="form-select mb-3"><option value="Activo">Activo</option><option value="Inactivo">Inactivo</option></select><div id="msg-Horarios" class="text-center fw-bold"></div></div><div class="modal-footer"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button><button id="btn-form-Horarios" class="btn btn-primary" onclick="guardarDato('Horarios', ['hor-0','hor-1','hor-2','hor-3','hor-4','hor-5','hor-6','hor-7','hor-8'])">Guardar</button></div></div></div></div>
     
-    <div class="modal fade" id="modal-Feriados" tabindex="-1"><div class="modal-dialog"><div class="modal-content"><div class="modal-header bg-danger text-white"><h5 class="modal-title"><i class="fa-solid fa-calendar-day"></i> Nuevo Feriado</h5><button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button></div><div class="modal-body"><input type="hidden" id="fer-0"><label class="text-muted small mb-1">Fecha del Feriado</label><input type="date" id="fer-1" class="form-control mb-3"><label class="text-muted small mb-1">Motivo / Descripción</label><input type="text" id="fer-2" class="form-control mb-2" placeholder="Ej: Día del Maestro"><div id="msg-Feriados" class="text-center fw-bold"></div></div><div class="modal-footer"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button><button id="btn-form-Feriados" class="btn btn-danger" onclick="guardarDato('Feriados', ['fer-0','fer-1','fer-2'])">Guardar</button></div></div></div></div>
-    <div class="modal fade" id="modal-Estudiantes" tabindex="-1"><div class="modal-dialog"><div class="modal-content"><div class="modal-header bg-primary text-white"><h5 class="modal-title"><i class="fa-solid fa-user-graduate"></i> Estudiante</h5><button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button></div><div class="modal-body"><input type="text" id="est-0" class="form-control mb-2" placeholder="DNI (8 dígitos)" maxlength="8" oninput="this.value = this.value.replace(/[^0-9]/g, '');"><input type="text" id="est-1" class="form-control mb-2" placeholder="Nombres Completos"><div class="row g-2 mb-2"><div class="col"><input type="text" id="est-2" class="form-control" placeholder="Grado (Ej: 3ro)"></div><div class="col"><input type="text" id="est-3" class="form-control" placeholder="Sección (Ej: B)"></div></div><div class="row g-2 mb-2">
+    <div class="modal fade" data-bs-backdrop="static" data-bs-keyboard="false" id="modal-Feriados" tabindex="-1"><div class="modal-dialog"><div class="modal-content"><div class="modal-header bg-danger text-white"><h5 class="modal-title"><i class="fa-solid fa-calendar-day"></i> Nuevo Feriado</h5><button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button></div><div class="modal-body"><input type="hidden" id="fer-0"><label class="text-muted small mb-1">Fecha del Feriado</label><input type="date" id="fer-1" class="form-control mb-3"><label class="text-muted small mb-1">Motivo / Descripción</label><input type="text" id="fer-2" class="form-control mb-2" placeholder="Ej: Día del Maestro"><div id="msg-Feriados" class="text-center fw-bold"></div></div><div class="modal-footer"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button><button id="btn-form-Feriados" class="btn btn-danger" onclick="guardarDato('Feriados', ['fer-0','fer-1','fer-2'])">Guardar</button></div></div></div></div>
+    <div class="modal fade" data-bs-backdrop="static" data-bs-keyboard="false" id="modal-Estudiantes" tabindex="-1"><div class="modal-dialog"><div class="modal-content"><div class="modal-header bg-primary text-white"><h5 class="modal-title"><i class="fa-solid fa-user-graduate"></i> Estudiante</h5><button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button></div><div class="modal-body"><input type="text" id="est-0" class="form-control mb-2" placeholder="DNI (8 dígitos)" maxlength="8" oninput="this.value = this.value.replace(/[^0-9]/g, '');"><input type="text" id="est-1" class="form-control mb-2" placeholder="Nombres Completos"><div class="row g-2 mb-2"><div class="col"><input type="text" id="est-2" class="form-control" placeholder="Grado (Ej: 3ro)"></div><div class="col"><input type="text" id="est-3" class="form-control" placeholder="Sección (Ej: B)"></div></div><div class="row g-2 mb-2">
     <div class="col"><select id="est-4" class="form-select"><option value="">Nivel</option><option value="Secundaria">Secundaria</option><option value="Primaria">Primaria</option></select></div>
     <div class="col"><input type="number" id="est-5" class="form-control" placeholder="Edad"></div>
     <div class="col"><select id="est-8" class="form-select"><option value="">Género...</option><option value="Hombre">Hombre</option><option value="Mujer">Mujer</option></select></div>
@@ -3468,7 +3529,7 @@
 </div><div id="msg-Estudiantes" class="text-center fw-bold"></div></div><div class="modal-footer"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button><button id="btn-form-Estudiantes" class="btn btn-primary" onclick="guardarEstudianteCompleto()">Guardar</button></div></div></div></div>
 
     <!-- Modal Duplicados -->
-    <div class="modal fade" id="modal-Duplicados" tabindex="-1" aria-hidden="true">
+    <div class="modal fade" data-bs-backdrop="static" data-bs-keyboard="false" id="modal-Duplicados" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-lg modal-dialog-centered">
             <div class="modal-content border-0 shadow-lg">
                 <div class="modal-header bg-danger text-white">
@@ -3506,7 +3567,25 @@
         </div>
     </div>
 
-    <div class="modal fade" id="modal-Incidencias" tabindex="-1">
+    <!-- Modal Progreso Eliminación Duplicados -->
+    <div class="modal fade" data-bs-backdrop="static" data-bs-keyboard="false" id="modal-Progreso-Eliminacion" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow-lg">
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title fw-bold"><i class="fa-solid fa-trash-can me-2"></i> Depurando Duplicados</h5>
+                </div>
+                <div class="modal-body text-center p-4">
+                    <h6 class="fw-bold mb-3 text-dark" id="eliminar-dup-titulo">Procesando registros...</h6>
+                    <div class="progress mb-3" style="height: 25px; border-radius: 12px; overflow: hidden; border: 1px solid #ced4da;">
+                        <div id="eliminar-dup-barra" class="progress-bar progress-bar-striped progress-bar-animated bg-danger" role="progressbar" style="width: 0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"><span id="eliminar-dup-porcentaje" class="fw-bold" style="font-size: 14px;">0%</span></div>
+                    </div>
+                    <p class="text-muted small fw-bold mb-0" id="eliminar-dup-texto">0 de 0 registros eliminados</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" data-bs-backdrop="static" data-bs-keyboard="false" id="modal-Incidencias" tabindex="-1">
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
                 <div class="modal-header bg-danger text-white">
@@ -3639,9 +3718,9 @@
     </div>
 
     
-    <div class="modal fade" id="modal-Registro_Asistencia" tabindex="-1"><div class="modal-dialog"><div class="modal-content"><div class="modal-header bg-primary text-white"><h5 class="modal-title"><i class="fa-solid fa-list-check"></i> Editor Estudiante (Clase)</h5><button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button></div><div class="modal-body"><input type="hidden" id="reg-0"><div class="row g-2 mb-2"><div class="col"><label class="text-muted small mb-1">Fecha (DD/MM/AAAA)</label><input type="text" id="reg-1" class="form-control" placeholder="DD/MM/AAAA"></div><div class="col"><label class="text-muted small mb-1">Hora</label><input type="text" id="reg-2" class="form-control" placeholder="Ej: 08:00 AM"></div></div><input type="text" id="reg-3" class="form-control mb-2" placeholder="DNI (8 dígitos)" maxlength="8" oninput="this.value = this.value.replace(/[^0-9]/g, '');"><input type="text" id="reg-4" class="form-control mb-2" placeholder="Nombres Completos"><div class="row g-2 mb-2"><div class="col"><input type="text" id="reg-5" class="form-control" placeholder="Grado"></div><div class="col"><input type="text" id="reg-6" class="form-control" placeholder="Sección"></div></div><div class="row g-2 mb-2"><div class="col"><select id="reg-7" class="form-select"><option value="">Área</option></select></div><div class="col"><select id="reg-8" class="form-select"><option value="Asistió">Asistió</option><option value="Falta">Falta</option><option value="Justificado">Justificado</option></select></div></div><input type="text" id="reg-9" class="form-control mb-3" placeholder="Registrado Por"><div id="msg-Registro_Asistencia" class="text-center fw-bold"></div></div><div class="modal-footer"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button><button id="btn-form-Registro_Asistencia" class="btn btn-primary" onclick="guardarDato('Registro_Asistencia', ['reg-0','reg-1','reg-2','reg-3','reg-4','reg-5','reg-6','reg-7','reg-8','reg-9'])">Guardar</button></div></div></div></div>
+    <div class="modal fade" data-bs-backdrop="static" data-bs-keyboard="false" id="modal-Registro_Asistencia" tabindex="-1"><div class="modal-dialog"><div class="modal-content"><div class="modal-header bg-primary text-white"><h5 class="modal-title"><i class="fa-solid fa-list-check"></i> Editor Estudiante (Clase)</h5><button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button></div><div class="modal-body"><input type="hidden" id="reg-0"><div class="row g-2 mb-2"><div class="col"><label class="text-muted small mb-1">Fecha (DD/MM/AAAA)</label><input type="text" id="reg-1" class="form-control" placeholder="DD/MM/AAAA"></div><div class="col"><label class="text-muted small mb-1">Hora</label><input type="text" id="reg-2" class="form-control" placeholder="Ej: 08:00 AM"></div></div><input type="text" id="reg-3" class="form-control mb-2" placeholder="DNI (8 dígitos)" maxlength="8" oninput="this.value = this.value.replace(/[^0-9]/g, '');"><input type="text" id="reg-4" class="form-control mb-2" placeholder="Nombres Completos"><div class="row g-2 mb-2"><div class="col"><input type="text" id="reg-5" class="form-control" placeholder="Grado"></div><div class="col"><input type="text" id="reg-6" class="form-control" placeholder="Sección"></div></div><div class="row g-2 mb-2"><div class="col"><select id="reg-7" class="form-select"><option value="">Área</option></select></div><div class="col"><select id="reg-8" class="form-select"><option value="Asistió">Asistió</option><option value="Falta">Falta</option><option value="Justificado">Justificado</option></select></div></div><input type="text" id="reg-9" class="form-control mb-3" placeholder="Registrado Por"><div id="msg-Registro_Asistencia" class="text-center fw-bold"></div></div><div class="modal-footer"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button><button id="btn-form-Registro_Asistencia" class="btn btn-primary" onclick="guardarDato('Registro_Asistencia', ['reg-0','reg-1','reg-2','reg-3','reg-4','reg-5','reg-6','reg-7','reg-8','reg-9'])">Guardar</button></div></div></div></div>
 
-    <div class="modal fade" id="modal-Asistencia_Auxiliar" tabindex="-1"><div class="modal-dialog"><div class="modal-content"><div class="modal-header bg-success text-white"><h5 class="modal-title"><i class="fa-solid fa-clipboard-check"></i> Editor Auxiliar (Entrada)</h5><button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button></div><div class="modal-body"><input type="hidden" id="aax-0"><div class="row g-2 mb-2"><div class="col"><label class="text-muted small mb-1">Fecha</label><input type="date" id="aax-1" class="form-control" onchange="recalcularAsistenciaAuxiliarManual()"></div><div class="col"><label class="text-muted small mb-1">Hora</label><input type="time" id="aax-2" class="form-control" onchange="recalcularAsistenciaAuxiliarManual()"></div></div><input type="text" id="aax-3" class="form-control mb-2" placeholder="DNI (8 dígitos)" maxlength="8" oninput="this.value = this.value.replace(/[^0-9]/g, '');"><select id="aax-4" class="form-select mb-2" onchange="actualizarDniAuxiliar()"><option value="">Nombres Completos...</option></select><div class="row g-2 mb-2"><div class="col"><select id="aax-5" class="form-select" onchange="actualizarAlumnosAuxiliar()"><option value="">Grado...</option></select></div><div class="col"><select id="aax-6" class="form-select" onchange="actualizarAlumnosAuxiliar()"><option value="">Sección...</option></select></div></div><input type="text" id="aax-7" class="form-control mb-2 text-center fw-bold text-success border-success" value="Automático" disabled style="background-color: #e9ecef; cursor: not-allowed;"><input type="text" id="aax-8" class="form-control mb-3" placeholder="Registrado Por" readonly style="background-color: #e9ecef; cursor: not-allowed;"><div id="msg-Asistencia_Auxiliar" class="text-center fw-bold"></div></div><div class="modal-footer"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button><button id="btn-form-Asistencia_Auxiliar" class="btn btn-success" onclick="guardarDato('Asistencia_Auxiliar', ['aax-0','aax-1','aax-2','aax-3','aax-4','aax-5','aax-6','aax-7','aax-8'])">Guardar</button></div></div></div></div>
+    <div class="modal fade" data-bs-backdrop="static" data-bs-keyboard="false" id="modal-Asistencia_Auxiliar" tabindex="-1"><div class="modal-dialog"><div class="modal-content"><div class="modal-header bg-success text-white"><h5 class="modal-title"><i class="fa-solid fa-clipboard-check"></i> Editor Auxiliar (Entrada)</h5><button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button></div><div class="modal-body"><input type="hidden" id="aax-0"><div class="row g-2 mb-2"><div class="col"><label class="text-muted small mb-1">Fecha</label><input type="date" id="aax-1" class="form-control" onchange="recalcularAsistenciaAuxiliarManual()"></div><div class="col"><label class="text-muted small mb-1">Hora</label><input type="time" id="aax-2" class="form-control" onchange="recalcularAsistenciaAuxiliarManual()"></div></div><input type="text" id="aax-3" class="form-control mb-2" placeholder="DNI (8 dígitos)" maxlength="8" oninput="this.value = this.value.replace(/[^0-9]/g, '');"><select id="aax-4" class="form-select mb-2" onchange="actualizarDniAuxiliar()"><option value="">Nombres Completos...</option></select><div class="row g-2 mb-2"><div class="col"><select id="aax-5" class="form-select" onchange="actualizarAlumnosAuxiliar()"><option value="">Grado...</option></select></div><div class="col"><select id="aax-6" class="form-select" onchange="actualizarAlumnosAuxiliar()"><option value="">Sección...</option></select></div></div><input type="text" id="aax-7" class="form-control mb-2 text-center fw-bold text-success border-success" value="Automático" disabled style="background-color: #e9ecef; cursor: not-allowed;"><input type="text" id="aax-8" class="form-control mb-3" placeholder="Registrado Por" readonly style="background-color: #e9ecef; cursor: not-allowed;"><div id="msg-Asistencia_Auxiliar" class="text-center fw-bold"></div></div><div class="modal-footer"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button><button id="btn-form-Asistencia_Auxiliar" class="btn btn-success" onclick="guardarDato('Asistencia_Auxiliar', ['aax-0','aax-1','aax-2','aax-3','aax-4','aax-5','aax-6','aax-7','aax-8'])">Guardar</button></div></div></div></div>
 
     <div class="modal fade" id="modalVerQR" tabindex="-1">
         <div class="modal-dialog modal-md modal-dialog-centered">
@@ -3668,7 +3747,7 @@
         </div>
     </div>
 
-    <div class="modal fade" id="modalMasivo" tabindex="-1"><div class="modal-dialog modal-lg"><div class="modal-content">
+    <div class="modal fade" data-bs-backdrop="static" data-bs-keyboard="false" id="modalMasivo" tabindex="-1"><div class="modal-dialog modal-lg"><div class="modal-content">
         <div class="modal-header bg-success text-white"><h5 class="modal-title fw-bold"><i class="fa-solid fa-file-excel"></i> Registro Masivo</h5><button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button></div>
         <div class="modal-body">
             <div class="alert alert-info d-flex justify-content-between align-items-center flex-wrap gap-2">
@@ -3768,7 +3847,7 @@
         </div>
     </div>
 
-    <div class="modal fade" id="modalConsultaEstudiante" tabindex="-1" aria-hidden="true">
+    <div class="modal fade" data-bs-backdrop="static" data-bs-keyboard="false" id="modalConsultaEstudiante" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
                 <div class="modal-header bg-info text-dark"><h5 class="modal-title fw-bold"><i class="fa-solid fa-magnifying-glass-chart"></i> Consulta de Asistencia por Alumno</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
@@ -3786,7 +3865,7 @@
         </div>
     </div>
 
-    <div class="modal fade" id="modalConsultaAuxiliar" tabindex="-1" aria-hidden="true">
+    <div class="modal fade" data-bs-backdrop="static" data-bs-keyboard="false" id="modalConsultaAuxiliar" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
                 <div class="modal-header text-white" style="background-color: #002b5e;"><h5 class="modal-title fw-bold"><i class="fa-solid fa-clipboard-user"></i> Consulta Asistencia Diaria (Auxiliar)</h5><button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button></div>
@@ -3856,7 +3935,7 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
     <script>
-        const URL_API = "https://script.google.com/macros/s/AKfycbynabeSmA0Uqv5j5pdGK7unIswhlYbXK3vtU_hn3tuUoeiSws7IYpFHHwb4K-JTKGzN/exec";
+        const URL_API = "https://script.google.com/macros/s/AKfycby8U59rxq5e1ZwUQuzxVvorl1ky532cPXlxoSejES6JIGrLdaDcQ0GW7gFvGuEY08rC/exec";
 
         let datosMemoria = {}; let fotosCache = {}; let qrsCache = {}; let editandoID = null; let reporteGlobalData = {}; let rolActual = ''; let usuarioDniActual = '';
         window.colaSincronizarAuxiliar = JSON.parse(localStorage.getItem('colaSincronizarAuxiliar') || '[]');
@@ -4704,7 +4783,7 @@
 
         let sessionToken = '';
 
-        async function fetchAPI(payload, retries = 2) {
+        async function fetchAPI(payload, retries = 8) {
             // Inyectar el token de sesión si existe
             if (!payload.sessionToken) {
                 if (!sessionToken) {
@@ -4739,6 +4818,15 @@
                         }
                         return { exito: false, mensaje: "SESSION_EXPIRED" };
                     }
+                    
+                    let msgLower = result && result.mensaje ? String(result.mensaje).toLowerCase() : "";
+                    let isBusy = !result.exito && (msgLower.includes("ocupado") || msgLower.includes("busy") || msgLower.includes("lock") || msgLower.includes("límite"));
+                    
+                    if (isBusy && i < retries) {
+                        await new Promise(r => setTimeout(r, 3000 + (Math.random() * 3000))); // Delay aleatorio para desaturar
+                        continue;
+                    }
+                    
                     return result;
                 } catch (error) {
                     clearTimeout(timeoutId);
@@ -5056,6 +5144,10 @@
                 cargarTabla('Asistencia_Auxiliar', true, true);
                 cargarTabla('Registro_Asistencia', true, true);
                 cargarTabla('Asistencia_Docentes', true, true);
+                
+                fetchAPI({accion: 'obtenerDatos', hoja: 'TRASLADO/TERMINO'}).then(res => {
+                    if (res && res.exito) datosMemoria['TRASLADO/TERMINO'] = res.datos || [];
+                });
                 
                 // Iniciar polling de estado global de sincronización (cada 5s)
                 actualizarEstadoSyncGlobalUI();
@@ -5531,9 +5623,7 @@
             };
             poblar('Estudiantes', 'filtro-est-ano', 7);
             poblar('Docentes', 'filtro-doc-ano', 7);
-            poblar('Estudiantes', 'rep-aux-ano', 7);
             poblar('Estudiantes', 'rep-est-ano', 7);
-            poblar('Docentes', 'rep-doc-ano', 7);
         }
 
         const filtrarIncidenciasRapido = debounce(() => {
@@ -5893,7 +5983,7 @@
                 let rPerm = { datos: datosMemoria['Permisos'] || [] };
                 
                 let necesitaDocentes = (rolActual === 'Docente');
-                let hojasRequeridas = ['Estudiantes', 'Registro_Asistencia', 'Areas', 'Feriados', 'Permisos'];
+                let hojasRequeridas = ['Estudiantes', 'Registro_Asistencia', 'Areas', 'Feriados', 'Permisos', 'TRASLADO/TERMINO'];
                 if (necesitaDocentes) {
                     hojasRequeridas.push('Docentes');
                 }
@@ -5913,6 +6003,7 @@
                     rArea.datos = rM.datos['Areas'] || rArea.datos;
                     rFer.datos = rM.datos['Feriados'] || rFer.datos;
                     rPerm.datos = rM.datos['Permisos'] || rPerm.datos;
+                    if (rM.datos['TRASLADO/TERMINO']) datosMemoria['TRASLADO/TERMINO'] = rM.datos['TRASLADO/TERMINO'];
                     if (necesitaDocentes) {
                         rDoc.datos = rM.datos['Docentes'] || [];
                         datosMemoria['Docentes'] = rDoc.datos;
@@ -5926,7 +6017,8 @@
                 }
                 
                 reporteGlobalData = { 
-                    estudiantes: rEst.datos, 
+                    estudiantes: rEst.datos,
+                    "TRASLADO/TERMINO": datosMemoria['TRASLADO/TERMINO'] || [], 
                     asistencias: rAsis.datos.map(a => { 
                         if (a[1]) { let fStr = a[1].toString().trim(); if (fStr.includes('T')) { let p = fStr.split('T')[0].split('-'); a[1] = p[2] + '/' + p[1] + '/' + p[0]; } else { a[1] = fStr; } } return a; 
                     }), 
@@ -5966,7 +6058,7 @@
                 let rVac = { datos: datosMemoria['Vacaciones'] || [] };
                 
                 let necesitaAuxiliares = (rolActual === 'Auxiliar');
-                let hojasRequeridas = ['Estudiantes', 'Asistencia_Auxiliar', 'Feriados', 'Permisos', 'Vacaciones'];
+                let hojasRequeridas = ['Estudiantes', 'Asistencia_Auxiliar', 'Feriados', 'Permisos', 'Vacaciones', 'TRASLADO/TERMINO', 'Docentes'];
                 if (necesitaAuxiliares) {
                     hojasRequeridas.push('Auxiliares');
                 }
@@ -5976,6 +6068,7 @@
                                  rFer.datos.length === 0 || 
                                  rPerm.datos.length === 0 || 
                                  rVac.datos.length === 0 ||
+                                 !datosMemoria['Docentes'] || datosMemoria['Docentes'].length === 0 ||
                                  (necesitaAuxiliares && rAux.datos.length === 0);
                 
                 if (debeCargar) {
@@ -5986,6 +6079,8 @@
                     rFer.datos = rM.datos['Feriados'] || rFer.datos;
                     rPerm.datos = rM.datos['Permisos'] || rPerm.datos;
                     rVac.datos = rM.datos['Vacaciones'] || rVac.datos;
+                    if (rM.datos['Docentes']) datosMemoria['Docentes'] = rM.datos['Docentes'];
+                    if (rM.datos['TRASLADO/TERMINO']) datosMemoria['TRASLADO/TERMINO'] = rM.datos['TRASLADO/TERMINO'];
                     if (necesitaAuxiliares) {
                         rAux.datos = rM.datos['Auxiliares'] || [];
                         datosMemoria['Auxiliares'] = rAux.datos;
@@ -5999,7 +6094,8 @@
                 }
                 
                 reporteGlobalData = { 
-                    estudiantes: rEst.datos, 
+                    estudiantes: rEst.datos,
+                    "TRASLADO/TERMINO": datosMemoria['TRASLADO/TERMINO'] || [], 
                     asistencias: rAsisAux.datos.map(a => { 
                         if (a[1]) { let fStr = a[1].toString().trim(); if (fStr.includes('T')) { let p = fStr.split('T')[0].split('-'); a[1] = p[2] + '/' + p[1] + '/' + p[0]; } else { a[1] = fStr; } } return a; 
                     }), 
@@ -6038,10 +6134,38 @@
                 }
                 
                 let selDocente = document.getElementById('rep-doc-docente');
-                selDocente.innerHTML = '<option value="">Todos los Docentes</option>';
-                rDoc.datos.forEach(d => {
-                    if(d[5] === 'Activo') selDocente.innerHTML += `<option value="${d[0]}">${d[1]}</option>`;
-                });
+                let rolUser = sessionStorage.getItem('rolActual') || '';
+                let dniUser = sessionStorage.getItem('usuarioDniActual') || '';
+                let divBotonesImpresion = document.querySelector('#v-reporte-docente .d-print-none .d-flex.gap-2.align-items-center');
+
+                if (rolUser === 'Docente') {
+                    selDocente.innerHTML = '';
+                    let myDoc = rDoc.datos.find(d => d[0] === dniUser);
+                    if(myDoc) {
+                        selDocente.innerHTML = `<option value="${myDoc[0]}">${myDoc[1]}</option>`;
+                    } else {
+                        selDocente.innerHTML = `<option value="${dniUser}">Mi Usuario</option>`;
+                    }
+                    selDocente.value = dniUser;
+                    selDocente.disabled = true;
+
+                    if (divBotonesImpresion) {
+                        divBotonesImpresion.classList.remove('d-flex');
+                        divBotonesImpresion.classList.add('d-none');
+                    }
+                } else {
+                    selDocente.innerHTML = '<option value="">Todos los Docentes</option>';
+                    rDoc.datos.forEach(d => {
+                        if(d[5] === 'Activo') selDocente.innerHTML += `<option value="${d[0]}">${d[1]}</option>`;
+                    });
+                    selDocente.disabled = false;
+                    
+                    if (divBotonesImpresion) {
+                        divBotonesImpresion.classList.remove('d-none');
+                        divBotonesImpresion.classList.add('d-flex');
+                    }
+                }
+                
                 msg.innerHTML = '';
             } catch (error) { msg.innerHTML = '<span class="text-danger">Error al cargar base de datos.</span>'; }
         }
@@ -6058,7 +6182,7 @@
                 let rVac = { datos: datosMemoria['Vacaciones'] || [] };
                 
                 let necesitaAuxiliares = (rolActual === 'Auxiliar');
-                let hojasRequeridas = ['Estudiantes', 'Asistencia_Auxiliar', 'Feriados', 'Permisos', 'Vacaciones'];
+                let hojasRequeridas = ['Estudiantes', 'Asistencia_Auxiliar', 'Feriados', 'Permisos', 'Vacaciones', 'TRASLADO/TERMINO'];
                 if (necesitaAuxiliares) {
                     hojasRequeridas.push('Auxiliares');
                 }
@@ -6076,6 +6200,7 @@
                     rFer.datos = rM.datos['Feriados'] || rFer.datos;
                     rPerm.datos = rM.datos['Permisos'] || rPerm.datos;
                     rVac.datos = rM.datos['Vacaciones'] || rVac.datos;
+                    if (rM.datos['TRASLADO/TERMINO']) datosMemoria['TRASLADO/TERMINO'] = rM.datos['TRASLADO/TERMINO'];
                     if (necesitaAuxiliares) {
                         rAux.datos = rM.datos['Auxiliares'] || [];
                         datosMemoria['Auxiliares'] = rAux.datos;
@@ -6345,7 +6470,7 @@
             });
 
             if (contadorRenderizado === 0) {
-                tbody.innerHTML = `<tr><td colspan="5" class="text-center py-4 fw-bold text-success border border-dark">No hay estudiantes con faltas o tardanzas registradas en este período.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="6" class="text-center py-4 fw-bold text-success border border-dark">No hay estudiantes con faltas o tardanzas registradas en este período.</td></tr>`;
             }
         }
 
@@ -6521,7 +6646,7 @@
                 areaVal = document.getElementById('rep-area').value;
                 if(!fIniVal || !fFinVal || !areaVal || !gradoVal || !anoFiltro) { alert("Para buscar, seleccione Fecha de Inicio, Fecha Fin, Área, Grado y Año."); return; }
             } else {
-                if(!fIniVal || !fFinVal || !gradoVal || !anoFiltro) { alert("Para buscar, seleccione Fecha de Inicio, Fecha Fin, Grado y Año."); return; }
+                if(!fIniVal || !fFinVal || !gradoVal) { alert("Para buscar, seleccione Fecha de Inicio, Fecha Fin y Grado."); return; }
             }
 
             if(window.configuracionSistema) {
@@ -6655,7 +6780,18 @@
                     let esFinDeSemana = (diaSemanaStr === 0 || diaSemanaStr === 6);
                     let esFeriadoDeclarado = (reporteGlobalData.feriados && reporteGlobalData.feriados.includes(fechaDia));
 
-                    if (esFeriadoDeclarado) {
+                    let tieneTR = false;
+                    let fFmtTR = fechaIteracion.getFullYear() + "-" + String(fechaIteracion.getMonth() + 1).padStart(2, '0') + "-" + String(fechaIteracion.getDate()).padStart(2, '0');
+                    (reporteGlobalData['TRASLADO/TERMINO'] || []).forEach(tt => {
+                        if(String(tt[2]) === dni && String(tt[1]) === 'Estudiante') {
+                            let fTT = String(tt[5]).split('T')[0];
+                            if(fFmtTR >= fTT) tieneTR = true; 
+                        }
+                    });
+
+                    if (tieneTR) {
+                        checksHTML += `<td style="border: 2px solid black; background-color: #f8f9fa;" class="align-middle text-center"><span class="text-secondary fw-bold" style="font-size: 0.95rem;" title="Traslado">TR</span></td>`;
+                    } else if (esFeriadoDeclarado) {
                         checksHTML += `<td style="border: 2px solid black; background-color: #ffe0b2; color: #e65100; font-weight: bold; font-size: 0.85rem;" class="align-middle" title="Día Feriado / No Laborable">F</td>`;
                     } else if (esFinDeSemana) {
                         let textShort = (diaSemanaStr === 0 ? 'D' : 'S');
@@ -7663,7 +7799,7 @@
             let anoFiltro = reqAno ? reqAno.value : '';
             let msg = document.getElementById('msg-filtro-reporte-doc');
             
-            if(!fIniVal || !fFinVal || (!dniFiltro && !anoFiltro)) { alert("Seleccione Fecha de Inicio, Fecha Fin y Año (o Docente)."); return; }
+            if(!fIniVal || !fFinVal) { alert("Seleccione Fecha de Inicio y Fecha Fin."); return; }
 
 
             
@@ -7672,9 +7808,10 @@
             
             msg.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Generando Reporte Matricial...';
             
-            let rM = await fetchAPI({ accion: 'obtenerDatosVarios', hojas: ['Asistencia_Docentes', 'Horario_Docentes', 'Feriados', 'Permisos_Docentes'] });
+            let rM = await fetchAPI({ accion: 'obtenerDatosVarios', hojas: ['Asistencia_Docentes', 'Horario_Docentes', 'Feriados', 'Permisos_Docentes', 'Vacaciones'] });
             if(!rM || !rM.exito || !rM.datos) { msg.innerHTML = '<span class="text-danger">Error al cargar datos.</span>'; return; }
             datosMemoria['Permisos_Docentes'] = rM.datos['Permisos_Docentes'] || [];
+              datosMemoria['Vacaciones'] = rM.datos['Vacaciones'] || [];
             let rAsis = { exito: true, datos: rM.datos['Asistencia_Docentes'] || [] };
             let rHor = { exito: true, datos: rM.datos['Horario_Docentes'] || [] };
             let rFer = { exito: true, datos: rM.datos['Feriados'] || [] };
@@ -7785,7 +7922,18 @@
                     let diaNomMap = "";
                     if(diaSem===0) diaNomMap="DOMINGO"; else if(diaSem===1) diaNomMap="LUNES"; else if(diaSem===2) diaNomMap="MARTES"; else if(diaSem===3) diaNomMap="MIÉRCOLES"; else if(diaSem===4) diaNomMap="JUEVES"; else if(diaSem===5) diaNomMap="VIERNES"; else if(diaSem===6) diaNomMap="SÁBADO";
 
-                    if (fObj.feriado) {
+                    let tieneTC = false;
+                    let fFmtTC = fDate.getFullYear() + "-" + String(fDate.getMonth() + 1).padStart(2, '0') + "-" + String(fDate.getDate()).padStart(2, '0');
+                    (datosMemoria['TRASLADO/TERMINO'] || []).forEach(tt => {
+                        if(String(tt[2]) === dni && String(tt[1]) === 'Docente') {
+                            let fTT = String(tt[5]).split('T')[0];
+                            if(fFmtTC >= fTT) tieneTC = true;
+                        }
+                    });
+
+                    if (tieneTC) {
+                        cellsHTML += `<td style="border: 2px solid black; background-color: #f8f9fa;" class="align-middle text-center"><span class="text-secondary fw-bold" style="font-size: 0.95rem;" title="Término de Contrato">TC</span></td>`;
+                    } else if (fObj.feriado) {
                         cellsHTML += `<td style="border: 2px solid black; background-color: #d1ecf1; color: #0c5460; font-size: 0.65rem; font-weight: bold;" title="${fObj.feriado}">FERIADO</td>`;
                     } else if (diaSem === 0 || diaSem === 6) {
                         cellsHTML += `<td style="border: 2px solid black; background-color: #ffc10744; font-size: 0.65rem; color: #666; font-weight: bold;">${diaSem === 0 ? 'DOM' : 'SAB'}</td>`;
@@ -7810,7 +7958,27 @@
                             }
                         });
 
-                        if (tienePermiso) {
+                        let trabajoVirtual = false;
+                        (datosMemoria['Vacaciones'] || []).forEach(v => {
+                            let vDni = (Array.isArray(v) ? String(v[1] || '') : String(v.DNI || v.dni || v[1] || '')).replace(/['"]/g, '').trim();
+                            if(vDni === dni && String(v[4]).toLowerCase() === 'docente') {
+                                let vIniVal = Array.isArray(v) ? v[5] : (v.Fecha_Inicio || v.fecIni || v[5]);
+                                let vFinVal = Array.isArray(v) ? v[6] : (v.Fecha_Fin || v.fecFin || v[6]);
+                                let vIni = vIniVal ? String(vIniVal).split('T')[0] : "";
+                                let vFin = vFinVal ? String(vFinVal).split('T')[0] : "";
+                                if(fFmt >= vIni && fFmt <= vFin) {
+                                    let motivoV = Array.isArray(v) ? v[7] : (v.Motivo || v[7]);
+                                    if(String(motivoV).toLowerCase().includes('trabajo virtual')) {
+                                        trabajoVirtual = true;
+                                    }
+                                }
+                            }
+                        });
+
+                        if (trabajoVirtual) {
+                            totalAsist++;
+                            cellsHTML += `<td style="border: 2px solid black; background-color: #fff3cd;"><span class="text-warning fw-bold fs-5" title="Trabajo Virtual">W</span></td>`;
+                        } else if (tienePermiso) {
                             totalAsist++;
                             cellsHTML += `<td style="border: 2px solid black; background-color: #e6f9ed;"><span class="text-success fw-bold fs-5" title="Permiso Docente">P</span></td>`;
                         } else {
@@ -8012,6 +8180,50 @@
                 faltas: countFaltasTotal,
                 asistencias: totalAsistDocentes
             });
+
+            // ========== HORARIO FIJO INJECTION ==========
+            let containerHorario = document.getElementById('horario-fijo-docente-container');
+            if (containerHorario) {
+                if (dniFiltro !== "") {
+                    let nombreDoc = docentesAProcesar.find(d => String(d[0]).trim() === dniFiltro);
+                    nombreDoc = nombreDoc ? nombreDoc[1] : "Docente";
+                    
+                    let formatH = (t) => {
+                        if(!t || String(t).toLowerCase().includes('libre')) return '-';
+                        let s = String(t);
+                        if(s.includes('T')) s = s.split('T')[1];
+                        let m = s.match(/(\d{1,2}:\d{2})/);
+                        return m ? formatoHoraInput(m[1]) : s;
+                    };
+
+                    let diasSemana = ["LUNES", "MARTES", "MI&Eacute;RCOLES", "JUEVES", "VIERNES"];
+                    let horarioHtml = `<div class="card border-primary shadow-sm mt-4"><div class="card-header bg-primary text-white fw-bold"><i class="fa-regular fa-calendar-days me-2"></i>Horario Fijo: ${nombreDoc}</div><div class="card-body p-0"><div class="table-responsive"><table class="table table-bordered table-striped text-center mb-0" style="font-size: 0.9rem;"><thead class="table-light"><tr>`;
+                    
+                    diasSemana.forEach(d => { horarioHtml += `<th>${d}</th>`; });
+                    horarioHtml += `</tr></thead><tbody><tr>`;
+                    
+                    diasSemana.forEach(d => {
+                        let diaBuscar = (d === "MI&Eacute;RCOLES") ? "MIERCOLES" : d;
+                        let hObj = mapHorarios[diaBuscar.toUpperCase() + "|" + dniFiltro] || mapHorarios[d.toUpperCase() + "|" + dniFiltro] || mapHorarios["MIÉRCOLES|" + dniFiltro] || mapHorarios["MIERCOLES|" + dniFiltro] || mapHorarios["MIRCOLES|" + dniFiltro];
+                        
+                        if (hObj && hObj.ingreso && hObj.ingreso !== 'dia libre') {
+                            let dataIng = formatH(hObj.ingreso);
+                            let dataSal = formatH(hObj.salida);
+                            horarioHtml += `<td class="align-middle fw-bold text-dark"><div class="text-success small mb-1">Ingreso:</div><div class="fs-6 mb-2">${dataIng}</div><div class="text-danger small mb-1">Salida:</div><div class="fs-6">${dataSal}</div></td>`;
+                        } else {
+                            horarioHtml += `<td class="align-middle text-muted fst-italic py-3">D&iacute;a Libre</td>`;
+                        }
+                    });
+                    
+                    horarioHtml += `</tr></tbody></table></div></div></div>`;
+                    containerHorario.innerHTML = horarioHtml;
+                    containerHorario.classList.remove('d-none');
+                } else {
+                    containerHorario.innerHTML = "";
+                    containerHorario.classList.add('d-none');
+                }
+            }
+            // ===========================================
 
             msg.innerHTML = '';
         }
@@ -8241,14 +8453,19 @@
 
                     // Agrupar estudiantes filtrados por Grado, Sección y Año
                     let grupos = {};
-                    estudiantesFiltrados.forEach(fila => {
-                        let grado = String(fila[2] || "Sin Grado").trim();
-                        let seccion = String(fila[3] || "S/S").trim();
-                        let ano = String(fila[7] || "Sin Año").trim();
-                        let key = `${grado}|${seccion}|${ano}`;
-                        if(!grupos[key]) grupos[key] = [];
-                        grupos[key].push(fila);
-                    });
+                    let isTextSearch = (fDni !== '' || fNom !== '');
+                    if (isTextSearch && estudiantesFiltrados.length > 0) {
+                        grupos["Resultados|Búsqueda|Todos"] = estudiantesFiltrados;
+                    } else {
+                        estudiantesFiltrados.forEach(fila => {
+                            let grado = String(fila[2] || "Sin Grado").trim();
+                            let seccion = String(fila[3] || "S/S").trim();
+                            let ano = String(fila[7] || "Sin Año").trim();
+                            let key = `${grado}|${seccion}|${ano}`;
+                            if(!grupos[key]) grupos[key] = [];
+                            grupos[key].push(fila);
+                        });
+                    }
 
                     // Ordenar las llaves de los grupos
                     let keysOrdenadas = Object.keys(grupos).sort((a, b) => a.localeCompare(b));
@@ -9128,6 +9345,11 @@
                 if (fecha.includes('T')) {
                     let p = fecha.split('T')[0].split('-');
                     fecha = p[2] + '/' + p[1] + '/' + p[0];
+                } else if (fecha.includes('-')) {
+                    let p = fecha.split('-');
+                    if (p.length === 3 && p[0].length === 4) {
+                        fecha = p[2] + '/' + p[1] + '/' + p[0];
+                    }
                 }
                 
                 let { texto: mesAnio, sortKey } = obtenerMesAnioTexto(fecha);
@@ -9190,7 +9412,7 @@
                         if (!isFaltaA && isFaltaB) return -1;
                         
                         // Sort by date descending
-                        let dateComp = b[1].localeCompare(a[1]);
+                        let dateComp = String(b[1] || "").localeCompare(String(a[1] || ""));
                         if (dateComp !== 0) return dateComp;
                         
                         // Sort by name
@@ -9218,8 +9440,16 @@
                     let rowsHtml = '';
                     registrosGrado.forEach(fila => {
                         let id = fila[0];
-                        let fecha = fila[1];
-                        if(typeof fecha === 'string' && fecha.includes('T')) { let p = fecha.split('T')[0].split('-'); fecha = p[2] + '/' + p[1] + '/' + p[0]; }
+                        let fecha = String(fila[1] || '').trim();
+                        if (fecha.includes('T')) {
+                            let p = fecha.split('T')[0].split('-');
+                            fecha = p[2] + '/' + p[1] + '/' + p[0];
+                        } else if (fecha.includes('-')) {
+                            let p = fecha.split('-');
+                            if (p.length === 3 && p[0].length === 4) {
+                                fecha = p[2] + '/' + p[1] + '/' + p[0];
+                            }
+                        }
                         
                         let bClass = fila[7] === 'Asistió' ? 'bg-success' : (fila[7] === 'Falta' ? 'bg-danger' : 'bg-warning text-dark');
                         let registradoPor = fila[8] ? fila[8] : 'Manual';
@@ -9390,6 +9620,11 @@
                 if (fecha.includes('T')) {
                     let p = fecha.split('T')[0].split('-');
                     fecha = p[2] + '/' + p[1] + '/' + p[0];
+                } else if (fecha.includes('-')) {
+                    let p = fecha.split('-');
+                    if (p.length === 3 && p[0].length === 4) {
+                        fecha = p[2] + '/' + p[1] + '/' + p[0];
+                    }
                 }
                 let dni = String(fila[3] || '').trim();
                 let key = fecha + '|' + dni;
@@ -10810,7 +11045,7 @@
             let btnEliminar = document.getElementById('btn-eliminar-dup');
             let chkTodos = document.getElementById('chk-sel-todos-dup');
 
-            tbody.innerHTML = '<tr><td colspan="6" class="text-center py-4"><i class="fa-solid fa-spinner fa-spin"></i> Analizando duplicados...</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="7" class="text-center py-4"><i class="fa-solid fa-spinner fa-spin"></i> Analizando duplicados...</td></tr>';
             msg.innerHTML = "";
             btnEliminar.disabled = true;
             chkTodos.checked = false;
@@ -10858,7 +11093,7 @@
             }
 
             if(duplicados.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="6" class="text-center py-5 text-success fw-bold"><i class="fa-solid fa-check-circle fa-2x d-block mb-2"></i> No se encontraron registros duplicados del mismo día.</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="7" class="text-center py-5 text-success fw-bold"><i class="fa-solid fa-check-circle fa-2x d-block mb-2"></i> No se encontraron registros duplicados del mismo día.</td></tr>';
                 bootstrap.Modal.getOrCreateInstance(document.getElementById('modal-Duplicados')).show();
                 return;
             }
@@ -10898,13 +11133,31 @@
 
             if(!confirm(`¿Desea eliminar los ${seleccionados.length} registros seleccionados permanentemente?`)) return;
 
-            let msg = document.getElementById('msg-Duplicados');
             let btn = document.getElementById('btn-eliminar-dup');
             btn.disabled = true;
-            msg.innerHTML = `<span class="text-primary fw-bold"><i class="fa-solid fa-spinner fa-spin"></i> Eliminando ${seleccionados.length} registros...</span>`;
+            
+            // Ocultar modal actual y mostrar modal de progreso
+            bootstrap.Modal.getOrCreateInstance(document.getElementById('modal-Duplicados')).hide();
+            
+            let modalProgreso = bootstrap.Modal.getOrCreateInstance(document.getElementById('modal-Progreso-Eliminacion'));
+            let barra = document.getElementById('eliminar-dup-barra');
+            let porcentajeText = document.getElementById('eliminar-dup-porcentaje');
+            let texto = document.getElementById('eliminar-dup-texto');
+            let titulo = document.getElementById('eliminar-dup-titulo');
+            
+            barra.style.width = '0%';
+            barra.setAttribute('aria-valuenow', 0);
+            barra.className = 'progress-bar progress-bar-striped progress-bar-animated bg-danger';
+            porcentajeText.innerText = '0%';
+            texto.innerText = `0 de ${seleccionados.length} registros eliminados`;
+            titulo.innerHTML = 'Procesando registros...';
+            
+            modalProgreso.show();
 
             let exitos = 0;
             let errores = 0;
+            let procesados = 0;
+            let total = seleccionados.length;
 
             // Eliminación secuencial (más segura para evitar bloqueos de script en el servidor)
             for(let id of seleccionados) {
@@ -10913,20 +11166,29 @@
                     if(r.exito) exitos++;
                     else errores++;
                 } catch(e) { errores++; }
+                
+                procesados++;
+                let porcentaje = Math.round((procesados / total) * 100);
+                barra.style.width = porcentaje + '%';
+                barra.setAttribute('aria-valuenow', porcentaje);
+                porcentajeText.innerText = porcentaje + '%';
+                texto.innerText = `${procesados} de ${total} registros eliminados`;
             }
 
             if(errores === 0) {
-                msg.innerHTML = `<span class="text-success fw-bold"><i class="fa-solid fa-circle-check"></i> ¡Éxito! Se eliminaron ${exitos} registros.</span>`;
+                titulo.innerHTML = `<span class="text-success"><i class="fa-solid fa-circle-check"></i> ¡Proceso Completado!</span>`;
+                barra.className = 'progress-bar bg-success';
             } else {
-                msg.innerHTML = `<span class="text-warning fw-bold">Proceso terminado. Eliminados: ${exitos}, Errores: ${errores}.</span>`;
+                titulo.innerHTML = `<span class="text-warning"><i class="fa-solid fa-triangle-exclamation"></i> Proceso terminado con errores</span>`;
+                barra.className = 'progress-bar bg-warning';
+                texto.innerText += ` (Éxitos: ${exitos}, Errores: ${errores})`;
             }
 
-            await cargarTabla(hojaDuplicadosActual, true);
             setTimeout(() => {
-                bootstrap.Modal.getOrCreateInstance(document.getElementById('modal-Duplicados')).hide();
+                modalProgreso.hide();
                 btn.disabled = false;
-                msg.innerHTML = "";
-            }, 2000);
+                cargarTabla(hojaDuplicadosActual, true);
+            }, 800);
         }
         async function cambiarEstado(hoja, id) { 
             if(!confirm(`¿Deseas cambiar el estado de este registro?`)) return; 
@@ -11572,6 +11834,33 @@
             if (dnisEnProceso.has(dniPadded)) return;
             dnisEnProceso.add(dniPadded);
 
+            // === VERIFICACIÓN DE TRASLADO/TERMINO ===
+            let trasladoOtermino = (datosMemoria['TRASLADO/TERMINO'] || []).find(r => r[2] && String(r[2]).replace(/['"]/g, '').trim().padStart(8, '0') === dniPadded);
+            if (trasladoOtermino) {
+                dnisEnProceso.delete(dniPadded);
+                let tipoTT = trasladoOtermino[1];
+                let mensajeRetirado = (String(tipoTT).trim().toLowerCase() === 'estudiante') ? 'EL ALUMNO SE TRASLADO A OTRO COLEGIO' : 'TERMINO SU CONTRATO';
+                
+                Swal.fire({
+                    title: '¡ATENCIÓN!',
+                    html: '<div style="font-size: 2rem; font-weight: 900; color: #dc3545; text-transform: uppercase; line-height: 1.2; padding: 20px;">' + mensajeRetirado + '</div>',
+                    icon: 'error',
+                    background: '#fff3f3',
+                    confirmButtonColor: '#dc3545',
+                    confirmButtonText: 'ENTENDIDO',
+                    allowOutsideClick: false
+                });
+                
+                try {
+                    let ctxAudio = new (window.AudioContext || window.webkitAudioContext)();
+                    let osc = ctxAudio.createOscillator(); osc.connect(ctxAudio.destination);
+                    osc.type = 'sawtooth'; osc.frequency.setValueAtTime(150, ctxAudio.currentTime);
+                    osc.start(); osc.stop(ctxAudio.currentTime + 0.5);
+                } catch(e) {}
+                
+                return;
+            }
+
             let datosLocal = null;
             let modoElement = document.querySelector('input[name="modoScanner"]:checked');
             let modo = modoElement ? modoElement.value : 'estudiante';
@@ -11973,7 +12262,7 @@
             // Agregar la petición a la cola de ejecución secuencial en segundo plano para evitar saturar el servidor (LockService)
             window.colaPeticionesAsistencia = window.colaPeticionesAsistencia.then(() => {
                 return new Promise((resolveQueue) => {
-                    fetchAPI(payload).then(r => {
+                    fetchAPI(payload, 0).then(r => {
                         if(r && r.exito) {
                             if (datosMemoria[hojaCheck]) {
                                 let idx = datosMemoria[hojaCheck].findIndex(row => row[0] === tempId);
@@ -12205,7 +12494,7 @@
             if (!listDetalles) return;
             
             if (!lista || lista.length === 0) {
-                listDetalles.innerHTML = `<tr><td colspan="5" class="text-center text-muted py-2">No hay registros pendientes</td></tr>`;
+                listDetalles.innerHTML = `<tr><td colspan="6" class="text-center text-muted py-2">No hay registros pendientes</td></tr>`;
                 return;
             }
             
@@ -12290,6 +12579,10 @@
                     setTimeout(() => {
                         if (item.accion === 'registrarAsistenciaDocente') {
                             cargarTabla('Asistencia_Docentes', true, true);
+                
+                fetchAPI({accion: 'obtenerDatos', hoja: 'TRASLADO/TERMINO'}).then(res => {
+                    if (res && res.exito) datosMemoria['TRASLADO/TERMINO'] = res.datos || [];
+                });
                         } else {
                             cargarTabla('Registro_Asistencia', true, true);
                             cargarTabla('Asistencia_Auxiliar', true, true);
@@ -12426,6 +12719,52 @@
             }
 
             let duplicadosBorrados = [];
+            let keysCola = new Set();
+            p.forEach(item => {
+                let dni = String(item.dni).trim().padStart(8, '0');
+                let fecha = String(item.fecha || "").trim();
+                if (fecha.includes('-')) {
+                    let pts = fecha.split('T')[0].split('-');
+                    fecha = `${pts[2]}/${pts[1]}/${pts[0]}`;
+                }
+                if (fecha.includes('/')) {
+                    let parts = fecha.split('/');
+                    if (parts.length === 3) fecha = parts[0].padStart(2, '0') + '/' + parts[1].padStart(2, '0') + '/' + parts[2];
+                }
+                keysCola.add(`${dni}|${fecha}`);
+            });
+
+            let setExistentes = new Set();
+            let setExistentesDocentes = new Set();
+
+            for (let hoja of ['Asistencia_Docentes', 'Asistencia_Auxiliar', 'Registro_Asistencia']) {
+                let datos = datosMemoria[hoja];
+                if (!datos) continue;
+                for (let r of datos) {
+                    let dniRaw = String(r[3] || "");
+                    if (dniRaw) {
+                        let dniR = dniRaw.replace(/['"]/g, '').trim().padStart(8, '0');
+                        let fechaR = String(r[1] || "").trim();
+                        if (fechaR.includes('T')) {
+                            let pts = fechaR.split('T')[0].split('-');
+                            fechaR = `${pts[2]}/${pts[1]}/${pts[0]}`;
+                        }
+                        if (fechaR.includes('/')) {
+                            let parts = fechaR.split('/');
+                            if (parts.length === 3) fechaR = parts[0].padStart(2, '0') + '/' + parts[1].padStart(2, '0') + '/' + parts[2];
+                        }
+                        let k = `${dniR}|${fechaR}`;
+                        if (keysCola.has(k)) {
+                            if (hoja === 'Asistencia_Docentes') {
+                                setExistentesDocentes.add(k + "|" + String(r[5] || "").trim().toLowerCase());
+                            } else {
+                                setExistentes.add(k);
+                            }
+                        }
+                    }
+                }
+            }
+
             let nuevaCola = p.filter(item => {
                 let dniPadded = String(item.dni).trim().padStart(8, '0');
                 let fechaItem = String(item.fecha || "").trim();
@@ -12440,45 +12779,12 @@
                     if (parts.length === 3) fechaItem = parts[0].padStart(2, '0') + '/' + parts[1].padStart(2, '0') + '/' + parts[2];
                 }
 
-                // Hojas donde se buscará
-                let hojasABuscar = [];
-                if (item.accion === 'registrarAsistenciaDocente') {
-                    hojasABuscar = ['Asistencia_Docentes'];
-                } else {
-                    hojasABuscar = ['Asistencia_Auxiliar', 'Registro_Asistencia'];
-                }
-
+                let k = `${dniPadded}|${fechaItem}`;
                 let yaExiste = false;
-                for (let hoja of hojasABuscar) {
-                    let datos = datosMemoria[hoja];
-                    if (!datos) continue;
-                    
-                    let encontrado = datos.some(r => {
-                        let dniR = String(r[3] || "").replace(/['"]/g, '').trim().padStart(8, '0');
-                        let fechaR = String(r[1] || "").trim();
-                        
-                        if (fechaR.includes('T')) {
-                            let pts = fechaR.split('T')[0].split('-');
-                            fechaR = `${pts[2]}/${pts[1]}/${pts[0]}`;
-                        }
-                        if (fechaR.includes('/')) {
-                            let parts = fechaR.split('/');
-                            if (parts.length === 3) fechaR = parts[0].padStart(2, '0') + '/' + parts[1].padStart(2, '0') + '/' + parts[2];
-                        }
-
-                        if (dniR === dniPadded && fechaR === fechaItem) {
-                            if (hoja === 'Asistencia_Docentes') {
-                                return String(r[5] || "").trim().toLowerCase() === String(item.tipoMarca || "").trim().toLowerCase();
-                            }
-                            return true;
-                        }
-                        return false;
-                    });
-                    
-                    if (encontrado) {
-                        yaExiste = true;
-                        break;
-                    }
+                if (item.accion === 'registrarAsistenciaDocente') {
+                    yaExiste = setExistentesDocentes.has(k + "|" + String(item.tipoMarca || "").trim().toLowerCase());
+                } else {
+                    yaExiste = setExistentes.has(k);
                 }
 
                 if (yaExiste) {
@@ -13624,7 +13930,7 @@
             selE.innerHTML = '<option value="">Seleccione...</option>';
             if(g && s) {
                 let filtrados = datosMemoria.Estudiantes.filter(e => e[2] == g && e[3] == s);
-                filtrados.sort((a,b)=>a[1].localeCompare(b[1])).forEach(e => {
+                filtrados.sort((a,b)=>String(a[1]||'').localeCompare(String(b[1]||''))).forEach(e => {
                     selE.innerHTML += `<option value="${e[0]}">${e[1]}</option>`;
                 });
             }
@@ -16312,7 +16618,9 @@ async function descargarConsolidadoIncidenciasPDF(dni, fInicio, fFin) {
             { id: 'RepAux', nombre: 'Reporte Auxiliar (Solo Ver)' },
             { id: 'GrafAux', nombre: 'Reporte Gráfico Entrada' },
             { id: 'RepFaltas', nombre: 'Reporte de Faltas y Tardanzas' },
-            { id: 'Nomina', nombre: 'Nómina de Matrícula' }
+            { id: 'Nomina', nombre: 'Nómina de Matrícula' },
+            { id: 'TRASLADO/TERMINO', nombre: 'Traslado/T.Contrato' },
+            { id: 'Vacaciones', nombre: 'Vacaciones/T.Virtual' }
         ];
 
         function abrirModalAccesos(hoja, idUsuario) {
@@ -16418,7 +16726,9 @@ async function descargarConsolidadoIncidenciasPDF(dni, fInicio, fFin) {
                 'Permisos': { links: ['link-permisos-doc', 'link-permisos-aux'], btnAdd: 'btn-add-permiso' },
                 'QR': { links: ['link-qr'] },
                 'QRDoc': { links: ['link-qr'] },
-                'Nomina': { links: ['link-nomina'] }
+                'Nomina': { links: ['link-nomina'] },
+                'TRASLADO/TERMINO': { links: ['link-retirados'], btnAdd: 'btn-registrar-tt' },
+                'Vacaciones': { links: ['link-vacaciones'] }
             };
 
             let mostrarDocente = false;
@@ -16446,6 +16756,14 @@ async function descargarConsolidadoIncidenciasPDF(dni, fInicio, fFin) {
                         if(b) {
                             if(nivel === 'RW') b.classList.remove('d-none');
                             else b.classList.add('d-none');
+                        }
+                    }
+                    if (key === 'Vacaciones') {
+                        let b2 = document.getElementById('btn-registrar-vacaciones');
+                        let divB2 = b2 ? b2.parentElement : null;
+                        if (divB2 && divB2.classList.contains('d-flex')) {
+                            if(nivel === 'RW') divB2.classList.remove('d-none');
+                            else divB2.classList.add('d-none');
                         }
                     }
                     if(conf.btnExtra) {
@@ -18668,12 +18986,15 @@ async function descargarConsolidadoIncidenciasPDF(dni, fInicio, fFin) {
             let tipo = document.getElementById('vac-selector-tipo').value;
             let panelEst = document.getElementById('vac-panel-estudiantes');
             let panelDoc = document.getElementById('vac-panel-docentes');
+            let wrapper = document.getElementById('vac-motivo-wrapper');
             if (tipo === 'estudiantes') {
                 if (panelEst) panelEst.classList.remove('d-none');
                 if (panelDoc) panelDoc.classList.add('d-none');
+                if (wrapper) wrapper.innerHTML = '<input type="text" id="vac-motivo" class="form-control" placeholder="Ej: Vacaciones Programadas" value="Vacaciones Programadas">';
             } else {
                 if (panelEst) panelEst.classList.add('d-none');
                 if (panelDoc) panelDoc.classList.remove('d-none');
+                if (wrapper) wrapper.innerHTML = '<select id="vac-motivo" class="form-select fw-bold"><option value="Vacaciones Programadas">Vacaciones Programadas</option><option value="Trabajo virtual">Trabajo virtual</option></select>';
             }
         }
 
@@ -18776,18 +19097,37 @@ async function descargarConsolidadoIncidenciasPDF(dni, fInicio, fFin) {
             let timestampBase = Date.now();
 
             if (tipo === 'estudiantes') {
-                let gradosSel = Array.from(document.querySelectorAll('.chk-vac-grado:checked')).map(c => c.value);
-                if (gradosSel.length === 0) return Swal.fire('Atención', 'Seleccione grados.', 'warning');
-                let estudiantes = datosMemoria['Estudiantes'] || [];
-                estudiantes.forEach(est => {
-                    let g = String(est[2] || '').trim();
-                    if(gradosSel.includes(g)) {
+                let modeEl = document.querySelector('input[name="vac-est-mode"]:checked');
+                let mode = modeEl ? modeEl.value : 'grupo';
+                
+                if (mode === 'grupo') {
+                    let gradosSel = Array.from(document.querySelectorAll('.chk-vac-grado:checked')).map(c => c.value);
+                    if (gradosSel.length === 0) return Swal.fire('Atención', 'Seleccione grados.', 'warning');
+                    let estudiantes = datosMemoria['Estudiantes'] || [];
+                    estudiantes.forEach(est => {
+                        let g = String(est[2] || '').trim();
+                        if(gradosSel.includes(g)) {
+                            let dni = String(est[0] || '').replace(/'/g, '').trim();
+                            let nom = est[1] || '';
+                            let id = 'VAC_' + timestampBase++;
+                            nuevosRegistros.push([id, dni, nom, g, 'Estudiante', fecIni, fecFin, motivo, resp, fechaReg]);
+                        }
+                    });
+                } else {
+                    let estSelDnis = Array.from(document.querySelectorAll('.chk-vac-est-indiv:checked')).map(c => c.value);
+                    if (estSelDnis.length === 0) return Swal.fire('Atención', 'Seleccione estudiantes.', 'warning');
+                    
+                    let estudiantes = datosMemoria['Estudiantes'] || [];
+                    estudiantes.forEach(est => {
                         let dni = String(est[0] || '').replace(/'/g, '').trim();
-                        let nom = est[1] || '';
-                        let id = 'VAC_' + timestampBase++;
-                        nuevosRegistros.push([id, dni, nom, g, 'Estudiante', fecIni, fecFin, motivo, resp, fechaReg]);
-                    }
-                });
+                        if (estSelDnis.includes(dni)) {
+                            let nom = est[1] || '';
+                            let g = String(est[2] || '').trim();
+                            let id = 'VAC_' + timestampBase++;
+                            nuevosRegistros.push([id, dni, nom, g, 'Estudiante', fecIni, fecFin, motivo, resp, fechaReg]);
+                        }
+                    });
+                }
             } else {
                 let docsSel = Array.from(document.querySelectorAll('.chk-vac-docente:checked')).map(c => c.value.split('|'));
                 if (docsSel.length === 0) return Swal.fire('Atención', 'Seleccione docentes.', 'warning');
@@ -18805,7 +19145,7 @@ async function descargarConsolidadoIncidenciasPDF(dni, fInicio, fFin) {
             btn.disabled = true;
 
             try {
-                let payload = { accion: 'guardarMultiples', hojas: { 'Vacaciones': nuevosRegistros } };
+                let payload = { accion: 'guardarMasivo', hoja: 'Vacaciones', matriz: nuevosRegistros };
                 let r = await fetchAPI(payload);
                 if (r.exito) {
                     if (!datosMemoria['Vacaciones']) datosMemoria['Vacaciones'] = [];
@@ -18826,6 +19166,7 @@ async function descargarConsolidadoIncidenciasPDF(dni, fInicio, fFin) {
         }
 
         function renderizarHistorialVacaciones() {
+            let canEditDelete = (rolActual === 'Administrador') || (window.permisosUsuario && window.permisosUsuario['Vacaciones'] === 'RW');
             let tbody = document.getElementById('tb-historial-vacaciones');
             if (!tbody) return;
             tbody.innerHTML = '';
@@ -18876,9 +19217,7 @@ async function descargarConsolidadoIncidenciasPDF(dni, fInicio, fFin) {
                     <td>${motivo}</td>
                     <td><small class="text-muted">${resp}</small></td>
                     <td>
-                        <button class="btn btn-sm btn-outline-danger py-0 px-2" onclick="eliminarVacacion('${id}', '${dni}')">
-                            <i class="fa-solid fa-trash"></i>
-                        </button>
+                        ${canEditDelete ? `<button class="btn btn-sm btn-outline-danger py-0 px-2" onclick="eliminarVacacion('${id}', '${dni}')"><i class="fa-solid fa-trash"></i></button>` : `-`}
                     </td>
                 `;
                 tbody.appendChild(tr);
@@ -18886,20 +19225,29 @@ async function descargarConsolidadoIncidenciasPDF(dni, fInicio, fFin) {
         }
 
         async function eliminarVacacion(id, dni) {
-            let conf = await Swal.fire({
-                title: '¿Eliminar Vacación?', text: "Se borrará este registro.",
-                icon: 'warning', showCancelButton: true, confirmButtonText: 'Sí, eliminar', confirmButtonColor: '#d33'
-            });
-            if(!conf.isConfirmed) return;
-            
-            let btn = document.activeElement;
-            let origHtml = '';
-            if(btn && btn.tagName==='BUTTON') { origHtml = btn.innerHTML; btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>'; btn.disabled=true; }
-            
-            try {
-                let payload = { accion: 'eliminarDatosVarios', hojas: { 'Vacaciones': [{columnaBusqueda: 0, valorBusqueda: id}] } };
-                let r = await fetchAPI(payload);
-                if(r.exito) {
+            Swal.fire({
+                title: '¿Eliminar Vacación?',
+                text: "Se borrará este registro.",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Sí, eliminar',
+                confirmButtonColor: '#d33',
+                showLoaderOnConfirm: true,
+                preConfirm: async () => {
+                    try {
+                        let payload = { accion: 'eliminarRegistro', hoja: 'Vacaciones', id: id };
+                        let r = await fetchAPI(payload);
+                        if (!r.exito) {
+                            Swal.showValidationMessage('No se pudo eliminar.');
+                        }
+                        return r;
+                    } catch (error) {
+                        Swal.showValidationMessage('Error de conexión');
+                    }
+                },
+                allowOutsideClick: () => !Swal.isLoading()
+            }).then((result) => {
+                if (result.isConfirmed && result.value && result.value.exito) {
                     let vacs = datosMemoria['Vacaciones'] || [];
                     let idx = vacs.findIndex(v => {
                         let vId = Array.isArray(v) ? String(v[0]||'') : String(v.ID_VAC || v.id || v[0] || '');
@@ -18907,18 +19255,13 @@ async function descargarConsolidadoIncidenciasPDF(dni, fInicio, fFin) {
                     });
                     if(idx !== -1) vacs.splice(idx, 1);
                     renderizarHistorialVacaciones();
-                    Swal.fire('Eliminado', 'Vacación eliminada.', 'success');
-                } else {
-                    Swal.fire('Error', 'No se pudo eliminar.', 'error');
                 }
-            } catch(e) { Swal.fire('Error', 'Error de conexión', 'error'); }
-            
-            if(btn && btn.tagName==='BUTTON') { btn.innerHTML = origHtml; btn.disabled=false; }
+            });
         }
 </script>
 
     <!-- MODAL PREVIEW PDF -->
-    <div class="modal fade" id="modal-Preview-PDF" tabindex="-1">
+    <div class="modal fade" data-bs-backdrop="static" data-bs-keyboard="false" id="modal-Preview-PDF" tabindex="-1">
         <div class="modal-dialog modal-xl">
             <div class="modal-content">
                 <div class="modal-header bg-dark text-white">
@@ -19043,81 +19386,349 @@ async function descargarConsolidadoIncidenciasPDF(dni, fInicio, fFin) {
         }
 </style>
 <script>
-    function cargarOpcionesRetirados() {
-        let sE = document.getElementById('ret-est-select');
-        let sD = document.getElementById('ret-doc-select');
-        let tE = document.getElementById('tb-retirados-est');
-        let tD = document.getElementById('tb-retirados-doc');
-        
+    async function cargarOpcionesRetirados() {
+        Swal.fire({ title: 'Cargando datos...', allowOutsideClick: false, didOpen: () => { Swal.showLoading(); } });
+        let r = await fetchAPI({accion: 'obtenerDatos', hoja: 'TRASLADO/TERMINO'});
+        if(r && r.exito) {
+            datosMemoria['TRASLADO/TERMINO'] = r.datos || [];
+        } else {
+            Swal.fire('Error de conexin', 'No se pudieron descargar los datos de la hoja TRASLADO/TERMINO. Verifique el nombre de la hoja en la base de datos.', 'error');
+        }
+        Swal.close();
+
         let ests = (datosMemoria['Estudiantes'] || []).slice(1);
-        let docs = (datosMemoria['Docentes'] || []).slice(1);
+        let aniosSet = new Set();
+        ests.forEach(e => {
+            if(e[7] && e[7].toString().trim() !== "") {
+                aniosSet.add(e[7].toString().trim());
+            }
+        });
+        let anios = [...aniosSet].sort((a,b)=>b-a);
         
-        // Populate and sort selects (excluding already retired ones to keep it clean)
-        if(sE) {
-            let activeEsts = ests.filter(e => !e[12]);
-            activeEsts.sort((a, b) => (a[1] || "").localeCompare(b[1] || ""));
-            sE.innerHTML = '<option value="">Seleccione Estudiante...</option>';
-            activeEsts.forEach(e => {
-                sE.innerHTML += '<option value="' + e[0] + '">' + e[1] + ' - ' + e[2] + ' "' + e[3] + '"</option>';
+        let selAnio = document.getElementById('tt-anio');
+        if(selAnio) {
+            selAnio.innerHTML = '<option value="">Seleccione A&ntilde;o...</option>';
+            anios.forEach(a => {
+                selAnio.innerHTML += `<option value="${a}">${a}</option>`;
+            });
+            let currentYear = new Date().getFullYear().toString();
+            if (anios.includes(currentYear)) {
+                selAnio.value = currentYear;
+            } else if(anios.length > 0) {
+                selAnio.value = anios[0];
+            }
+        }
+
+        cambiarGrupoTT();
+        renderTablasTT();
+    }
+
+    function cambiarGrupoTT() {
+        let grupo = document.getElementById('tt-grupo').value;
+        let anio = document.getElementById('tt-anio').value;
+        let gradoDiv = document.getElementById('tt-grado-div');
+        let gradoSel = document.getElementById('tt-grado');
+        let personaSel = document.getElementById('tt-persona');
+        
+        personaSel.innerHTML = '<option value="">Seleccione...</option>';
+        gradoSel.innerHTML = '<option value="">Seleccione...</option>';
+        
+        if (!anio) return; // Obligatorio el año
+        
+        if (grupo === 'Estudiante') {
+            gradoDiv.style.display = 'block';
+            let ests = (datosMemoria['Estudiantes'] || []).slice(1);
+            ests = ests.filter(e => e[7] && e[7].toString().trim() === anio);
+            let grados = [...new Set(ests.map(e => e[2] + " " + (e[3]||"")).filter(g => g.trim() !== ""))].sort();
+            grados.forEach(g => {
+                gradoSel.innerHTML += `<option value="${g}">${g}</option>`;
+            });
+        } else {
+            gradoDiv.style.display = 'none';
+            let docs = (datosMemoria['Docentes'] || []).slice(1);
+            docs.sort((a, b) => (a[1] || "").localeCompare(b[1] || ""));
+            docs.forEach(d => {
+                personaSel.innerHTML += `<option value="${d[0]}">${d[1]}</option>`;
             });
         }
-        if(sD) {
-            let activeDocs = docs.filter(d => !d[11]);
-            activeDocs.sort((a, b) => (a[1] || "").localeCompare(b[1] || ""));
-            sD.innerHTML = '<option value="">Seleccione Docente...</option>';
-            activeDocs.forEach(d => {
-                sD.innerHTML += '<option value="' + d[0] + '">' + d[1] + '</option>';
+    }
+
+    function filtrarPersonasTT() {
+        let grupo = document.getElementById('tt-grupo').value;
+        let anio = document.getElementById('tt-anio').value;
+        let grado = document.getElementById('tt-grado').value;
+        let personaSel = document.getElementById('tt-persona');
+        
+        personaSel.innerHTML = '<option value="">Seleccione...</option>';
+        if (!anio) return;
+        
+        if (grupo === 'Estudiante' && grado) {
+            let ests = (datosMemoria['Estudiantes'] || []).slice(1);
+            let filtrados = ests.filter(e => (e[7] && e[7].toString().trim() === anio) && (e[2] + " " + (e[3]||"")) === grado);
+            filtrados.sort((a, b) => (a[1] || "").localeCompare(b[1] || ""));
+            filtrados.forEach(e => {
+                personaSel.innerHTML += `<option value="${e[0]}">${e[1]}</option>`;
             });
         }
+    }
+
+    function renderTablasTT() {
+        let datos = [];
+        if (datosMemoria['TRASLADO/TERMINO'] && datosMemoria['TRASLADO/TERMINO'].length > 0) {
+            datos = datosMemoria['TRASLADO/TERMINO'];
+            let header = datos[0];
+            if (header && (String(header[2]).toLowerCase().includes('dni') || String(header[1]).toLowerCase() === 'tipo' || String(header[0]).toLowerCase() === 'ao' || String(header[0]).toLowerCase() === 'ano')) {
+                datos = datos.slice(1);
+            }
+        }
+        let tE = document.getElementById('tb-tt-est');
+        let tD = document.getElementById('tb-tt-doc');
         
-        // Populate tables
+        if(tE) tE.innerHTML = '';
+        if(tD) tD.innerHTML = '';
+        
+        let ests = datos.filter(d => String(d[1] || '').trim().toLowerCase() === 'estudiante');
+        let docs = datos.filter(d => String(d[1] || '').trim().toLowerCase() === 'docente');
+        
+        ests.sort((a, b) => new Date(b[5] + "T00:00:00") - new Date(a[5] + "T00:00:00"));
+        docs.sort((a, b) => new Date(b[5] + "T00:00:00") - new Date(a[5] + "T00:00:00"));
+
+        let formatFecha = (f) => f ? String(f).split('T')[0] : '';
+        let canEditDelete = (rolActual === 'Administrador') || (window.permisosUsuario && window.permisosUsuario['TRASLADO/TERMINO'] === 'RW');
+        
         if(tE) {
-            let retEsts = ests.filter(e => e[12]); // has retirement date
-            retEsts.sort((a, b) => new Date(b[12] + "T00:00:00") - new Date(a[12] + "T00:00:00")); // Sort newest first
-            if (retEsts.length === 0) {
-                tE.innerHTML = '<tr><td colspan="4" class="text-muted py-3">No hay estudiantes retirados registrados.</td></tr>';
+            if(ests.length === 0) {
+                tE.innerHTML = '<tr><td colspan="7" class="text-muted py-3">No hay estudiantes trasladados.</td></tr>';
             } else {
-                tE.innerHTML = retEsts.map(e => '<tr><td>'+e[0]+'</td><td class="text-start">'+e[1]+'</td><td>'+e[2]+' "'+e[3]+'"</td><td class="text-danger fw-bold">'+e[12]+'</td></tr>').join('');
+                tE.innerHTML = ests.map(e => `<tr><td>${e[0]}</td><td>${e[2]}</td><td>${e[3]}</td><td class="text-start">${e[4]}</td><td class="text-danger fw-bold">${formatFecha(e[5])}</td><td>${e[6] || ''}</td><td>` + (canEditDelete ? `<button class="btn btn-sm btn-danger py-0 px-2" onclick="eliminarRegistroTT('${e[2]}')"><i class="fa-solid fa-trash"></i></button>` : `-`) + `</td></tr>`).join('');
             }
         }
         
         if(tD) {
-            let retDocs = docs.filter(d => d[11]);
-            retDocs.sort((a, b) => new Date(b[11] + "T00:00:00") - new Date(a[11] + "T00:00:00"));
-            if (retDocs.length === 0) {
-                tD.innerHTML = '<tr><td colspan="3" class="text-muted py-3">No hay docentes con término de contrato.</td></tr>';
+            if(docs.length === 0) {
+                tD.innerHTML = '<tr><td colspan="6" class="text-muted py-3">No hay docentes con t&eacute;rmino de contrato.</td></tr>';
             } else {
-                tD.innerHTML = retDocs.map(d => '<tr><td>'+d[0]+'</td><td class="text-start">'+d[1]+'</td><td class="text-danger fw-bold">'+d[11]+'</td></tr>').join('');
+                tD.innerHTML = docs.map(d => `<tr><td>${d[0]}</td><td>${d[2]}</td><td class="text-start">${d[4]}</td><td class="text-danger fw-bold">${formatFecha(d[5])}</td><td>${d[6] || ''}</td><td>` + (canEditDelete ? `<button class="btn btn-sm btn-danger py-0 px-2" onclick="eliminarRegistroTT('${d[2]}')"><i class="fa-solid fa-trash"></i></button>` : `-`) + `</td></tr>`).join('');
             }
         }
     }
-    
-    async function registrarRetiro(tipo) {
-        let dni = document.getElementById(tipo === 'Estudiantes' ? 'ret-est-select' : 'ret-doc-select').value;
-        let fecha = document.getElementById(tipo === 'Estudiantes' ? 'ret-est-fecha' : 'ret-doc-fecha').value;
-        if(!dni || !fecha) { alert('Seleccione persona y fecha.'); return; }
-        
-        let fila = datosMemoria[tipo].find(f => f[0].toString() === dni.toString());
-        if(!fila) return;
-        
-        if(tipo === 'Estudiantes') {
-            while(fila.length < 13) fila.push("");
-            fila[12] = fecha;
-        } else {
-            while(fila.length < 12) fila.push("");
-            fila[11] = fecha;
+
+    async function eliminarRegistroTT(dni) {
+        const result = await Swal.fire({
+            title: '¿Confirmar eliminación?',
+            text: '¿ELIMINAR registro permanentemente?',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: 'Sí, eliminar',
+            cancelButtonText: 'No, cancelar'
+        });
+
+        if (result.isConfirmed) {
+            Swal.fire({ title: 'Eliminando...', allowOutsideClick: false, didOpen: () => { Swal.showLoading(); } });
+            let r = await fetchAPI({ accion: 'eliminarRegistro', hoja: 'TRASLADO/TERMINO', id: dni });
+            if(r && r.exito) {
+                Swal.fire('¡Eliminado!', 'El registro ha sido eliminado.', 'success');
+                datosMemoria['TRASLADO/TERMINO'] = datosMemoria['TRASLADO/TERMINO'].filter(d => d[2] !== dni);
+                renderTablasTT();
+            } else {
+                Swal.fire('Error', r.mensaje || 'Error al eliminar', 'error');
+            }
         }
+    }
+
+    async function registrarTT() {
+        let anio = document.getElementById('tt-anio').value;
+        let grupo = document.getElementById('tt-grupo').value;
+        let gradoSec = document.getElementById('tt-grado').value || "";
+        let dni = document.getElementById('tt-persona').value;
+        let fecha = document.getElementById('tt-fecha').value;
+        
+        if(!anio || !grupo || !dni || !fecha) {
+            Swal.fire('Atenci&oacute;n', 'Complete todos los campos requeridos.', 'warning');
+            return;
+        }
+        
+        let existe = (datosMemoria['TRASLADO/TERMINO'] || []).find(r => r[2] && String(r[2]).trim() === String(dni).trim());
+        if (existe) {
+            Swal.fire('Atenci&oacute;n', 'Esta persona ya se encuentra registrada como trasladada o con t&eacute;rmino de contrato.', 'warning');
+            return;
+        }
+
+        let nombres = "";
+        if (grupo === 'Estudiante') {
+            let p = datosMemoria['Estudiantes'].find(x => x[0].toString() === dni.toString());
+            if(p) nombres = p[1];
+        } else {
+            let p = datosMemoria['Docentes'].find(x => x[0].toString() === dni.toString());
+            if(p) nombres = p[1];
+        }
+        
+        let desc = document.getElementById('tt-descripcion') ? document.getElementById('tt-descripcion').value.trim() : '';
+        let record = [anio, grupo, dni, gradoSec, nombres, fecha, desc];
         
         Swal.fire({ title: 'Guardando...', allowOutsideClick: false, didOpen: () => { Swal.showLoading(); } });
         
-        google.script.run.withSuccessHandler(res => {
-            if(res.exito) {
-                Swal.fire('Éxito', 'Registrado correctamente.', 'success');
-                cargarOpcionesRetirados();
+        let payload = {
+            accion: 'guardarRegistro',
+            hoja: 'TRASLADO/TERMINO',
+            datos: record
+        };
+        
+        try {
+            let res = await fetchAPI(payload);
+            if (res && res.exito) {
+                Swal.fire('&Eacute;xito', 'Registrado correctamente.', 'success');
+                if(!datosMemoria['TRASLADO/TERMINO'] || datosMemoria['TRASLADO/TERMINO'].length === 0) {
+                    datosMemoria['TRASLADO/TERMINO'] = [['AÑO', 'TIPO', 'DNI', 'GRADO Y SECCION', 'NOMBRES', 'FECHA']];
+                }
+                datosMemoria['TRASLADO/TERMINO'].push(record);
+                renderTablasTT();
             } else {
-                Swal.fire('Error', 'No se pudo guardar.', 'error');
+                Swal.fire('Error', res.mensaje || 'No se pudo guardar.', 'error');
             }
-        }).editarFila(tipo, dni, fila);
+        } catch (e) {
+            Swal.fire('Error', e.message, 'error');
+        }
     }
+
+
+        function toggleVacEstMode() {
+            let mode = document.querySelector('input[name="vac-est-mode"]:checked').value;
+            if (mode === 'grupo') {
+                document.getElementById('vac-est-grupo-container').classList.remove('d-none');
+                document.getElementById('vac-est-indiv-container').classList.add('d-none');
+            } else {
+                document.getElementById('vac-est-grupo-container').classList.add('d-none');
+                document.getElementById('vac-est-indiv-container').classList.remove('d-none');
+                renderizarEstudiantesIndivVacaciones();
+            }
+        }
+
+        function renderizarEstudiantesIndivVacaciones() {
+            let grid = document.getElementById('vac-grid-est-indiv');
+            if (!grid) return;
+            grid.innerHTML = '';
+            let estudiantesRaw = datosMemoria['Estudiantes'] || [];
+            // filter out header and empty rows
+            let estudiantes = estudiantesRaw.filter(e => e && e[0] && String(e[0]).toLowerCase() !== 'dni');
+            
+            if(estudiantes.length === 0) { 
+                grid.innerHTML = '<div class="col-12"><div class="alert alert-info py-2">No hay estudiantes registrados.</div></div>'; 
+                return; 
+            }
+            
+            // Agrupar y ordenar por Grado/Sección y luego alfabéticamente
+            estudiantes.sort((a, b) => {
+                let ga = String(a[2] || '').trim();
+                let sa = String(a[3] || '').trim();
+                let gb = String(b[2] || '').trim();
+                let sb = String(b[3] || '').trim();
+                let nomA = String(a[1] || '').trim();
+                let nomB = String(b[1] || '').trim();
+                
+                let gradeA = ga + ' "' + sa + '"';
+                let gradeB = gb + ' "' + sb + '"';
+                
+                if (gradeA !== gradeB) {
+                    return gradeA.localeCompare(gradeB, undefined, {numeric: true});
+                }
+                return nomA.localeCompare(nomB);
+            });
+
+            let html = '';
+            let currentGroup = null;
+            let groupId = 0;
+
+            estudiantes.forEach(est => {
+                let dni = String(est[0] || '').replace(/'/g, '').trim();
+                let nom = est[1] || '';
+                let ga = String(est[2] || '').trim();
+                let sa = String(est[3] || '').trim();
+                let gText = ga + (sa ? ' "' + sa + '"' : '');
+
+                if (gText !== currentGroup) {
+                    if (currentGroup !== null) {
+                        html += `</div></div>`;
+                    }
+                    groupId++;
+                    html += `
+                    <div class="col-12 mt-2 mb-1 vac-est-indiv-group" data-group="${groupId}">
+                        <div class="border-bottom pb-1 text-primary fw-bold d-flex justify-content-between align-items-center" style="cursor: pointer; background: rgba(255, 248, 225, 0.8); padding: 10px; border-radius: 5px; border: 1px solid #ffc107;" onclick="toggleVacGroup(${groupId})">
+                            <span><i class="fa-solid fa-layer-group me-2"></i>${gText || 'Sin Grado'}</span>
+                            <i class="fa-solid fa-chevron-down" id="vac-group-icon-${groupId}"></i>
+                        </div>
+                        <div id="vac-group-body-${groupId}" class="row g-2 mt-1 d-none px-2">
+                    `;
+                    currentGroup = gText;
+                }
+
+                html += `
+                <div class="col-12 col-md-6 col-lg-4 vac-est-indiv-item">
+                    <div class="form-check border rounded px-3 py-2 h-100 bg-white shadow-sm">
+                        <input class="form-check-input chk-vac-est-indiv" type="checkbox" value="${dni}" id="chk-vac-ei-${dni}">
+                        <label class="form-check-label d-block w-100" for="chk-vac-ei-${dni}" style="cursor:pointer;">
+                            <div class="fw-bold text-dark text-truncate vac-est-indiv-name" style="font-size: 0.85rem;" title="${nom}">${nom}</div>
+                            <div class="text-muted" style="font-size: 0.75rem;"><i class="fa-solid fa-id-card me-1"></i>${dni}</div>
+                        </label>
+                    </div>
+                </div>`;
+            });
+            
+            if (currentGroup !== null) {
+                html += `</div></div>`;
+            }
+            grid.innerHTML = html;
+        }
+
+        function toggleVacGroup(id) {
+            let body = document.getElementById('vac-group-body-' + id);
+            let icon = document.getElementById('vac-group-icon-' + id);
+            if(body.classList.contains('d-none')) {
+                body.classList.remove('d-none');
+                icon.classList.remove('fa-chevron-down');
+                icon.classList.add('fa-chevron-up');
+            } else {
+                body.classList.add('d-none');
+                icon.classList.remove('fa-chevron-up');
+                icon.classList.add('fa-chevron-down');
+            }
+        }
+
+        function filtrarEstudiantesIndivVacaciones(txt) {
+            let items = document.querySelectorAll('.vac-est-indiv-item');
+            let t = txt.toLowerCase().trim();
+            items.forEach(it => {
+                let text = it.innerText.toLowerCase();
+                if (text.includes(t)) {
+                    it.style.display = '';
+                    if (t !== '') {
+                        let body = it.closest('[id^="vac-group-body-"]');
+                        if (body && body.classList.contains('d-none')) {
+                            body.classList.remove('d-none');
+                            let icon = document.getElementById('vac-group-icon-' + body.id.split('-').pop());
+                            if (icon) { icon.classList.remove('fa-chevron-down'); icon.classList.add('fa-chevron-up'); }
+                        }
+                    }
+                } else {
+                    it.style.display = 'none';
+                }
+            });
+            
+            document.querySelectorAll('.vac-est-indiv-group').forEach(group => {
+                let body = group.querySelector('[id^="vac-group-body-"]');
+                let hasVisible = Array.from(body.querySelectorAll('.vac-est-indiv-item')).some(it => it.style.display !== 'none');
+                group.style.display = hasVisible ? '' : 'none';
+            });
+        }
+
+        function toggleAllEstIndivVacaciones(chk) {
+            let chks = document.querySelectorAll('.chk-vac-est-indiv');
+            chks.forEach(c => {
+                let p = c.closest('.vac-est-indiv-item');
+                if(p && p.style.display !== 'none') c.checked = chk.checked;
+            });
+        }
 </script>
 </body>
