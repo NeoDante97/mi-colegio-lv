@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>2026 I.E.La Victoria</title>
+    <title>I.E. La Victoria</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -3472,7 +3472,7 @@
         </div>
     </div>
 
-    <div class="modal fade" data-bs-backdrop="static" data-bs-keyboard="false" id="modal-Areas" tabindex="-1"><div class="modal-dialog"><div class="modal-content"><div class="modal-header bg-primary text-white"><h5 class="modal-title"><i class="fa-solid fa-book"></i> Área</h5><button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button></div><div class="modal-body"><input type="text" id="are-0" class="form-control mb-3" placeholder="Nombre del Área"><div id="msg-Areas" class="text-center fw-bold"></div></div><div class="modal-footer"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button><button id="btn-form-Areas" class="btn btn-primary" onclick="guardarDato('Areas', ['are-0'])">Guardar</button></div></div></div></div>
+    <div class="modal fade" data-bs-backdrop="static" data-bs-keyboard="false" id="modal-Areas" tabindex="-1"><div class="modal-dialog"><div class="modal-content"><div class="modal-header bg-primary text-white"><h5 class="modal-title"><i class="fa-solid fa-book"></i> Área</h5><button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button></div><div class="modal-body"><input type="hidden" id="are-0"><input type="text" id="are-1" class="form-control mb-3" placeholder="Nombre del Área"><div id="msg-Areas" class="text-center fw-bold"></div></div><div class="modal-footer"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button><button id="btn-form-Areas" class="btn btn-primary" onclick="guardarDato('Areas', ['are-0', 'are-1'])">Guardar</button></div></div></div></div>
     
     <div class="modal fade" data-bs-backdrop="static" data-bs-keyboard="false" id="modal-Horarios" tabindex="-1"><div class="modal-dialog"><div class="modal-content"><div class="modal-header bg-primary text-white"><h5 class="modal-title"><i class="fa-regular fa-clock"></i> Horario de Alumnos (AM/PM)</h5><button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button></div><div class="modal-body"><input type="hidden" id="hor-0"><label class="text-muted small mb-1">Día de la Semana</label><select id="hor-1" class="form-select mb-2"><option value="">Seleccionar...</option><option value="Lunes">Lunes</option><option value="Martes">Martes</option><option value="Miércoles">Miércoles</option><option value="Jueves">Jueves</option><option value="Viernes">Viernes</option></select><div class="row g-2 mb-2">
     <div class="col"><label class="text-muted small mb-1">Grado</label><select id="hor-2" class="form-select" onchange="actualizarSeccionesHorarios()"><option value="">Grado...</option></select></div>
@@ -4982,9 +4982,13 @@
                     (async () => {
                         try {
                             if (hojasParaCargarFiltradas.length > 0) {
+                                if(hojasParaCargarFiltradas.includes('Areas')) hojasParaCargarFiltradas.push('Areas Curriculares');
                                 let rHojas = await fetchAPI({ accion: 'obtenerDatosVarios', hojas: hojasParaCargarFiltradas });
                                 if (rHojas.exito && rHojas.datos) {
                                     hojasParaCargarFiltradas.forEach(h => datosMemoria[h] = rHojas.datos[h] || []);
+                                    if(rHojas.datos['Areas Curriculares'] && (!rHojas.datos['Areas'] || rHojas.datos['Areas'].length === 0)) {
+                                        datosMemoria['Areas'] = rHojas.datos['Areas Curriculares'];
+                                    }
                                 }
                             }
                             aplicarPermisosVisuales();
@@ -8273,10 +8277,13 @@
                 }
             }
 
-            let r = await fetchAPI({ accion: 'obtenerDatos', hoja: hoja });
+            let reqData = (hoja === 'Areas') ? { accion: 'obtenerDatosVarios', hojas: ['Areas', 'Areas Curriculares'] } : { accion: 'obtenerDatos', hoja: hoja };
+            let r = await fetchAPI(reqData);
+            
             if(r.exito) {
+                let datosRecibidos = (hoja === 'Areas') ? (r.datos['Areas'] || r.datos['Areas Curriculares'] || []) : (r.datos || []);
                 // Si es silencioso y los datos son exactamente iguales en contenido, no redibujamos para no parpadear
-                if (silencioso && datosMemoria[hoja] && JSON.stringify(r.datos || []) === JSON.stringify(datosMemoria[hoja])) {
+                if (silencioso && datosMemoria[hoja] && JSON.stringify(datosRecibidos) === JSON.stringify(datosMemoria[hoja])) {
                     if (hoja === 'Asistencia_Auxiliar' || hoja === 'Registro_Asistencia' || hoja === 'Asistencia_Docentes') {
                         limpiarDuplicadosColaLocal(false);
                     }
@@ -8290,13 +8297,14 @@
                     }
                 }
 
-                datosMemoria[hoja] = r.datos || [];
+                datosMemoria[hoja] = datosRecibidos;
                 dibujarFilasTabla(hoja, datosMemoria[hoja]);
                 if (hoja === 'Asistencia_Auxiliar' || hoja === 'Registro_Asistencia' || hoja === 'Asistencia_Docentes') {
                     limpiarDuplicadosColaLocal(false);
                 }
             } else if (!silencioso) {
-                datosMemoria[hoja] = [];
+                // If there's an error, try to use memory instead of clearing it, or clear if empty
+                datosMemoria[hoja] = datosMemoria[hoja] || [];
                 dibujarFilasTabla(hoja, datosMemoria[hoja]);
             }
 
@@ -8697,7 +8705,11 @@
                         }
                         tr.innerHTML = `${cellCheckbox}<td class="fw-bold">${fila[0]}</td><td>${cellCelular || '-'}</td>${apoAcciones}`;
                     }
-                    if(hoja === 'Areas') tr.innerHTML = `<td class="fw-bold">${fila[0]}</td>${cellAcciones}`;
+                    if(hoja === 'Areas') {
+                        if (!fila || fila.length === 0 || (!fila[0] && !fila[1])) return; // Omitir filas completamente vacías
+                        let nombreArea = fila[1] || fila[0] || 'Sin Nombre';
+                        tr.innerHTML = `<td class="fw-bold">${nombreArea}</td>${cellAcciones}`;
+                    }
                     
                     if(hoja === 'Horario_Docentes') {
                         let hIniDisp = fila[4] === 'dia libre' ? '<span class="badge bg-secondary opacity-75">Día Libre</span>' : `<span class="text-success fw-bold">${fila[4]}</span>`;
@@ -8839,9 +8851,9 @@
 
             // Solo solicitar datos del servidor si no están cargados en memoria
             if (areas.length === 0 || docentes.length === 0 || estudiantes.length === 0) {
-                let rM = await fetchAPI({ accion: 'obtenerDatosVarios', hojas: ['Areas', 'Docentes', 'Estudiantes'] });
+                let rM = await fetchAPI({ accion: 'obtenerDatosVarios', hojas: ['Areas', 'Areas Curriculares', 'Docentes', 'Estudiantes'] });
                 if (rM && rM.exito && rM.datos) {
-                    areas = rM.datos['Areas'] || [];
+                    areas = rM.datos['Areas'] || rM.datos['Areas Curriculares'] || [];
                     docentes = rM.datos['Docentes'] || [];
                     estudiantes = rM.datos['Estudiantes'] || [];
                     datosMemoria['Areas'] = areas;
@@ -8852,7 +8864,10 @@
 
             if(areas.length > 0) {
                 let options = '<option value="">Seleccione un Área</option>'; 
-                areas.forEach(f => options += `<option value="${f[0]}">${f[0]}</option>`); 
+                areas.forEach(f => {
+                    let text = f[1] || f[0];
+                    options += `<option value="${f[0]}">${text}</option>`;
+                });
                 if(selectArea1) selectArea1.innerHTML = options; 
                 if(selectArea2) selectArea2.innerHTML = options;
                 if(selectArea3) selectArea3.innerHTML = options;
@@ -10222,6 +10237,7 @@
                 limpiarFotoCapturadaEstudiante(); 
                 await actualizarSelectApoderados();
             }
+            if(hoja === 'Areas') { document.getElementById('are-0').value = 'ARE-' + Date.now(); }
             if(hoja === 'Incidencias') { limpiarFotoCapturadaGenerica('inc'); }
             if(hoja === 'Horarios') { document.getElementById('hor-0').value = 'HOR-' + Date.now(); cargarSelectsDinamicos(); }
             if(hoja === 'Horario_Docentes') {
@@ -10401,7 +10417,7 @@
                     grados.forEach(g => selG.innerHTML += `<option value="${g}">${g}</option>`); 
                     secciones.forEach(s => selS.innerHTML += `<option value="${s}">${s}</option>`);
                     
-                    (datosMemoria['Areas'] || []).forEach(a => selArea.innerHTML += `<option value="${a[0]}">${a[0]}</option>`);
+                    (datosMemoria['Areas'] || []).forEach(a => { let text = a[1] || a[0]; selArea.innerHTML += `<option value="${a[0]}">${text}</option>`; });
                     (datosMemoria['Docentes'] || []).forEach(d => { if(d[5] === 'Activo') selDocente.innerHTML += `<option value="${d[1]}">${d[1]}</option>`; });
 
                     // Llenar datos específicos de la fila
@@ -10421,10 +10437,10 @@
                 };
 
                 if(ests.length === 0 || areas.length === 0 || docs.length === 0) {
-                    fetchAPI({ accion: 'obtenerDatosVarios', hojas: ['Estudiantes', 'Areas', 'Docentes'] }).then(rM => {
+                    fetchAPI({ accion: 'obtenerDatosVarios', hojas: ['Estudiantes', 'Areas', 'Areas Curriculares', 'Docentes'] }).then(rM => {
                         if (rM && rM.exito && rM.datos) {
                             if (rM.datos['Estudiantes']) datosMemoria['Estudiantes'] = rM.datos['Estudiantes'];
-                            if (rM.datos['Areas']) datosMemoria['Areas'] = rM.datos['Areas'];
+                            let a = rM.datos['Areas'] || rM.datos['Areas Curriculares']; if(a) datosMemoria['Areas'] = a;
                             if (rM.datos['Docentes']) datosMemoria['Docentes'] = rM.datos['Docentes'];
                         }
                         llenarSelectsInc();
@@ -10955,7 +10971,23 @@
             msgDiv.innerHTML = '<span class="text-primary"><i class="fa-solid fa-spinner fa-spin"></i> Procesando...</span>';
             let req = { hoja: hoja, datos: datosArray }; if(editandoID) { req.accion = 'editarRegistro'; req.idActual = editandoID; } else { req.accion = 'guardarRegistro'; }
             let r = await fetchAPI(req);
-            if(r.exito) { msgDiv.innerHTML = '<span class="text-success"><i class="fa-solid fa-circle-check"></i> ' + r.mensaje + '</span>'; cargarTabla(hoja); setTimeout(() => { bootstrap.Modal.getInstance(document.getElementById('modal-' + hoja)).hide(); cancelarEdicion(hoja); }, 1000); 
+            if(r.exito) { 
+                msgDiv.innerHTML = '<span class="text-success"><i class="fa-solid fa-circle-check"></i> ' + r.mensaje + '</span>'; 
+                
+                if (hoja === 'Areas') {
+                    if (!datosMemoria['Areas']) datosMemoria['Areas'] = [];
+                    if (!editandoID) {
+                        datosMemoria['Areas'].push([...datosArray]);
+                    } else {
+                        let idx = datosMemoria['Areas'].findIndex(f => f[0] == editandoID);
+                        if (idx !== -1) datosMemoria['Areas'][idx] = [...datosArray];
+                    }
+                    cargarTabla(hoja, false); // No forzar fetch para evitar parpadeos o cachés vacíos
+                } else {
+                    cargarTabla(hoja); 
+                }
+                
+                setTimeout(() => { bootstrap.Modal.getInstance(document.getElementById('modal-' + hoja)).hide(); cancelarEdicion(hoja); }, 1000); 
             } else { msgDiv.innerHTML = '<span class="text-danger"><i class="fa-solid fa-circle-xmark"></i> ' + r.mensaje + '</span>'; }
         }
 
@@ -13927,7 +13959,7 @@
                 let selA = document.getElementById('inc-asignatura');
                 if(selA) {
                     selA.innerHTML = '<option value="">Seleccione...</option>';
-                    if(datosMemoria.Areas) datosMemoria.Areas.forEach(a => selA.innerHTML += `<option value="${a[0]}">${a[0]}</option>`);
+                    if(datosMemoria.Areas) datosMemoria.Areas.forEach(a => { let text = a[1] || a[0]; selA.innerHTML += `<option value="${a[0]}">${text}</option>`; });
                 }
 
                 let grados = datosMemoria.Estudiantes ? [...new Set(datosMemoria.Estudiantes.map(e => e[2]))].filter(Boolean).sort() : [];
@@ -15709,9 +15741,13 @@ async function descargarConsolidadoIncidenciasPDF(dni, fInicio, fFin) {
                 
                 (async () => {
                     try {
+                        if(hojasParaCargar.includes('Areas')) hojasParaCargar.push('Areas Curriculares');
                         let rHojas = await fetchAPI({ accion: 'obtenerDatosVarios', hojas: hojasParaCargar });
                         if (rHojas.exito && rHojas.datos) {
                             hojasParaCargar.forEach(h => datosMemoria[h] = rHojas.datos[h] || []);
+                            if(rHojas.datos['Areas Curriculares'] && (!rHojas.datos['Areas'] || rHojas.datos['Areas'].length === 0)) {
+                                datosMemoria['Areas'] = rHojas.datos['Areas Curriculares'];
+                            }
                             aplicarPermisosVisuales();
                         }
                     } catch(e) { console.error("Error al restaurar datos:", e); }
