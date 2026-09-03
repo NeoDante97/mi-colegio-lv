@@ -1304,7 +1304,7 @@
 
             <div class="input-group mb-3">
                 <span class="input-group-text"><i class="fa-solid fa-user"></i></span>
-                <input type="text" class="form-control" id="dni" placeholder="Número de DNI" maxlength="8" oninput="this.value = this.value.replace(/[^0-9]/g, '');">
+                <input type="text" class="form-control" id="dni" placeholder="Número de DNI" maxlength="8" oninput="this.value = this.value.replace(/[^0-9]/g, '');" onblur="if(this.value.length > 0) this.value = this.value.padStart(8, '0');">
             </div>
             
             <div class="input-group mb-3" id="password-container">
@@ -1635,7 +1635,7 @@
                         <div class="row g-2 align-items-end">
                             <div class="col-12 col-md-4">
                                 <label class="fw-bold small text-danger">DNI del Estudiante (*):</label>
-                                <input type="text" id="cg-dni" class="form-control form-control-lg text-center fw-bold border-danger" placeholder="8 dígitos" maxlength="8" oninput="this.value = this.value.replace(/[^0-9]/g, '');" style="letter-spacing: 2px;">
+                                <input type="text" id="cg-dni" class="form-control form-control-lg text-center fw-bold border-danger" placeholder="8 dígitos" maxlength="8" oninput="this.value = this.value.replace(/[^0-9]/g, '');" onblur="if(this.value.length > 0) this.value = this.value.padStart(8, '0');" style="letter-spacing: 2px;">
                             </div>
                             <div class="col-6 col-md-3">
                                 <label class="fw-bold small text-danger">Fecha Inicio (*):</label>
@@ -1710,7 +1710,7 @@
                 </div>
                 <div class="modal-body text-center p-4">
                     <p class="mb-3 text-muted fs-5">Ingrese su <strong>DNI de Docente</strong> para habilitar la cámara.</p>
-                    <input type="text" id="dni-docente-rapido" class="form-control form-control-lg text-center fw-bold mb-4" placeholder="DNI (8 dígitos)" maxlength="8" oninput="this.value = this.value.replace(/[^0-9]/g, '');" style="font-size: 1.5rem; letter-spacing: 2px;">
+                    <input type="text" id="dni-docente-rapido" class="form-control form-control-lg text-center fw-bold mb-4" placeholder="DNI (8 dígitos)" maxlength="8" oninput="this.value = this.value.replace(/[^0-9]/g, '');" onblur="if(this.value.length > 0) this.value = this.value.padStart(8, '0');" style="font-size: 1.5rem; letter-spacing: 2px;">
                     <button class="btn btn-success btn-lg w-100 fw-bold" onclick="accesoRapidoQR()" id="btn-qr-login-modal"><i class="fa-solid fa-right-to-bracket"></i> Validar y Entrar</button>
                     <div id="mensaje-modal-rapido" class="mt-3 fw-bold"></div>
                 </div>
@@ -1729,7 +1729,7 @@
                 </div>
                 <div class="modal-body text-center p-4">
                     <p class="mb-3 text-muted">Ingrese el <strong>DNI del Estudiante</strong> y el rango de fechas.</p>
-                    <input type="text" id="consulta-inc-dni" class="form-control text-center fw-bold mb-3" placeholder="DNI (8 dígitos)" maxlength="8" oninput="this.value = this.value.replace(/[^0-9]/g, '');">
+                    <input type="text" id="consulta-inc-dni" class="form-control text-center fw-bold mb-3" placeholder="DNI (8 dígitos)" maxlength="8" oninput="this.value = this.value.replace(/[^0-9]/g, '');" onblur="if(this.value.length > 0) this.value = this.value.padStart(8, '0');">
                     <div class="row g-2 mb-3">
                         <div class="col-6">
                             <label class="small text-muted fw-bold">Fecha Inicio</label>
@@ -2047,6 +2047,7 @@
                     <div class="d-flex gap-2">
                         <button class="btn btn-outline-dark fw-bold shadow-sm" onclick="cargarTabla('Asistencia_Docentes', true).then(() => filtrarAsistencias('tb-Asistencia_Docentes', 'buscar-adoc-dni', 'buscar-adoc-fecha'))"><i class="fa-solid fa-sync"></i> Actualizar</button>
                         <button class="btn btn-primary fw-bold shadow-sm admin-btn d-none" onclick="abrirModalNuevo('Asistencia_Docentes')"><i class="fa-solid fa-plus"></i> Agregar Manual</button>
+                        <button class="btn btn-danger fw-bold shadow-sm admin-btn d-none" id="btn-delete-selected-Asistencia_Docentes" onclick="eliminarSeleccionados('Asistencia_Docentes')" disabled><i class="fa-solid fa-trash"></i> Eliminar Seleccionados</button>
                     </div>
                 </div>
                 <div class="row mb-3 g-2">
@@ -2649,7 +2650,7 @@
                 <div id="alerta-qr" class="alert alert-secondary fs-5 fw-bold mx-auto" style="max-width: 500px;"><i class="fa-solid fa-camera"></i> Presiona Iniciar para activar la cámara</div>
                 <div id="reader" class="mx-auto shadow-sm"></div>
                 <div class="mt-4"><button class="btn btn-primary btn-lg me-2 fw-bold shadow-sm" onclick="iniciarCamara()"><i class="fa-solid fa-play"></i> Iniciar</button><button class="btn btn-danger btn-lg fw-bold shadow-sm" onclick="detenerCamara()"><i class="fa-solid fa-stop"></i> Detener</button></div>
-                <div class="input-group mt-4 mx-auto shadow-sm" style="max-width: 500px; border-radius: 8px;"><input type="text" id="dni-manual" class="form-control" placeholder="Ingreso manual de DNI (8 dígitos)" maxlength="8" oninput="this.value = this.value.replace(/[^0-9]/g, '');" onkeypress="if(event.key === 'Enter') enviarAsistencia(this.value)"><button class="btn btn-dark" onclick="enviarAsistencia(document.getElementById('dni-manual').value)">Registrar</button></div>
+                <div class="input-group mt-4 mx-auto shadow-sm" style="max-width: 500px; border-radius: 8px;"><input type="text" id="dni-manual" class="form-control" placeholder="Ingreso manual de DNI (8 dígitos)" maxlength="8" oninput="this.value = this.value.replace(/[^0-9]/g, '');" onblur="if(this.value.length > 0) this.value = this.value.padStart(8, '0');" onkeypress="if(event.key === 'Enter') enviarAsistencia(this.value)"><button class="btn btn-dark" onclick="enviarAsistencia(document.getElementById('dni-manual').value)">Registrar</button></div>
             </div>
 
             
@@ -3400,9 +3401,9 @@
         </div>
     </div>
 
-    <div class="modal fade" data-bs-backdrop="static" data-bs-keyboard="false" id="modal-Administradores" tabindex="-1"><div class="modal-dialog"><div class="modal-content"><div class="modal-header bg-primary text-white"><h5 class="modal-title"><i class="fa-solid fa-user-shield"></i> Administrador</h5><button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button></div><div class="modal-body"><input type="text" id="adm-0" class="form-control mb-2" placeholder="DNI (8 dígitos)" maxlength="8" oninput="this.value = this.value.replace(/[^0-9]/g, '');"><input type="text" id="adm-1" class="form-control mb-2" placeholder="Nombres"><input type="text" id="adm-2" class="form-control mb-2" placeholder="Contraseña"><input type="text" id="adm-3" class="form-control mb-2" value="Administrador" disabled><select id="adm-4" class="form-select mb-3"><option value="">Estado</option><option value="Activo">Activo</option><option value="Inactivo">Inactivo</option></select><div id="msg-Administradores" class="text-center fw-bold"></div></div><div class="modal-footer"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button><button id="btn-form-Administradores" class="btn btn-primary" onclick="guardarDato('Administradores', ['adm-0','adm-1','adm-2','adm-3','adm-4'])">Guardar</button></div></div></div></div>
+    <div class="modal fade" data-bs-backdrop="static" data-bs-keyboard="false" id="modal-Administradores" tabindex="-1"><div class="modal-dialog"><div class="modal-content"><div class="modal-header bg-primary text-white"><h5 class="modal-title"><i class="fa-solid fa-user-shield"></i> Administrador</h5><button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button></div><div class="modal-body"><input type="text" id="adm-0" class="form-control mb-2" placeholder="DNI (8 dígitos)" maxlength="8" oninput="this.value = this.value.replace(/[^0-9]/g, '');" onblur="if(this.value.length > 0) this.value = this.value.padStart(8, '0');"><input type="text" id="adm-1" class="form-control mb-2" placeholder="Nombres"><input type="text" id="adm-2" class="form-control mb-2" placeholder="Contraseña"><input type="text" id="adm-3" class="form-control mb-2" value="Administrador" disabled><select id="adm-4" class="form-select mb-3"><option value="">Estado</option><option value="Activo">Activo</option><option value="Inactivo">Inactivo</option></select><div id="msg-Administradores" class="text-center fw-bold"></div></div><div class="modal-footer"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button><button id="btn-form-Administradores" class="btn btn-primary" onclick="guardarDato('Administradores', ['adm-0','adm-1','adm-2','adm-3','adm-4'])">Guardar</button></div></div></div></div>
     
-    <div class="modal fade" data-bs-backdrop="static" data-bs-keyboard="false" id="modal-Docentes" tabindex="-1"><div class="modal-dialog"><div class="modal-content"><div class="modal-header bg-primary text-white"><h5 class="modal-title"><i class="fa-solid fa-chalkboard-user"></i> Docente</h5><button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button></div><div class="modal-body"><input type="text" id="doc-0" class="form-control mb-2" placeholder="DNI (8 dígitos)" maxlength="8" oninput="this.value = this.value.replace(/[^0-9]/g, '');"><input type="text" id="doc-1" class="form-control mb-2" placeholder="Nombres Completos"><input type="text" id="doc-2" class="form-control mb-2" placeholder="Contraseña"><select id="doc-3" class="form-select mb-2"><option value="">Nivel</option><option value="Secundaria">Secundaria</option><option value="Primaria">Primaria</option></select><select id="doc-4" class="form-select mb-2"><option value="">Cargando áreas...</option></select><input type="text" id="doc-8" class="form-control mb-2" placeholder="Celular (Opcional, 9 dígitos)" maxlength="9" oninput="this.value = this.value.replace(/[^0-9]/g, '');"><input type="number" id="doc-6" class="form-control mb-2" placeholder="Año (Ej: 2026)" value="2026">
+    <div class="modal fade" data-bs-backdrop="static" data-bs-keyboard="false" id="modal-Docentes" tabindex="-1"><div class="modal-dialog"><div class="modal-content"><div class="modal-header bg-primary text-white"><h5 class="modal-title"><i class="fa-solid fa-chalkboard-user"></i> Docente</h5><button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button></div><div class="modal-body"><input type="text" id="doc-0" class="form-control mb-2" placeholder="DNI (8 dígitos)" maxlength="8" oninput="this.value = this.value.replace(/[^0-9]/g, '');" onblur="if(this.value.length > 0) this.value = this.value.padStart(8, '0');"><input type="text" id="doc-1" class="form-control mb-2" placeholder="Nombres Completos"><input type="text" id="doc-2" class="form-control mb-2" placeholder="Contraseña"><select id="doc-3" class="form-select mb-2"><option value="">Nivel</option><option value="Secundaria">Secundaria</option><option value="Primaria">Primaria</option></select><select id="doc-4" class="form-select mb-2"><option value="">Cargando áreas...</option></select><input type="text" id="doc-8" class="form-control mb-2" placeholder="Celular (Opcional, 9 dígitos)" maxlength="9" oninput="this.value = this.value.replace(/[^0-9]/g, '');"><input type="number" id="doc-6" class="form-control mb-2" placeholder="Año (Ej: 2026)" value="2026">
     <div class="row g-2 mb-2">
         <div class="col"><label class="small text-muted fw-bold">Fecha de Inicio (asistencia)</label><input type="date" id="doc-fecha-inicio" class="form-control"></div>
         <div class="col"><label class="small text-muted fw-bold">Fecha de Fin (término contrato)</label><input type="date" id="doc-fecha-fin" class="form-control"></div>
@@ -3442,7 +3443,7 @@
     <div class="modal fade" data-bs-backdrop="static" data-bs-keyboard="false" id="modal-Asistencia_Docentes" tabindex="-1"><div class="modal-dialog"><div class="modal-content"><div class="modal-header bg-dark text-white"><h5 class="modal-title"><i class="fa-solid fa-user-check"></i> Asistencia Docente Manual</h5><button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button></div><div class="modal-body"><input type="hidden" id="adc-0"><div class="row g-2 mb-2"><div class="col"><label class="text-muted small mb-1">Fecha</label><input type="text" id="adc-1" class="form-control" placeholder="DD/MM/AAAA" onchange="recalcularTardanzaManualDocente()"></div><div class="col"><label class="text-muted small mb-1">Hora</label><input type="time" id="adc-2" class="form-control" onchange="recalcularTardanzaManualDocente()" oninput="recalcularTardanzaManualDocente()"></div></div><input type="text" id="adc-3" class="form-control mb-2" placeholder="DNI Docente" maxlength="8" oninput="this.value = this.value.replace(/[^0-9]/g, ''); recalcularTardanzaManualDocente();" onchange="recalcularTardanzaManualDocente()"><input type="text" id="adc-4" class="form-control mb-2" placeholder="Nombre Docente"><select id="adc-5" class="form-select mb-2" onchange="recalcularTardanzaManualDocente()"><option value="">Seleccionar...</option><option value="Ingreso">Ingreso</option><option value="Salida">Salida</option></select><div class="row g-2 mb-2"><div class="col"><label class="text-muted small mb-1">Tardanza</label><input type="text" id="adc-6" class="form-control" value="0"></div><div class="col"><label class="text-muted small mb-1">Salida Temprano</label><input type="text" id="adc-7" class="form-control" value="0"></div></div><input type="text" id="adc-8" class="form-control mb-2" placeholder="Registrado Por (Manual)"><div class="row g-2 mb-3"><div class="col"><label class="text-muted small mb-1">Ing. Fijo (Ref)</label><input type="text" id="adc-9" class="form-control" placeholder="Ej: 08:00 AM"></div><div class="col"><label class="text-muted small mb-1">Sal. Fijo (Ref)</label><input type="text" id="adc-10" class="form-control" placeholder="Ej: 01:00 PM"></div></div><div id="msg-Asistencia_Docentes" class="text-center fw-bold"></div></div><div class="modal-footer"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button><button id="btn-form-Asistencia_Docentes" class="btn btn-primary" onclick="guardarDato('Asistencia_Docentes', ['adc-0','adc-1','adc-2','adc-3','adc-4','adc-5','adc-6','adc-7','adc-8','adc-9','adc-10'])">Guardar</button></div></div></div></div>
 
     <div class="modal fade" data-bs-backdrop="static" data-bs-keyboard="false" id="modal-Auxiliares" tabindex="-1"><div class="modal-dialog"><div class="modal-content"><div class="modal-header bg-primary text-white"><h5 class="modal-title"><i class="fa-solid fa-id-badge"></i> Registrar Auxiliar</h5><button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button></div><div class="modal-body">
-        <input type="text" id="aux-0" class="form-control mb-2" placeholder="DNI (8 dígitos)" maxlength="8" oninput="this.value = this.value.replace(/[^0-9]/g, '');">
+        <input type="text" id="aux-0" class="form-control mb-2" placeholder="DNI (8 dígitos)" maxlength="8" oninput="this.value = this.value.replace(/[^0-9]/g, '');" onblur="if(this.value.length > 0) this.value = this.value.padStart(8, '0');">
         <input type="text" id="aux-1" class="form-control mb-2" placeholder="Nombres y Apellidos">
         <input type="text" id="aux-2" class="form-control mb-2" placeholder="Contraseña">
         <input type="hidden" id="aux-3">
@@ -3480,7 +3481,7 @@
 </div><label class="text-muted small mb-1">Área</label><select id="hor-4" class="form-select mb-2"><option value="">Cargando áreas...</option></select><label class="text-muted small mb-1">Docente Asignado</label><select id="hor-5" class="form-select mb-2"><option value="">Cargando docentes...</option></select><div class="row g-2 mb-3"><div class="col"><label class="text-muted small mb-1">Hora Inicio</label><input type="time" id="hor-6" class="form-control"></div><div class="col"><label class="text-muted small mb-1">Hora Fin</label><input type="time" id="hor-7" class="form-control"></div></div><label class="text-muted small mb-1">Estado</label><select id="hor-8" class="form-select mb-3"><option value="Activo">Activo</option><option value="Inactivo">Inactivo</option></select><div id="msg-Horarios" class="text-center fw-bold"></div></div><div class="modal-footer"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button><button id="btn-form-Horarios" class="btn btn-primary" onclick="guardarDato('Horarios', ['hor-0','hor-1','hor-2','hor-3','hor-4','hor-5','hor-6','hor-7','hor-8'])">Guardar</button></div></div></div></div>
     
     <div class="modal fade" data-bs-backdrop="static" data-bs-keyboard="false" id="modal-Feriados" tabindex="-1"><div class="modal-dialog"><div class="modal-content"><div class="modal-header bg-danger text-white"><h5 class="modal-title"><i class="fa-solid fa-calendar-day"></i> Nuevo Feriado</h5><button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button></div><div class="modal-body"><input type="hidden" id="fer-0"><label class="text-muted small mb-1">Fecha del Feriado</label><input type="date" id="fer-1" class="form-control mb-3"><label class="text-muted small mb-1">Motivo / Descripción</label><input type="text" id="fer-2" class="form-control mb-2" placeholder="Ej: Día del Maestro"><div id="msg-Feriados" class="text-center fw-bold"></div></div><div class="modal-footer"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button><button id="btn-form-Feriados" class="btn btn-danger" onclick="guardarDato('Feriados', ['fer-0','fer-1','fer-2'])">Guardar</button></div></div></div></div>
-    <div class="modal fade" data-bs-backdrop="static" data-bs-keyboard="false" id="modal-Estudiantes" tabindex="-1"><div class="modal-dialog"><div class="modal-content"><div class="modal-header bg-primary text-white"><h5 class="modal-title"><i class="fa-solid fa-user-graduate"></i> Estudiante</h5><button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button></div><div class="modal-body"><input type="text" id="est-0" class="form-control mb-2" placeholder="DNI (8 dígitos)" maxlength="8" oninput="this.value = this.value.replace(/[^0-9]/g, '');"><input type="text" id="est-1" class="form-control mb-2" placeholder="Nombres Completos"><div class="row g-2 mb-2"><div class="col"><input type="text" id="est-2" class="form-control" placeholder="Grado (Ej: 3ro)"></div><div class="col"><input type="text" id="est-3" class="form-control" placeholder="Sección (Ej: B)"></div></div><div class="row g-2 mb-2">
+    <div class="modal fade" data-bs-backdrop="static" data-bs-keyboard="false" id="modal-Estudiantes" tabindex="-1"><div class="modal-dialog"><div class="modal-content"><div class="modal-header bg-primary text-white"><h5 class="modal-title"><i class="fa-solid fa-user-graduate"></i> Estudiante</h5><button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button></div><div class="modal-body"><input type="text" id="est-0" class="form-control mb-2" placeholder="DNI (8 dígitos)" maxlength="8" oninput="this.value = this.value.replace(/[^0-9]/g, '');" onblur="if(this.value.length > 0) this.value = this.value.padStart(8, '0');"><input type="text" id="est-1" class="form-control mb-2" placeholder="Nombres Completos"><div class="row g-2 mb-2"><div class="col"><input type="text" id="est-2" class="form-control" placeholder="Grado (Ej: 3ro)"></div><div class="col"><input type="text" id="est-3" class="form-control" placeholder="Sección (Ej: B)"></div></div><div class="row g-2 mb-2">
     <div class="col"><select id="est-4" class="form-select"><option value="">Nivel</option><option value="Secundaria">Secundaria</option><option value="Primaria">Primaria</option></select></div>
     <div class="col"><input type="number" id="est-5" class="form-control" placeholder="Edad"></div>
     <div class="col"><select id="est-8" class="form-select"><option value="">Género...</option><option value="Hombre">Hombre</option><option value="Mujer">Mujer</option></select></div>
@@ -3718,9 +3719,9 @@
     </div>
 
     
-    <div class="modal fade" data-bs-backdrop="static" data-bs-keyboard="false" id="modal-Registro_Asistencia" tabindex="-1"><div class="modal-dialog"><div class="modal-content"><div class="modal-header bg-primary text-white"><h5 class="modal-title"><i class="fa-solid fa-list-check"></i> Editor Estudiante (Clase)</h5><button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button></div><div class="modal-body"><input type="hidden" id="reg-0"><div class="row g-2 mb-2"><div class="col"><label class="text-muted small mb-1">Fecha (DD/MM/AAAA)</label><input type="text" id="reg-1" class="form-control" placeholder="DD/MM/AAAA"></div><div class="col"><label class="text-muted small mb-1">Hora</label><input type="text" id="reg-2" class="form-control" placeholder="Ej: 08:00 AM"></div></div><input type="text" id="reg-3" class="form-control mb-2" placeholder="DNI (8 dígitos)" maxlength="8" oninput="this.value = this.value.replace(/[^0-9]/g, '');"><input type="text" id="reg-4" class="form-control mb-2" placeholder="Nombres Completos"><div class="row g-2 mb-2"><div class="col"><input type="text" id="reg-5" class="form-control" placeholder="Grado"></div><div class="col"><input type="text" id="reg-6" class="form-control" placeholder="Sección"></div></div><div class="row g-2 mb-2"><div class="col"><select id="reg-7" class="form-select"><option value="">Área</option></select></div><div class="col"><select id="reg-8" class="form-select"><option value="Asistió">Asistió</option><option value="Falta">Falta</option><option value="Justificado">Justificado</option></select></div></div><input type="text" id="reg-9" class="form-control mb-3" placeholder="Registrado Por"><div id="msg-Registro_Asistencia" class="text-center fw-bold"></div></div><div class="modal-footer"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button><button id="btn-form-Registro_Asistencia" class="btn btn-primary" onclick="guardarDato('Registro_Asistencia', ['reg-0','reg-1','reg-2','reg-3','reg-4','reg-5','reg-6','reg-7','reg-8','reg-9'])">Guardar</button></div></div></div></div>
+    <div class="modal fade" data-bs-backdrop="static" data-bs-keyboard="false" id="modal-Registro_Asistencia" tabindex="-1"><div class="modal-dialog"><div class="modal-content"><div class="modal-header bg-primary text-white"><h5 class="modal-title"><i class="fa-solid fa-list-check"></i> Editor Estudiante (Clase)</h5><button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button></div><div class="modal-body"><input type="hidden" id="reg-0"><div class="row g-2 mb-2"><div class="col"><label class="text-muted small mb-1">Fecha (DD/MM/AAAA)</label><input type="text" id="reg-1" class="form-control" placeholder="DD/MM/AAAA"></div><div class="col"><label class="text-muted small mb-1">Hora</label><input type="text" id="reg-2" class="form-control" placeholder="Ej: 08:00 AM"></div></div><input type="text" id="reg-3" class="form-control mb-2" placeholder="DNI (8 dígitos)" maxlength="8" oninput="this.value = this.value.replace(/[^0-9]/g, '');" onblur="if(this.value.length > 0) this.value = this.value.padStart(8, '0');"><input type="text" id="reg-4" class="form-control mb-2" placeholder="Nombres Completos"><div class="row g-2 mb-2"><div class="col"><input type="text" id="reg-5" class="form-control" placeholder="Grado"></div><div class="col"><input type="text" id="reg-6" class="form-control" placeholder="Sección"></div></div><div class="row g-2 mb-2"><div class="col"><select id="reg-7" class="form-select"><option value="">Área</option></select></div><div class="col"><select id="reg-8" class="form-select"><option value="Asistió">Asistió</option><option value="Falta">Falta</option><option value="Justificado">Justificado</option></select></div></div><input type="text" id="reg-9" class="form-control mb-3" placeholder="Registrado Por"><div id="msg-Registro_Asistencia" class="text-center fw-bold"></div></div><div class="modal-footer"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button><button id="btn-form-Registro_Asistencia" class="btn btn-primary" onclick="guardarDato('Registro_Asistencia', ['reg-0','reg-1','reg-2','reg-3','reg-4','reg-5','reg-6','reg-7','reg-8','reg-9'])">Guardar</button></div></div></div></div>
 
-    <div class="modal fade" data-bs-backdrop="static" data-bs-keyboard="false" id="modal-Asistencia_Auxiliar" tabindex="-1"><div class="modal-dialog"><div class="modal-content"><div class="modal-header bg-success text-white"><h5 class="modal-title"><i class="fa-solid fa-clipboard-check"></i> Editor Auxiliar (Entrada)</h5><button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button></div><div class="modal-body"><input type="hidden" id="aax-0"><div class="row g-2 mb-2"><div class="col"><label class="text-muted small mb-1">Fecha</label><input type="date" id="aax-1" class="form-control" onchange="recalcularAsistenciaAuxiliarManual()"></div><div class="col"><label class="text-muted small mb-1">Hora</label><input type="time" id="aax-2" class="form-control" onchange="recalcularAsistenciaAuxiliarManual()"></div></div><input type="text" id="aax-3" class="form-control mb-2" placeholder="DNI (8 dígitos)" maxlength="8" oninput="this.value = this.value.replace(/[^0-9]/g, '');"><select id="aax-4" class="form-select mb-2" onchange="actualizarDniAuxiliar()"><option value="">Nombres Completos...</option></select><div class="row g-2 mb-2"><div class="col"><select id="aax-5" class="form-select" onchange="actualizarAlumnosAuxiliar()"><option value="">Grado...</option></select></div><div class="col"><select id="aax-6" class="form-select" onchange="actualizarAlumnosAuxiliar()"><option value="">Sección...</option></select></div></div><input type="text" id="aax-7" class="form-control mb-2 text-center fw-bold text-success border-success" value="Automático" disabled style="background-color: #e9ecef; cursor: not-allowed;"><input type="text" id="aax-8" class="form-control mb-3" placeholder="Registrado Por" readonly style="background-color: #e9ecef; cursor: not-allowed;"><div id="msg-Asistencia_Auxiliar" class="text-center fw-bold"></div></div><div class="modal-footer"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button><button id="btn-form-Asistencia_Auxiliar" class="btn btn-success" onclick="guardarDato('Asistencia_Auxiliar', ['aax-0','aax-1','aax-2','aax-3','aax-4','aax-5','aax-6','aax-7','aax-8'])">Guardar</button></div></div></div></div>
+    <div class="modal fade" data-bs-backdrop="static" data-bs-keyboard="false" id="modal-Asistencia_Auxiliar" tabindex="-1"><div class="modal-dialog"><div class="modal-content"><div class="modal-header bg-success text-white"><h5 class="modal-title"><i class="fa-solid fa-clipboard-check"></i> Editor Auxiliar (Entrada)</h5><button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button></div><div class="modal-body"><input type="hidden" id="aax-0"><div class="row g-2 mb-2"><div class="col"><label class="text-muted small mb-1">Fecha</label><input type="date" id="aax-1" class="form-control" onchange="recalcularAsistenciaAuxiliarManual()"></div><div class="col"><label class="text-muted small mb-1">Hora</label><input type="time" id="aax-2" class="form-control" onchange="recalcularAsistenciaAuxiliarManual()"></div></div><input type="text" id="aax-3" class="form-control mb-2" placeholder="DNI (8 dígitos)" maxlength="8" oninput="this.value = this.value.replace(/[^0-9]/g, '');" onblur="if(this.value.length > 0) this.value = this.value.padStart(8, '0');"><select id="aax-4" class="form-select mb-2" onchange="actualizarDniAuxiliar()"><option value="">Nombres Completos...</option></select><div class="row g-2 mb-2"><div class="col"><select id="aax-5" class="form-select" onchange="actualizarAlumnosAuxiliar()"><option value="">Grado...</option></select></div><div class="col"><select id="aax-6" class="form-select" onchange="actualizarAlumnosAuxiliar()"><option value="">Sección...</option></select></div></div><input type="text" id="aax-7" class="form-control mb-2 text-center fw-bold text-success border-success" value="Automático" disabled style="background-color: #e9ecef; cursor: not-allowed;"><input type="text" id="aax-8" class="form-control mb-3" placeholder="Registrado Por" readonly style="background-color: #e9ecef; cursor: not-allowed;"><div id="msg-Asistencia_Auxiliar" class="text-center fw-bold"></div></div><div class="modal-footer"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button><button id="btn-form-Asistencia_Auxiliar" class="btn btn-success" onclick="guardarDato('Asistencia_Auxiliar', ['aax-0','aax-1','aax-2','aax-3','aax-4','aax-5','aax-6','aax-7','aax-8'])">Guardar</button></div></div></div></div>
 
     <div class="modal fade" id="modalVerQR" tabindex="-1">
         <div class="modal-dialog modal-md modal-dialog-centered">
@@ -3853,7 +3854,7 @@
                 <div class="modal-header bg-info text-dark"><h5 class="modal-title fw-bold"><i class="fa-solid fa-magnifying-glass-chart"></i> Consulta de Asistencia por Alumno</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
                 <div class="modal-body">
                     <div class="row g-2 mb-3">
-                        <div class="col-12 col-md-4"><label class="fw-bold small text-muted">DNI del Estudiante:</label><input type="text" id="cons-dni" class="form-control" placeholder="8 dígitos" maxlength="8" oninput="this.value = this.value.replace(/[^0-9]/g, '');"></div>
+                        <div class="col-12 col-md-4"><label class="fw-bold small text-muted">DNI del Estudiante:</label><input type="text" id="cons-dni" class="form-control" placeholder="8 dígitos" maxlength="8" oninput="this.value = this.value.replace(/[^0-9]/g, '');" onblur="if(this.value.length > 0) this.value = this.value.padStart(8, '0');"></div>
                         <div class="col-6 col-md-4"><label class="fw-bold small text-muted">Fecha Inicio:</label><input type="date" id="cons-finicio" class="form-control"></div>
                         <div class="col-6 col-md-4"><label class="fw-bold small text-muted">Fecha Fin:</label><input type="date" id="cons-ffin" class="form-control"></div>
                     </div>
@@ -3871,7 +3872,7 @@
                 <div class="modal-header text-white" style="background-color: #002b5e;"><h5 class="modal-title fw-bold"><i class="fa-solid fa-clipboard-user"></i> Consulta Asistencia Diaria (Auxiliar)</h5><button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button></div>
                 <div class="modal-body">
                     <div class="row g-2 mb-3">
-                        <div class="col-12 col-md-4"><label class="fw-bold small text-muted">DNI del Estudiante:</label><input type="text" id="cons-aux-dni" class="form-control" placeholder="8 dígitos" maxlength="8" oninput="this.value = this.value.replace(/[^0-9]/g, '');"></div>
+                        <div class="col-12 col-md-4"><label class="fw-bold small text-muted">DNI del Estudiante:</label><input type="text" id="cons-aux-dni" class="form-control" placeholder="8 dígitos" maxlength="8" oninput="this.value = this.value.replace(/[^0-9]/g, '');" onblur="if(this.value.length > 0) this.value = this.value.padStart(8, '0');"></div>
                         <div class="col-6 col-md-4"><label class="fw-bold small text-muted">Fecha Inicio:</label><input type="date" id="cons-aux-finicio" class="form-control"></div>
                         <div class="col-6 col-md-4"><label class="fw-bold small text-muted">Fecha Fin:</label><input type="date" id="cons-aux-ffin" class="form-control"></div>
                     </div>
@@ -4782,8 +4783,35 @@
         }
 
         let sessionToken = '';
-
         async function fetchAPI(payload, retries = 8) {
+            // --- INICIO FIX DNI 8 DIGITOS ---
+            const fixDniStr = (val) => {
+                if (val === null || val === undefined || val === '') return val;
+                let s = String(val).replace(/['"]/g, '').trim();
+                if (/^\d{1,8}$/.test(s)) return "'" + s.padStart(8, '0');
+                return val;
+            };
+            const mapDniIndex = {
+                'Estudiantes': 0, 'Docentes': 0, 'Administradores': 0, 'Auxiliares': 0,
+                'Permisos': 1, 'Permisos_Docentes': 1,
+                'Registro_Asistencia': 3, 'Asistencia_Auxiliar': 3, 'Asistencia_Docentes': 3,
+                'TRASLADO/TERMINO': 2, 'Horario_Docentes': 2
+            };
+            
+            if (payload.accion === 'guardarRegistro' || payload.accion === 'editarRegistro') {
+                let idx = mapDniIndex[payload.hoja];
+                if (idx !== undefined && Array.isArray(payload.datos) && payload.datos.length > idx) {
+                    payload.datos[idx] = fixDniStr(payload.datos[idx]);
+                }
+            } else if (payload.accion === 'guardarMasivo' && Array.isArray(payload.matriz)) {
+                let idx = mapDniIndex[payload.hoja];
+                if (idx !== undefined) {
+                    payload.matriz.forEach(row => {
+                        if (Array.isArray(row) && row.length > idx) row[idx] = fixDniStr(row[idx]);
+                    });
+                }
+            }
+            // --- FIN FIX DNI 8 DIGITOS ---
             // Inyectar el token de sesión si existe
             if (!payload.sessionToken) {
                 if (!sessionToken) {
@@ -4808,6 +4836,34 @@
                     clearTimeout(timeoutId);
                     if (!res.ok) throw new Error(`HTTP_${res.status}`);
                     let result = await res.json();
+                    
+                    // --- INICIO FIX DNI 8 DIGITOS INCOMING ---
+                    if (result && result.datos) {
+                        const fixIncomingDni = (val) => {
+                            if (val === null || val === undefined || val === '') return val;
+                            let s = String(val).replace(/['"]/g, '').trim();
+                            if (/^\d{1,8}$/.test(s)) return s.padStart(8, '0');
+                            return val;
+                        };
+                        if (payload.accion === 'obtenerDatos' && Array.isArray(result.datos)) {
+                            let idx = mapDniIndex[payload.hoja];
+                            if (idx !== undefined) {
+                                result.datos.forEach(row => {
+                                    if (Array.isArray(row) && row.length > idx) row[idx] = fixIncomingDni(row[idx]);
+                                });
+                            }
+                        } else if (payload.accion === 'obtenerDatosVarios' && typeof result.datos === 'object') {
+                            for (let h in result.datos) {
+                                let idx = mapDniIndex[h];
+                                if (idx !== undefined && Array.isArray(result.datos[h])) {
+                                    result.datos[h].forEach(row => {
+                                        if (Array.isArray(row) && row.length > idx) row[idx] = fixIncomingDni(row[idx]);
+                                    });
+                                }
+                            }
+                        }
+                    }
+                    // --- FIN FIX DNI 8 DIGITOS INCOMING ---
                     
                     if (result && result.mensaje && result.mensaje.includes("UNAUTHORIZED")) {
                         // Solo alertar y recargar si realmente hay un token de sesión guardado (sesión previa activa)
@@ -7812,10 +7868,11 @@
             
             msg.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Generando Reporte Matricial...';
             
-            let rM = await fetchAPI({ accion: 'obtenerDatosVarios', hojas: ['Asistencia_Docentes', 'Horario_Docentes', 'Feriados', 'Permisos_Docentes', 'Vacaciones'] });
+            let rM = await fetchAPI({ accion: 'obtenerDatosVarios', hojas: ['Asistencia_Docentes', 'Horario_Docentes', 'Feriados', 'Permisos_Docentes', 'Vacaciones', 'TRASLADO/TERMINO'] });
             if(!rM || !rM.exito || !rM.datos) { msg.innerHTML = '<span class="text-danger">Error al cargar datos.</span>'; return; }
             datosMemoria['Permisos_Docentes'] = rM.datos['Permisos_Docentes'] || [];
-              datosMemoria['Vacaciones'] = rM.datos['Vacaciones'] || [];
+            datosMemoria['Vacaciones'] = rM.datos['Vacaciones'] || [];
+            datosMemoria['TRASLADO/TERMINO'] = rM.datos['TRASLADO/TERMINO'] || [];
             let rAsis = { exito: true, datos: rM.datos['Asistencia_Docentes'] || [] };
             let rHor = { exito: true, datos: rM.datos['Horario_Docentes'] || [] };
             let rFer = { exito: true, datos: rM.datos['Feriados'] || [] };
@@ -7917,9 +7974,13 @@
                 let totalTardanzasDoc = 0;
                 let sumaMinutosTardanzaDoc = 0;
 
+                let msInicio = window.parseFechaEstudiante(doc[10]);
+                let msFin = window.parseFechaEstudiante(doc[11]);
+
                 fechasRango.forEach(fObj => {
                     let fStr = fObj.str;
                     let fDate = fObj.obj;
+                    let msIter = fDate.getTime();
                     let diaSem = fDate.getDay(); 
                     
                     // Ajustar nombres de días para el mapa
@@ -7943,6 +8004,10 @@
                         cellsHTML += `<td style="border: 2px solid black; background-color: #ffc10744; font-size: 0.65rem; color: #666; font-weight: bold;">${diaSem === 0 ? 'DOM' : 'SAB'}</td>`;
                     } else if (fDate > hoy) {
                         cellsHTML += `<td style="border: 2px solid black; color: #ddd;">-</td>`;
+                    } else if (msInicio && msIter < msInicio) {
+                        cellsHTML += `<td style="border: 2px solid black; color: #999; font-weight: bold; font-size: 1.5rem;" title="Antes de Fecha de Inicio">-</td>`;
+                    } else if (msFin && msIter > msFin) {
+                        cellsHTML += `<td style="border: 2px solid black; color: #999; font-weight: bold; font-size: 1.5rem;" title="Después de Fecha de Fin">-</td>`;
                     } else {
                         // 1. Lógica de permisos docentes (Analizar primero antes de cualquier marca o falta)
                         let fFmt = fDate.getFullYear() + "-" + String(fDate.getMonth() + 1).padStart(2, '0') + "-" + String(fDate.getDate()).padStart(2, '0');
@@ -8866,7 +8931,7 @@
                 let options = '<option value="">Seleccione un Área</option>'; 
                 areas.forEach(f => {
                     let text = f[1] || f[0];
-                    options += `<option value="${f[0]}">${text}</option>`;
+                    options += `<option value="${text}">${text}</option>`;
                 });
                 if(selectArea1) selectArea1.innerHTML = options; 
                 if(selectArea2) selectArea2.innerHTML = options;
@@ -9085,6 +9150,7 @@
             if (hoja === 'Estudiantes') btnId = 'btn-delete-selected-Estudiantes';
             else if (hoja === 'Asistencia_Auxiliar') btnId = 'btn-delete-selected-Asistencia_Auxiliar';
             else if (hoja === 'Apoderados') btnId = 'btn-delete-selected-Apoderados';
+            else if (hoja === 'Asistencia_Docentes') btnId = 'btn-delete-selected-Asistencia_Docentes';
             
             let btn = document.getElementById(btnId);
             if (btn) {
@@ -9094,7 +9160,11 @@
 
         async function eliminarSeleccionados(hoja) {
             let seleccionados = [];
-            document.querySelectorAll('.chk-eliminar-' + hoja + ':checked').forEach(chk => seleccionados.push(chk.value));
+            document.querySelectorAll('.chk-eliminar-' + hoja + ':checked').forEach(chk => {
+                if (chk.value) {
+                    chk.value.split(',').filter(v => v).forEach(id => seleccionados.push(id));
+                }
+            });
             
             if (seleccionados.length === 0) {
                 Swal.fire('Atención', 'Por favor, seleccione al menos un registro para eliminar.', 'warning');
@@ -9109,7 +9179,9 @@
                 confirmButtonColor: '#d33',
                 cancelButtonColor: '#3085d6',
                 confirmButtonText: 'Sí, eliminar',
-                cancelButtonText: 'No, cancelar'
+                cancelButtonText: 'No, cancelar',
+                allowOutsideClick: false,
+                showCloseButton: true
             });
 
             if (!result.isConfirmed) return;
@@ -9117,6 +9189,8 @@
             let btnId = 'btn-eliminar-hdoc';
             if (hoja === 'Estudiantes') btnId = 'btn-delete-selected-Estudiantes';
             else if (hoja === 'Asistencia_Auxiliar') btnId = 'btn-delete-selected-Asistencia_Auxiliar';
+            else if (hoja === 'Apoderados') btnId = 'btn-delete-selected-Apoderados';
+            else if (hoja === 'Asistencia_Docentes') btnId = 'btn-delete-selected-Asistencia_Docentes';
             
             let btn = document.getElementById(btnId);
             let originalText = btn ? btn.innerHTML : '';
@@ -9125,24 +9199,57 @@
                 btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Eliminando...';
             }
 
+            Swal.fire({
+                title: 'Eliminando...',
+                html: 'Progreso: <b>0%</b>',
+                allowOutsideClick: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                }
+            });
+
             try {
-                // Ahora usamos la nueva acción masiva del backend para mayor rapidez
-                let r = await fetchAPI({ accion: 'eliminarMasivo', hoja: hoja, ids: seleccionados });
+                let chunkSize = 20;
+                let total = seleccionados.length;
+                let eliminados = 0;
+                let errorMensaje = "";
+                let exitoCompleto = true;
+
+                for (let i = 0; i < total; i += chunkSize) {
+                    let chunk = seleccionados.slice(i, i + chunkSize);
+                    let r = await fetchAPI({ accion: 'eliminarMasivo', hoja: hoja, ids: chunk });
+                    
+                    if (!r.exito) {
+                        exitoCompleto = false;
+                        errorMensaje = r.mensaje;
+                        break;
+                    }
+                    
+                    eliminados += chunk.length;
+                    let p = Math.round((eliminados / total) * 100);
+                    const b = Swal.getHtmlContainer().querySelector('b');
+                    if (b) b.textContent = p + '%';
+                }
                 
-                if (r.exito) {
-                    Swal.fire('¡Eliminado!', r.mensaje || "Registros eliminados exitosamente.", 'success');
+                if (exitoCompleto) {
+                    Swal.fire('¡Eliminado!', '100% completado. Registros eliminados exitosamente.', 'success');
                 } else {
-                    Swal.fire('Error', "Error: " + r.mensaje, 'error');
+                    Swal.fire('Error', "Error: " + errorMensaje, 'error');
                 }
                 
                 let chkAll = document.getElementById('chk-sel-todos-' + hoja) || document.getElementById('chk-all-hdoc');
                 if (chkAll) chkAll.checked = false;
-                
+
+                document.querySelectorAll('.chk-sel-mes-' + hoja).forEach(chk => chk.checked = false);
+
+                if (btn) {
+                    btn.innerHTML = originalText;
+                    btn.disabled = true;
+                }
                 cargarTabla(hoja);
-            } catch (e) {
-                console.error(e);
-                Swal.fire('Error', "Error al eliminar registros: " + e.message, 'error');
-            } finally {
+            } catch (error) {
+                clearInterval(timerInterval);
+                Swal.fire('Error', 'Error de red o servidor.', 'error');
                 if (btn) {
                     btn.disabled = false;
                     btn.innerHTML = originalText;
@@ -9781,8 +9888,14 @@
                 
                 let monthHeader = document.createElement('div');
                 monthHeader.className = 'month-header bg-dark text-white px-3 py-2 rounded-top fw-bold d-flex align-items-center justify-content-between shadow-sm';
+                let mesClassId = 'chk-mes-' + grupoMes.sortKey.replace('-', '');
+                let checkboxMesHtml = canEditDelete ? `<div class="form-check d-inline-block me-3"><input type="checkbox" class="form-check-input chk-sel-mes-Asistencia_Docentes" id="sel-${mesClassId}" onclick="document.querySelectorAll('.chk-eliminar-Asistencia_Docentes.${mesClassId}').forEach(c => { if(c.closest('tr') && !c.closest('tr').classList.contains('d-none')) c.checked = this.checked; }); actualizarBotonEliminarSeleccionados('Asistencia_Docentes');"><label class="form-check-label fw-bold small text-white" for="sel-${mesClassId}">Sel. Mes</label></div>` : '';
+                
                 monthHeader.innerHTML = `
-                    <span><i class="fa-solid fa-calendar-days me-2 text-primary"></i>${grupoMes.mesAnio}</span>
+                    <div class="d-flex align-items-center">
+                        ${checkboxMesHtml}
+                        <span><i class="fa-solid fa-calendar-days me-2 text-primary"></i>${grupoMes.mesAnio}</span>
+                    </div>
                     <span class="badge bg-secondary" style="font-size: 12px;">${countTotalMonth} Docente-Días</span>
                 `;
                 
@@ -9896,8 +10009,16 @@
                             accionesHtml = `<td class="text-center"><div class="d-flex flex-column align-items-center justify-content-center">${actList.join('')}</div></td>`;
                         }
                         
+                        let rowIds = [];
+                        if (rec.ingreso) rowIds.push(rec.ingreso[0]);
+                        if (rec.salida) rowIds.push(rec.salida[0]);
+                        if (rec.falta) rowIds.push(rec.falta[0]);
+                        rec.otros.forEach(o => rowIds.push(o[0]));
+                        let checkboxTdHtml = canEditDelete ? `<td class="text-center align-middle"><input type="checkbox" class="form-check-input chk-eliminar-Asistencia_Docentes chk-mes-${grupoMes.sortKey.replace('-', '')}" value="${rowIds.join(',')}" onclick="actualizarBotonEliminarSeleccionados('Asistencia_Docentes')"></td>` : '';
+                        
                         teachersRowsHtml += `
                             <tr class="teacher-attendance-row" data-dni="${dni}" data-docente="${docenteName}">
+                                ${checkboxTdHtml}
                                 <td>
                                     <div class="fw-bold text-dark">${docenteName}</div>
                                     <small class="text-muted"><i class="fa-solid fa-id-card me-1"></i> DNI: ${dni}</small>
@@ -9929,6 +10050,7 @@
                                     <table class="table table-hover align-middle mb-0" style="font-size: 13px;">
                                         <thead class="table-light text-muted small uppercase">
                                             <tr>
+                                                ${canEditDelete ? '<th style="width: 40px;" class="text-center">#</th>' : ''}
                                                 <th>Docente</th>
                                                 <th>Registro de Ingreso</th>
                                                 <th>Registro de Salida</th>
@@ -10417,7 +10539,7 @@
                     grados.forEach(g => selG.innerHTML += `<option value="${g}">${g}</option>`); 
                     secciones.forEach(s => selS.innerHTML += `<option value="${s}">${s}</option>`);
                     
-                    (datosMemoria['Areas'] || []).forEach(a => { let text = a[1] || a[0]; selArea.innerHTML += `<option value="${a[0]}">${text}</option>`; });
+                    (datosMemoria['Areas'] || []).forEach(a => { let text = a[1] || a[0]; selArea.innerHTML += `<option value="${text}">${text}</option>`; });
                     (datosMemoria['Docentes'] || []).forEach(d => { if(d[5] === 'Activo') selDocente.innerHTML += `<option value="${d[1]}">${d[1]}</option>`; });
 
                     // Llenar datos específicos de la fila
@@ -13959,7 +14081,7 @@
                 let selA = document.getElementById('inc-asignatura');
                 if(selA) {
                     selA.innerHTML = '<option value="">Seleccione...</option>';
-                    if(datosMemoria.Areas) datosMemoria.Areas.forEach(a => { let text = a[1] || a[0]; selA.innerHTML += `<option value="${a[0]}">${text}</option>`; });
+                    if(datosMemoria.Areas) datosMemoria.Areas.forEach(a => { let text = a[1] || a[0]; selA.innerHTML += `<option value="${text}">${text}</option>`; });
                 }
 
                 let grados = datosMemoria.Estudiantes ? [...new Set(datosMemoria.Estudiantes.map(e => e[2]))].filter(Boolean).sort() : [];
