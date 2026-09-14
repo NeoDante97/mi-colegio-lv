@@ -5025,31 +5025,54 @@
                     }
 
                     btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Configurando interfaz...';
-                    aplicarPermisosVisuales();
-                    btn.innerHTML = 'Ingresar'; btn.disabled = false;
+                    
+                    let bgLoader = document.getElementById('bg-loader-status');
+                    let bgLoaderBar = bgLoader ? bgLoader.querySelector('.progress-bar') : null;
+                    let bgLoaderText = document.getElementById('bg-loader-text');
+                    if (bgLoader) {
+                        bgLoader.classList.remove('d-none');
+                        if (bgLoaderBar) {
+                            bgLoaderBar.style.transition = 'width 0.4s ease-out';
+                            bgLoaderBar.style.width = '0%';
+                        }
+                        if (bgLoaderText) bgLoaderText.innerText = "INICIANDO CARGA DE SISTEMA...";
+                    }
 
-                    document.getElementById('login-section').classList.add('d-none'); 
-                    document.getElementById('dashboard-section').classList.remove('d-none'); 
-                    document.getElementById('user-name-display').innerText = r.mensaje;
-
-                    let hojasParaCargar = (tipo === 'Docente') ? ['Docentes', 'Estudiantes', 'Registro_Asistencia', 'Asistencia_Docentes', 'Incidencias', 'Areas', 'Horarios', 'Permisos', 'Apoderados', 'Feriados'] : ['Auxiliares', 'Estudiantes', 'Asistencia_Auxiliar', 'Incidencias', 'Areas', 'Horarios', 'Registro_Asistencia', 'Permisos', 'Apoderados', 'Feriados'];
+                    let hojasParaCargar = (tipo === 'Docente') ? ['Docentes', 'Estudiantes', 'Registro_Asistencia', 'Asistencia_Docentes', 'Incidencias', 'Areas', 'Horarios', 'Permisos', 'Apoderados', 'Feriados', 'Vacaciones', 'TRASLADO/TERMINO', 'Auxiliares'] : ['Auxiliares', 'Estudiantes', 'Asistencia_Auxiliar', 'Incidencias', 'Areas', 'Horarios', 'Registro_Asistencia', 'Permisos', 'Apoderados', 'Feriados', 'Vacaciones', 'TRASLADO/TERMINO', 'Docentes'];
                     let hojasParaCargarFiltradas = hojasParaCargar.filter(h => !datosMemoria[h] || datosMemoria[h].length === 0);
 
-                    (async () => {
-                        try {
-                            if (hojasParaCargarFiltradas.length > 0) {
-                                if(hojasParaCargarFiltradas.includes('Areas')) hojasParaCargarFiltradas.push('Areas Curriculares');
-                                let rHojas = await fetchAPI({ accion: 'obtenerDatosVarios', hojas: hojasParaCargarFiltradas });
-                                if (rHojas.exito && rHojas.datos) {
-                                    hojasParaCargarFiltradas.forEach(h => datosMemoria[h] = rHojas.datos[h] || []);
-                                    if(rHojas.datos['Areas Curriculares'] && (!rHojas.datos['Areas'] || rHojas.datos['Areas'].length === 0)) {
-                                        datosMemoria['Areas'] = rHojas.datos['Areas Curriculares'];
-                                    }
+                    try {
+                        if (hojasParaCargarFiltradas.length > 0) {
+                            if(hojasParaCargarFiltradas.includes('Areas')) hojasParaCargarFiltradas.push('Areas Curriculares');
+                            
+                            if (bgLoaderBar) bgLoaderBar.style.width = '30%';
+                            if (bgLoaderText) bgLoaderText.innerText = "DESCARGANDO DATOS (ESTUDIANTES)...";
+                            
+                            let rHojas = await fetchAPI({ accion: 'obtenerDatosVarios', hojas: hojasParaCargarFiltradas });
+                            
+                            if (bgLoaderBar) bgLoaderBar.style.width = '80%';
+                            
+                            if (rHojas.exito && rHojas.datos) {
+                                hojasParaCargarFiltradas.forEach(h => datosMemoria[h] = rHojas.datos[h] || []);
+                                if(rHojas.datos['Areas Curriculares'] && (!rHojas.datos['Areas'] || rHojas.datos['Areas'].length === 0)) {
+                                    datosMemoria['Areas'] = rHojas.datos['Areas Curriculares'];
                                 }
                             }
-                            aplicarPermisosVisuales();
-                        } catch(e) { console.error(e); }
-                    })();
+                        }
+                        
+                        if (bgLoaderBar) bgLoaderBar.style.width = '100%';
+                        if (bgLoaderText) bgLoaderText.innerText = "CARGA COMPLETADA AL 100%";
+                        
+                        aplicarPermisosVisuales();
+                    } catch(e) { console.error(e); }
+
+                    setTimeout(() => {
+                        if (bgLoader) bgLoader.classList.add('d-none');
+                        document.getElementById('login-section').classList.add('d-none'); 
+                        document.getElementById('dashboard-section').classList.remove('d-none'); 
+                        document.getElementById('user-name-display').innerText = r.mensaje;
+                        btn.innerHTML = 'Ingresar'; btn.disabled = false;
+                    }, 600);
 
                 } else {
                     btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Sincronizando... 20%';
@@ -6123,13 +6146,13 @@
                     hojasRequeridas.push('Auxiliares');
                 }
                 
-                let debeCargar = rEst.datos.length === 0 || 
-                                 rAsisAux.datos.length === 0 || 
-                                 rFer.datos.length === 0 || 
-                                 rPerm.datos.length === 0 || 
-                                 rVac.datos.length === 0 ||
-                                 !datosMemoria['Docentes'] || datosMemoria['Docentes'].length === 0 ||
-                                 (necesitaAuxiliares && rAux.datos.length === 0);
+                let debeCargar = !datosMemoria['Estudiantes'] || 
+                                 !datosMemoria['Asistencia_Auxiliar'] || 
+                                 !datosMemoria['Feriados'] || 
+                                 !datosMemoria['Permisos'] || 
+                                 !datosMemoria['Vacaciones'] ||
+                                 !datosMemoria['Docentes'] ||
+                                 (necesitaAuxiliares && !datosMemoria['Auxiliares']);
                 
                 if (debeCargar) {
                     let rM = await fetchAPI({ accion: 'obtenerDatosVarios', hojas: hojasRequeridas });
@@ -6186,7 +6209,7 @@
             let msg = document.getElementById('msg-filtro-reporte-doc'); msg.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Cargando base de datos...';
             try {
                 let rDoc = { datos: datosMemoria['Docentes'] || [] };
-                if (rDoc.datos.length === 0) {
+                if (!datosMemoria['Docentes']) {
                     let r = await fetchAPI({accion: 'obtenerDatos', hoja: 'Docentes'});
                     if (!r.exito) throw new Error(r && r.mensaje ? r.mensaje : "Error API");
                     rDoc.datos = r.datos || [];
@@ -6247,7 +6270,13 @@
                     hojasRequeridas.push('Auxiliares');
                 }
                 
-                let debeCargar = rEst.datos.length === 0 || rAsisAux.datos.length === 0 || rFer.datos.length === 0 || rPerm.datos.length === 0 || rVac.datos.length === 0 || (necesitaAuxiliares && rAux.datos.length === 0);
+                let debeCargar = !datosMemoria['Estudiantes'] || 
+                                 !datosMemoria['Asistencia_Auxiliar'] || 
+                                 !datosMemoria['Feriados'] || 
+                                 !datosMemoria['Permisos'] || 
+                                 !datosMemoria['Vacaciones'] ||
+                                 !datosMemoria['Docentes'] ||
+                                 (necesitaAuxiliares && !datosMemoria['Auxiliares']);
                 
                 if (debeCargar) {
                     let rM = await fetchAPI({ 
@@ -9601,12 +9630,12 @@
                             rowsHtml += `
                                 <tr class="student-attendance-row" data-dni="${fila[3]}" data-docente="${fila[4]}" data-fecha="${fecha}">
                                     ${cellCheckbox}
-                                    <td class="fw-bold">${fecha}</td>
+                                    <td class="fw-bold d-none d-md-table-cell">${fecha}</td>
                                     <td>${fila[2]}</td>
-                                    <td>${fila[3]}</td>
+                                    <td class="d-none d-md-table-cell">${fila[3]}</td>
                                     <td>${fila[4]}</td>
                                     <td><span class="badge ${bClass} p-2 shadow-sm">${estadoFmt}</span></td>
-                                    <td><span class="badge bg-info text-dark" style="font-size: 10px;">${registradoPor}</span></td>
+                                    <td class="d-none d-md-table-cell"><span class="badge bg-info text-dark" style="font-size: 10px;">${registradoPor}</span></td>
                                     ${cellAcciones}
                                 </tr>
                             `;
@@ -9626,16 +9655,16 @@
                                     </div>
                                 </div>
                                 <div class="table-responsive">
-                                    <table class="table table-hover table-striped align-middle mb-0" style="font-size: 13px;">
+                                    <table class="table table-hover table-striped align-middle mb-0 tabla-matricial" style="font-size: 13px;">
                                         <thead class="table-light">
                                             <tr>
                                                 ${canEditDelete ? '<th style="width: 40px;" class="text-center">#</th>' : ''}
-                                                <th>Fecha</th>
+                                                <th class="d-none d-md-table-cell">Fecha</th>
                                                 <th>Hora</th>
-                                                <th>DNI</th>
+                                                <th class="d-none d-md-table-cell">DNI</th>
                                                 <th>Nombres</th>
                                                 <th>Estado</th>
-                                                <th>Registrado Por</th>
+                                                <th class="d-none d-md-table-cell">Registrado Por</th>
                                                 ${canEditDelete ? '<th class="text-center">Acciones</th>' : ''}
                                             </tr>
                                         </thead>
@@ -13562,7 +13591,7 @@
             btn.disabled = true;
 
             // Asegurar que tenemos todos los datos necesarios en memoria
-            let hojasRequeridas = ['Asistencia_Docentes', 'Docentes', 'Feriados', 'Horario_Docentes', 'Permisos_Docentes'];
+            let hojasRequeridas = ['Asistencia_Docentes', 'Docentes', 'Feriados', 'Horario_Docentes', 'Permisos_Docentes', 'Vacaciones'];
             for (let hoja of hojasRequeridas) {
                 if (!datosMemoria[hoja] || datosMemoria[hoja].length === 0) {
                     let r = await fetchAPI({ accion: 'obtenerDatos', hoja: hoja });
@@ -13646,6 +13675,20 @@
                     });
 
                     if (tienePermiso) return;
+
+                    let tieneTrabajoVirtual = false;
+                    (datosMemoria['Vacaciones'] || []).forEach(v => {
+                        let vDni = String(v[1]).replace(/'/g, '').trim();
+                        let vTipo = String(v[4] || '').trim();
+                        let vMotivo = String(v[7] || '').trim().toLowerCase();
+                        if (vDni === dni && (vTipo === 'Docente' || vTipo === 'Docentes') && vMotivo === 'trabajo virtual') {
+                            let vIni = v[5] ? String(v[5]).split('T')[0] : "";
+                            let vFin = v[6] ? String(v[6]).split('T')[0] : "";
+                            if(fFmt >= vIni && fFmt <= vFin) tieneTrabajoVirtual = true;
+                        }
+                    });
+
+                    if (tieneTrabajoVirtual) return;
 
                     let esFaltaAuto = false;
                     let fDateSimple = new Date(fDate.getFullYear(), fDate.getMonth(), fDate.getDate());
