@@ -3920,6 +3920,53 @@
         const URL_API = "https://script.google.com/macros/s/AKfycbzuxSqHhKS_JGKLIAmyMmqEGa2u0DzOf6vFWSoMs-Pk-QcyBP0iA7-mHhXfzRm_zxKi/exec";
 
         let datosMemoria = {}; let fotosCache = {}; let qrsCache = {}; let editandoID = null; let reporteGlobalData = {}; let rolActual = ''; let usuarioDniActual = '';
+        
+        // --- INICIO CACHE INDEXEDDB ---
+        const DB_NAME = 'IELV_CacheDB';
+        const STORE_NAME = 'datosMemoria';
+        function initDB() {
+            return new Promise((resolve, reject) => {
+                let req = indexedDB.open(DB_NAME, 1);
+                req.onupgradeneeded = e => { e.target.result.createObjectStore(STORE_NAME); };
+                req.onsuccess = () => resolve(req.result);
+                req.onerror = () => reject(req.error);
+            });
+        }
+        async function saveToCache(key, value) {
+            try {
+                let db = await initDB();
+                let tx = db.transaction(STORE_NAME, 'readwrite');
+                tx.objectStore(STORE_NAME).put(value, key);
+                return new Promise(r => tx.oncomplete = () => r());
+            } catch(e) {}
+        }
+        async function loadFromCache(key) {
+            try {
+                let db = await initDB();
+                let tx = db.transaction(STORE_NAME, 'readonly');
+                let req = tx.objectStore(STORE_NAME).get(key);
+                return new Promise(r => { req.onsuccess = () => r(req.result); req.onerror = () => r(null); });
+            } catch(e) { return null; }
+        }
+        async function cargarDatosMemoriaDesdeCache() {
+            try {
+                let keys = ['Estudiantes', 'Registro_Asistencia', 'Asistencia_Auxiliar', 'Asistencia_Docentes', 'Docentes', 'Auxiliares', 'Apoderados', 'Areas', 'Horarios', 'Feriados', 'Permisos', 'Horario_Docentes', 'Incidencias', 'Administradores', 'Permisos_Docentes', 'TRASLADO/TERMINO', 'Vacaciones', 'Configuracion'];
+                for (let k of keys) {
+                    let data = await loadFromCache(k);
+                    if (data && (!datosMemoria[k] || datosMemoria[k].length === 0)) datosMemoria[k] = data;
+                }
+            } catch(e) {}
+        }
+        async function guardarDatosMemoriaEnCache(keysParam) {
+            try {
+                let keys = keysParam || Object.keys(datosMemoria);
+                for (let k of keys) {
+                    if (datosMemoria[k]) await saveToCache(k, datosMemoria[k]);
+                }
+            } catch(e) {}
+        }
+        // --- FIN CACHE INDEXEDDB ---
+
         window.colaSincronizarAuxiliar = JSON.parse(localStorage.getItem('colaSincronizarAuxiliar') || '[]');
 
         // Cache y Proxy para configuracionSistema para evitar peticiones repetitivas y acelerar el inicio
@@ -4765,7 +4812,27 @@
 
         let sessionToken = '';
 
+        function getFechasSemanaActual() {
+            let hoy = new Date();
+            let day = hoy.getDay();
+            let diffL = hoy.getDate() - day + (day === 0 ? -6 : 1);
+            let lunes = new Date(hoy.setDate(diffL));
+            let viernes = new Date(lunes);
+            viernes.setDate(lunes.getDate() + 4);
+            return {
+                fIni: lunes.toISOString().split('T')[0],
+                fFin: viernes.toISOString().split('T')[0]
+            };
+        }
+
         async function fetchAPI(payload, retries = 8) {
+            const sheetsWithDates = ['Registro_Asistencia', 'Incidencias', 'Vacaciones', 'TRASLADO/TERMINO'];
+            if ((payload.accion === 'obtenerDatos' && sheetsWithDates.includes(payload.hoja) && !payload.fechaInicio) ||
+                (payload.accion === 'obtenerDatosVarios' && payload.hojas && payload.hojas.some(h => sheetsWithDates.includes(h)) && !payload.fechaInicio)) {
+                let fw = getFechasSemanaActual();
+                payload.fechaInicio = fw.fIni;
+                payload.fechaFin = fw.fFin;
+            }
             // Inyectar el token de sesión si existe
             if (!payload.sessionToken) {
                 if (!sessionToken) {
@@ -4877,6 +4944,7 @@
         }
 
         async function iniciarSesion() {
+            await cargarDatosMemoriaDesdeCache();
             let dni = document.getElementById('dni').value, pass = document.getElementById('password').value, tipo = document.getElementById('tipo').value, btn = document.getElementById('btn-login');
             
             btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Verificando credenciales...'; btn.disabled = true;
@@ -4970,24 +5038,25 @@
 
                 } else {
                     btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Sincronizando... 20%';
-                    let hojasCriticas = ['Estudiantes', 'Registro_Asistencia', 'Asistencia_Auxiliar', 'Asistencia_Docentes'];
-            let hojasCriticasFiltradas = hojasCriticas.filter(h => !datosMemoria[h] || datosMemoria[h].length === 0);
-            let hojasParaCargar = [...hojasCriticasFiltradas];
-            if (!window.configuracionSistema) hojasParaCargar.push('Configuracion');
-            
-            if (hojasParaCargar.length > 0) {
-                try {
-                    let rHojas = await fetchAPI({ accion: 'obtenerDatosVarios', hojas: hojasParaCargar });
-                    if (rHojas.exito && rHojas.datos) {
-                        hojasCriticasFiltradas.forEach(h => datosMemoria[h] = rHojas.datos[h] || []);
-                        if (rHojas.datos['Configuracion']) {
-                            let config = {};
-                            rHojas.datos['Configuracion'].forEach(row => { if (row[0]) config[row[0]] = row[1]; });
-                            window.configuracionSistema = config;
-                        }
+                    let hojasCriticas = ['Estudiantes', 'Registro_Asistencia', 'Asistencia_Auxiliar'];
+                    let hojasCriticasFiltradas = hojasCriticas.filter(h => !datosMemoria[h] || datosMemoria[h].length === 0);
+                    let hojasParaCargar = [...hojasCriticasFiltradas];
+                    if (!window.configuracionSistema) hojasParaCargar.push('Configuracion');
+                    
+                    if (hojasParaCargar.length > 0) {
+                        try {
+                            let rHojas = await fetchAPI({ accion: 'obtenerDatosVarios', hojas: hojasParaCargar });
+                            if (rHojas.exito && rHojas.datos) {
+                                hojasCriticasFiltradas.forEach(h => datosMemoria[h] = rHojas.datos[h] || []);
+                                if (rHojas.datos['Configuracion']) {
+                                    let config = {};
+                                    rHojas.datos['Configuracion'].forEach(row => { if (row[0]) config[row[0]] = row[1]; });
+                                    window.configuracionSistema = config;
+                                }
+                                guardarDatosMemoriaEnCache(hojasParaCargar);
+                            }
+                        } catch(e) { console.error(e); }
                     }
-                } catch(e) { console.error(e); }
-            }
 
                     let licenciaValida = await validarLicenciaYBloquear(tipo);
                     if (!licenciaValida) {
@@ -4995,15 +5064,24 @@
                         btn.disabled = false;
                         return;
                     }
+                    
+                    document.getElementById('login-section').classList.add('d-none'); 
+                    document.getElementById('dashboard-section').classList.remove('d-none'); 
+                    document.getElementById('user-name-display').innerText = r.mensaje;
 
-                    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Sincronizando... 100%';
+                    btn.innerHTML = 'Ingresar'; btn.disabled = false;
+                    aplicarPermisosVisuales();
+                    if (window.hojaActualVisible) cargarTabla(window.hojaActualVisible, false, true);
+
+                    // Descargar resto de hojas en background...
                     try {
-                        let hojasAdmin = ['Docentes', 'Auxiliares', 'Apoderados', 'Areas', 'Horarios', 'Feriados', 'Permisos', 'Horario_Docentes', 'Incidencias', 'Administradores', 'Permisos_Docentes'];
+                        let hojasAdmin = ['Docentes', 'Auxiliares', 'Apoderados', 'Areas', 'Horarios', 'Feriados', 'Permisos', 'Incidencias', 'Administradores'];
                         let hojasAdminFilt = hojasAdmin.filter(h => !datosMemoria[h] || datosMemoria[h].length === 0);
                         if (hojasAdminFilt.length > 0) {
                             let rHAdmin = await fetchAPI({ accion: 'obtenerDatosVarios', hojas: hojasAdminFilt });
                             if (rHAdmin.exito && rHAdmin.datos) {
                                 hojasAdminFilt.forEach(h => datosMemoria[h] = rHAdmin.datos[h] || []);
+                                guardarDatosMemoriaEnCache(hojasAdminFilt);
                             }
                         }
                     } catch (e) { console.error("Error preloading Admin sheets:", e); }
@@ -5100,7 +5178,61 @@
             }
         }
 
-        function cambiarVista(idVista, btn, nombreHoja) {
+        function mostrarCargaConProgreso() {
+            Swal.fire({
+                title: 'Descargando...',
+                html: `Progreso: <b>0%</b><br><div class="progress mt-2" style="height: 10px;"><div class="progress-bar progress-bar-striped progress-bar-animated bg-warning text-dark" style="width: 0%"></div></div>`,
+                allowOutsideClick: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                    let b = Swal.getHtmlContainer().querySelector('b');
+                    let bar = Swal.getHtmlContainer().querySelector('.progress-bar');
+                    let progress = 0;
+                    window.fakeProgressInterval = setInterval(() => {
+                        progress += Math.floor(Math.random() * 15) + 5;
+                        if (progress > 95) progress = 95;
+                        if (b) b.textContent = progress + '%';
+                        if (bar) bar.style.width = progress + '%';
+                    }, 300);
+                }
+            });
+        }
+        function cerrarCargaConProgreso() {
+            clearInterval(window.fakeProgressInterval);
+            let b = Swal.getHtmlContainer()?.querySelector('b');
+            let bar = Swal.getHtmlContainer()?.querySelector('.progress-bar');
+            if (b) b.textContent = '100%';
+            if (bar) bar.style.width = '100%';
+            setTimeout(() => Swal.close(), 300);
+        }
+
+        async function cambiarVista(idVista, btn, nombreHoja) {
+            const vistasControlDocentes = ['v-horario-docente', 'v-asistencia-docente', 'v-permisos-docentes', 'v-extractor-docente', 'v-reporte-docente'];
+            if (vistasControlDocentes.includes(idVista) && (!datosMemoria['Asistencia_Docentes'] || datosMemoria['Asistencia_Docentes'].length === 0)) {
+                let conf = await Swal.fire({
+                    title: '¿Descargar Control Docentes?',
+                    text: 'Desea descargar esta sección para visualizar el menú?',
+                    icon: 'question',
+                    showCancelButton: true,
+                    confirmButtonText: 'Sí, descargar',
+                    cancelButtonText: 'No'
+                });
+                if (!conf.isConfirmed) return; // detiene el cambio de vista
+
+                mostrarCargaConProgreso();
+                let hojas = ['Asistencia_Docentes', 'Horario_Docentes', 'Permisos_Docentes'];
+                let r = await fetchAPI({ accion: 'obtenerDatosVarios', hojas: hojas });
+                cerrarCargaConProgreso();
+
+                if (r.exito && r.datos) {
+                    hojas.forEach(h => datosMemoria[h] = r.datos[h] || []);
+                    guardarDatosMemoriaEnCache(hojas);
+                } else {
+                    Swal.fire('Error', 'No se pudo descargar.', 'error');
+                    return;
+                }
+            }
+
             window.hojaActualVisible = nombreHoja; // Guardar para autorefresco
             cancelarEdicion(nombreHoja); document.querySelectorAll('.vista-modulo').forEach(v => v.classList.add('d-none')); document.getElementById(idVista).classList.remove('d-none');
             
@@ -6257,7 +6389,7 @@
             }
         }
 
-        function generarReporteFaltas() {
+        async function generarReporteFaltas() {
             let fIniVal = document.getElementById('rep-faltas-finicio').value;
             let fFinVal = document.getElementById('rep-faltas-ffin').value;
             let gradoVal = document.getElementById('rep-faltas-grado').value;
@@ -6309,6 +6441,26 @@
                 return; 
             }
             
+            let cachedFechas = getFechasSemanaActual();
+            if (fIniVal < cachedFechas.fIni || fFinVal > cachedFechas.fFin) {
+                let conf = await Swal.fire({
+                    title: '¿Descargar fecha filtrada?',
+                    text: 'Las fechas seleccionadas están fuera de la semana actual. ¿Desea descargar los datos de la fecha filtrada?',
+                    icon: 'question',
+                    showCancelButton: true,
+                    confirmButtonText: 'SÍ',
+                    cancelButtonText: 'NO'
+                });
+                if (conf.isConfirmed) {
+                    mostrarCargaConProgreso();
+                    let r = await fetchAPI({ accion: 'obtenerDatos', hoja: 'Registro_Asistencia', fechaInicio: fIniVal, fechaFin: fFinVal });
+                    if (r.exito) datosMemoria['Registro_Asistencia'] = r.datos || [];
+                    cerrarCargaConProgreso();
+                } else {
+                    return;
+                }
+            }
+            
             let [gradoFiltro, seccionFiltro] = gradoVal.split('|'); 
             let userNameRaw = document.getElementById('user-name-display').innerText; 
             let userNameClean = userNameRaw.replace('Bienvenido(a), ', '').replace('Prof. ', '').replace('Auxiliar ', '').trim(); 
@@ -6339,7 +6491,13 @@
             tbody.innerHTML = '';
 
             let dataSrc = window.reporteFaltasData || { estudiantes: [], asistencias: [], feriados: [], permisos: [] };
-            let alumnosSalon = dataSrc.estudiantes.filter(e => e[2].toString().trim() === gradoFiltro.trim() && e[3].toString().trim() === seccionFiltro.trim());
+            let retirados = (datosMemoria['TRASLADO/TERMINO'] || []).map(r => r[2] ? String(r[2]).replace(/['"]/g, '').trim().padStart(8, '0') : '');
+            let alumnosSalon = dataSrc.estudiantes.filter(e => {
+                let dniE = String(e[0]).replace(/['"]/g, '').trim().padStart(8, '0');
+                return e[2].toString().trim() === gradoFiltro.trim() && 
+                       e[3].toString().trim() === seccionFiltro.trim() &&
+                       !retirados.includes(dniE);
+            });
             
             if(alumnosSalon.length === 0) { 
                 tbody.innerHTML = `<tr><td colspan="4" class="text-center py-4 fw-bold text-danger border border-dark">No hay estudiantes registrados en este salón.</td></tr>`; 
@@ -6607,7 +6765,7 @@
             });
         }
 
-        function generarReporteMatricial(tipoReporte) {
+        async function generarReporteMatricial(tipoReporte) {
             let fIniVal = document.getElementById(tipoReporte === 'auxiliar' ? 'rep-aux-finicio' : 'rep-finicio').value;
             let fFinVal = document.getElementById(tipoReporte === 'auxiliar' ? 'rep-aux-ffin' : 'rep-ffin').value;
             let gradoVal = document.getElementById(tipoReporte === 'auxiliar' ? 'rep-aux-grado' : 'rep-grado').value;
@@ -6664,6 +6822,27 @@
             
             let inicio = new Date(fIniVal + "T00:00:00"); let fin = new Date(fFinVal + "T00:00:00");
             if(inicio > fin) { alert("La Fecha de Inicio no puede ser mayor a la Fecha Fin."); return; }
+            
+            let cachedFechas = getFechasSemanaActual();
+            if (fIniVal < cachedFechas.fIni || fFinVal > cachedFechas.fFin) {
+                let conf = await Swal.fire({
+                    title: '¿Descargar fecha filtrada?',
+                    text: 'Las fechas seleccionadas están fuera de la semana actual. ¿Desea descargar los datos de la fecha filtrada?',
+                    icon: 'question',
+                    showCancelButton: true,
+                    confirmButtonText: 'SÍ',
+                    cancelButtonText: 'NO'
+                });
+                if (conf.isConfirmed) {
+                    mostrarCargaConProgreso();
+                    let hojaToFetch = tipoReporte === 'auxiliar' ? 'Asistencia_Auxiliar' : 'Registro_Asistencia';
+                    let r = await fetchAPI({ accion: 'obtenerDatos', hoja: hojaToFetch, fechaInicio: fIniVal, fechaFin: fFinVal });
+                    if (r.exito) datosMemoria[hojaToFetch] = r.datos || [];
+                    cerrarCargaConProgreso();
+                } else {
+                    return;
+                }
+            }
             
             let [gradoFiltro, seccionFiltro] = gradoVal.split('|'); 
             let userNameRaw = document.getElementById('user-name-display').innerText; 
