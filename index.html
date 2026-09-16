@@ -1833,10 +1833,10 @@
                 </a>
 
                 <a class="nav-link menu-admin menu-docente menu-auxiliar d-none w-100 mt-2" id="link-vacaciones" onclick="cambiarVista('v-vacaciones', this, 'Vacaciones')">
-                    <i class="fa-solid fa-umbrella-beach icon-main me-1"></i> Vacaciones
+                    <i class="fa-solid fa-umbrella-beach icon-main me-1"></i> Vacaciones/Virtual Docentes
                 </a>
                 <a class="nav-link menu-admin d-none w-100 mt-2" id="link-retirados" onclick="cambiarVista('v-retirados', this, 'TRASLADO/TERMINO')">
-                    <i class="fa-solid fa-user-minus icon-main me-1"></i> TRASLADO/TERMINO DE CONTRATO/RENUNCIA
+                    <i class="fa-solid fa-user-minus icon-main me-1"></i> Traslado/T.CONTRATA
                 </a>
 
                 <a class="nav-link menu-admin menu-docente menu-auxiliar d-none w-100 mt-2" id="link-nomina" href="https://nominalv.netlify.app" target="_blank">
@@ -2834,7 +2834,7 @@
                         <input type="text" id="tt-descripcion" class="form-control" placeholder="Ej: Cambio de residencia, Renuncia voluntaria, etc.">
                     </div>
                     <div class="col-md-12 text-end mt-3">
-                        <button class="btn btn-primary fw-bold" onclick="registrarTT()">Guardar Registro</button>
+                        <button class="btn btn-primary fw-bold" id="btn-registrar-tt" onclick="registrarTT()">Guardar Registro</button>
                     </div>
                 </div>
             </div>
@@ -2878,7 +2878,7 @@
                 </div>
 
                 <!-- SELECTOR ESTUDIANTES / DOCENTES Y CAMPOS COMUNES -->
-                <div class="card p-3 shadow-sm mb-4 border-warning border-2" style="background: rgba(255, 248, 225, 0.4);">
+                <div class="card p-3 shadow-sm mb-4 border-warning border-2" style="background: rgba(255, 248, 225, 0.4);" id="card-registrar-vacaciones">
                     <div class="row g-3">
                         <div class="col-12 col-md-4">
                             <label class="form-label fw-bold"><i class="fa-solid fa-layer-group text-warning me-1"></i> Tipo de Personal / Estudiantes:</label>
@@ -3376,6 +3376,7 @@
                 </div>
 
                 <div id="msg-filtro-reporte-doc" class="text-center text-primary fw-bold mb-3 d-print-none"></div>
+                <div id="horario-fijo-docente-container" class="mb-4"></div>
                 
                 <div class="table-responsive">
                     <table class="table text-center align-middle tabla-matricial" id="tabla-imprimir-doc">
@@ -3916,7 +3917,7 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
     <script>
-        const URL_API = "https://script.google.com/macros/s/AKfycbxhMeG11xyLQ8SdjLy14JtjfBfo6e3QLk6v6k8QpErgD0nyIi7CqL_D8kQGtGBqMvMN/exec";
+        const URL_API = "https://script.google.com/macros/s/AKfycbzuxSqHhKS_JGKLIAmyMmqEGa2u0DzOf6vFWSoMs-Pk-QcyBP0iA7-mHhXfzRm_zxKi/exec";
 
         let datosMemoria = {}; let fotosCache = {}; let qrsCache = {}; let editandoID = null; let reporteGlobalData = {}; let rolActual = ''; let usuarioDniActual = '';
         window.colaSincronizarAuxiliar = JSON.parse(localStorage.getItem('colaSincronizarAuxiliar') || '[]');
@@ -4928,21 +4929,31 @@
                         } catch(e) { console.error(e); }
                     }
 
-                    if (!tieneLlaveAplicada) {
-                        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Descargando accesos...';
-                        let miHoja = tipo === 'Docente' ? 'Docentes' : 'Auxiliares';
+                    let hojasParaCargar = (tipo === 'Docente') ? ['Docentes', 'Estudiantes', 'Registro_Asistencia', 'Asistencia_Docentes', 'Incidencias', 'Areas', 'Horarios', 'Permisos', 'Apoderados', 'Feriados'] : ['Auxiliares', 'Estudiantes', 'Asistencia_Auxiliar', 'Incidencias', 'Areas', 'Horarios', 'Registro_Asistencia', 'Permisos', 'Apoderados', 'Feriados'];
+                    let hojasParaCargarFiltradas = hojasParaCargar.filter(h => !datosMemoria[h] || datosMemoria[h].length === 0);
+
+                    if (hojasParaCargarFiltradas.length > 0) {
+                        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Sincronizando datos...';
                         try {
-                            let rH = await fetchAPI({ accion: 'obtenerDatos', hoja: miHoja });
-                            if (rH.exito && rH.datos) {
-                                datosMemoria[miHoja] = rH.datos;
-                                let misDatos = rH.datos.find(row => String(row[0]).replace(/['"]/g, '').trim() === String(usuarioDniActual).replace(/['"]/g, '').trim());
-                                let colAcceso = tipo === 'Docente' ? 6 : 7;
-                                if (misDatos && typeof misDatos[colAcceso] === 'string' && misDatos[colAcceso].trim().startsWith('{')) {
-                                    window.permisosUsuario = JSON.parse(misDatos[colAcceso]);
-                                    tieneLlaveAplicada = true;
-                                }
+                            let rHojas = await fetchAPI({ accion: 'obtenerDatosVarios', hojas: hojasParaCargarFiltradas });
+                            if (rHojas.exito && rHojas.datos) {
+                                hojasParaCargarFiltradas.forEach(h => datosMemoria[h] = rHojas.datos[h] || []);
                             }
                         } catch(e) { console.error(e); }
+                    }
+
+                    if (!tieneLlaveAplicada) {
+                        let miHoja = tipo === 'Docente' ? 'Docentes' : 'Auxiliares';
+                        if (datosMemoria[miHoja] && datosMemoria[miHoja].length > 0) {
+                            let misDatos = datosMemoria[miHoja].find(row => String(row[0]).replace(/['"]/g, '').trim() === String(usuarioDniActual).replace(/['"]/g, '').trim());
+                            let colAcceso = tipo === 'Docente' ? 6 : 7;
+                            if (misDatos && typeof misDatos[colAcceso] === 'string' && misDatos[colAcceso].trim().startsWith('{')) {
+                                try {
+                                    window.permisosUsuario = JSON.parse(misDatos[colAcceso]);
+                                    tieneLlaveAplicada = true;
+                                } catch(e) { console.error(e); }
+                            }
+                        }
                     }
 
                     if (!tieneLlaveAplicada) {
@@ -4956,21 +4967,6 @@
                     document.getElementById('login-section').classList.add('d-none'); 
                     document.getElementById('dashboard-section').classList.remove('d-none'); 
                     document.getElementById('user-name-display').innerText = r.mensaje;
-
-                    let hojasParaCargar = (tipo === 'Docente') ? ['Docentes', 'Estudiantes', 'Registro_Asistencia', 'Asistencia_Docentes', 'Incidencias', 'Areas', 'Horarios', 'Permisos', 'Apoderados', 'Feriados'] : ['Auxiliares', 'Estudiantes', 'Asistencia_Auxiliar', 'Incidencias', 'Areas', 'Horarios', 'Registro_Asistencia', 'Permisos', 'Apoderados', 'Feriados'];
-                    let hojasParaCargarFiltradas = hojasParaCargar.filter(h => !datosMemoria[h] || datosMemoria[h].length === 0);
-
-                    (async () => {
-                        try {
-                            if (hojasParaCargarFiltradas.length > 0) {
-                                let rHojas = await fetchAPI({ accion: 'obtenerDatosVarios', hojas: hojasParaCargarFiltradas });
-                                if (rHojas.exito && rHojas.datos) {
-                                    hojasParaCargarFiltradas.forEach(h => datosMemoria[h] = rHojas.datos[h] || []);
-                                }
-                            }
-                            aplicarPermisosVisuales();
-                        } catch(e) { console.error(e); }
-                    })();
 
                 } else {
                     btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Sincronizando... 20%';
@@ -5000,6 +4996,18 @@
                         return;
                     }
 
+                    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Sincronizando... 100%';
+                    try {
+                        let hojasAdmin = ['Docentes', 'Auxiliares', 'Apoderados', 'Areas', 'Horarios', 'Feriados', 'Permisos', 'Horario_Docentes', 'Incidencias', 'Administradores', 'Permisos_Docentes'];
+                        let hojasAdminFilt = hojasAdmin.filter(h => !datosMemoria[h] || datosMemoria[h].length === 0);
+                        if (hojasAdminFilt.length > 0) {
+                            let rHAdmin = await fetchAPI({ accion: 'obtenerDatosVarios', hojas: hojasAdminFilt });
+                            if (rHAdmin.exito && rHAdmin.datos) {
+                                hojasAdminFilt.forEach(h => datosMemoria[h] = rHAdmin.datos[h] || []);
+                            }
+                        }
+                    } catch (e) { console.error("Error preloading Admin sheets:", e); }
+
                     document.getElementById('login-section').classList.add('d-none'); 
                     document.getElementById('dashboard-section').classList.remove('d-none'); 
                     document.getElementById('user-name-display').innerText = r.mensaje;
@@ -5007,18 +5015,7 @@
                     btn.innerHTML = 'Ingresar'; btn.disabled = false;
                     window.permisosUsuario = { 'Admin': 'RW' };
                     aplicarPermisosVisuales();
-
-                    // Pre-cargar datos en segundo plano para el Administrador
-                    (async () => {
-                        try {
-                            let hojasAdmin = ['Docentes', 'Auxiliares', 'Apoderados', 'Areas', 'Horarios', 'Feriados', 'Permisos', 'Horario_Docentes', 'Incidencias', 'Administradores', 'Permisos_Docentes'];
-                            let rHAdmin = await fetchAPI({ accion: 'obtenerDatosVarios', hojas: hojasAdmin });
-                            if (rHAdmin.exito && rHAdmin.datos) {
-                                hojasAdmin.forEach(h => datosMemoria[h] = rHAdmin.datos[h] || []);
-                                if (window.hojaActualVisible) cargarTabla(window.hojaActualVisible, false, true);
-                            }
-                        } catch (e) { console.error("Error preloading Admin sheets:", e); }
-                    })();
+                    if (window.hojaActualVisible) cargarTabla(window.hojaActualVisible, false, true);
                 }
             } else { 
                 btn.innerHTML = 'Ingresar'; btn.disabled = false;
@@ -8161,6 +8158,50 @@
                 faltas: countFaltasTotal,
                 asistencias: totalAsistDocentes
             });
+
+            // ========== HORARIO FIJO INJECTION ==========
+            let containerHorario = document.getElementById('horario-fijo-docente-container');
+            if (containerHorario) {
+                if (dniFiltro !== "") {
+                    let nombreDoc = docentesAProcesar.find(d => String(d[0]).trim() === dniFiltro);
+                    nombreDoc = nombreDoc ? nombreDoc[1] : "Docente";
+                    
+                    let formatH = (t) => {
+                        if(!t || String(t).toLowerCase().includes('libre')) return '-';
+                        let s = String(t);
+                        if(s.includes('T')) s = s.split('T')[1];
+                        let m = s.match(/(\d{1,2}:\d{2})/);
+                        return m ? formatoHoraInput(m[1]) : s;
+                    };
+
+                    let diasSemana = ["LUNES", "MARTES", "MI&Eacute;RCOLES", "JUEVES", "VIERNES"];
+                    let horarioHtml = `<div class="card border-primary shadow-sm mt-4"><div class="card-header bg-primary text-white fw-bold"><i class="fa-regular fa-calendar-days me-2"></i>Horario Fijo: ${nombreDoc}</div><div class="card-body p-0"><div class="table-responsive"><table class="table table-bordered table-striped text-center mb-0" style="font-size: 0.9rem;"><thead class="table-light"><tr>`;
+                    
+                    diasSemana.forEach(d => { horarioHtml += `<th>${d}</th>`; });
+                    horarioHtml += `</tr></thead><tbody><tr>`;
+                    
+                    diasSemana.forEach(d => {
+                        let diaBuscar = (d === "MI&Eacute;RCOLES") ? "MIERCOLES" : d;
+                        let hObj = mapHorarios[diaBuscar.toUpperCase() + "|" + dniFiltro] || mapHorarios[d.toUpperCase() + "|" + dniFiltro] || mapHorarios["MIÉRCOLES|" + dniFiltro] || mapHorarios["MIERCOLES|" + dniFiltro] || mapHorarios["MIRCOLES|" + dniFiltro];
+                        
+                        if (hObj && hObj.ingreso && hObj.ingreso !== 'dia libre') {
+                            let dataIng = formatH(hObj.ingreso);
+                            let dataSal = formatH(hObj.salida);
+                            horarioHtml += `<td class="align-middle fw-bold text-dark"><div class="text-success small mb-1">Ingreso:</div><div class="fs-6 mb-2">${dataIng}</div><div class="text-danger small mb-1">Salida:</div><div class="fs-6">${dataSal}</div></td>`;
+                        } else {
+                            horarioHtml += `<td class="align-middle text-muted fst-italic py-3">D&iacute;a Libre</td>`;
+                        }
+                    });
+                    
+                    horarioHtml += `</tr></tbody></table></div></div></div>`;
+                    containerHorario.innerHTML = horarioHtml;
+                    containerHorario.classList.remove('d-none');
+                } else {
+                    containerHorario.innerHTML = "";
+                    containerHorario.classList.add('d-none');
+                }
+            }
+            // ===========================================
 
             msg.innerHTML = '';
         }
@@ -15526,6 +15567,30 @@ async function descargarConsolidadoIncidenciasPDF(dni, fInicio, fFin) {
             // Iniciar aplicación de logo y configuración de inmediato (más rápido)
             aplicarLogoEnInterfaz();
 
+            // === NUEVO: PRE-CARGA SILENCIOSA EN EL LOGIN ===
+            // Como el usuario solicitó, descargamos la data en segundo plano
+            // ANTES de que hagan clic en "Ingresar". 
+            async function precargarDatosSinLogin() {
+                try {
+                    let cachedToken = sessionStorage.getItem('sessionToken');
+                    if (cachedToken) return; // Si ya hay sesión, el auto-login se encarga
+
+                    let hojasPrecarga = ['Estudiantes', 'Docentes', 'Auxiliares', 'Registro_Asistencia', 'Asistencia_Docentes', 'Asistencia_Auxiliar', 'Incidencias', 'Areas', 'Horarios', 'Permisos', 'Apoderados', 'Feriados', 'Horario_Docentes', 'Vacaciones'];
+                    
+                    // No usamos await aquí para no bloquear la ejecución del hilo principal
+                    fetchAPI({ accion: 'obtenerDatosVarios', hojas: hojasPrecarga }).then(rHojas => {
+                        if (rHojas && rHojas.exito && rHojas.datos) {
+                            hojasPrecarga.forEach(h => {
+                                if (rHojas.datos[h]) datosMemoria[h] = rHojas.datos[h];
+                            });
+                            console.log("Precarga completada antes del login.");
+                        }
+                    });
+                } catch(e) {}
+            }
+            precargarDatosSinLogin();
+            // ===============================================
+
             // Recuperar sesión persistida si existe
             let cachedToken = sessionStorage.getItem('sessionToken');
             if (cachedToken) {
@@ -15537,20 +15602,21 @@ async function descargarConsolidadoIncidenciasPDF(dni, fInicio, fFin) {
                 document.getElementById('dashboard-section').classList.remove('d-none');
                 document.getElementById('user-name-display').innerText = rolActual + " - " + usuarioDniActual;
                 
-                aplicarPermisosVisuales();
-                
-                // Cargar datos en segundo plano adaptados al rol
                 let hojasParaCargar = (rolActual === 'Docente') ? ['Docentes', 'Estudiantes', 'Registro_Asistencia', 'Asistencia_Docentes', 'Incidencias', 'Areas', 'Horarios', 'Permisos', 'Apoderados', 'Feriados', 'Vacaciones'] : 
                                       (rolActual === 'Auxiliar' ? ['Auxiliares', 'Estudiantes', 'Asistencia_Auxiliar', 'Incidencias', 'Areas', 'Horarios', 'Registro_Asistencia', 'Permisos', 'Apoderados', 'Feriados', 'Vacaciones'] : 
                                       ['Estudiantes', 'Registro_Asistencia', 'Asistencia_Auxiliar', 'Asistencia_Docentes', 'Docentes', 'Auxiliares', 'Apoderados', 'Areas', 'Horarios', 'Feriados', 'Permisos', 'Horario_Docentes', 'Incidencias', 'Administradores', 'Permisos_Docentes', 'Vacaciones']);
+                let hojasParaCargarFilt = hojasParaCargar.filter(h => !datosMemoria[h] || datosMemoria[h].length === 0);
                 
                 (async () => {
                     try {
-                        let rHojas = await fetchAPI({ accion: 'obtenerDatosVarios', hojas: hojasParaCargar });
-                        if (rHojas.exito && rHojas.datos) {
-                            hojasParaCargar.forEach(h => datosMemoria[h] = rHojas.datos[h] || []);
-                            aplicarPermisosVisuales();
+                        if (hojasParaCargarFilt.length > 0) {
+                            let rHojas = await fetchAPI({ accion: 'obtenerDatosVarios', hojas: hojasParaCargarFilt });
+                            if (rHojas.exito && rHojas.datos) {
+                                hojasParaCargarFilt.forEach(h => datosMemoria[h] = rHojas.datos[h] || []);
+                            }
                         }
+                        aplicarPermisosVisuales();
+                        if (window.hojaActualVisible) cargarTabla(window.hojaActualVisible, false, true);
                     } catch(e) { console.error("Error al restaurar datos:", e); }
                 })();
             }
@@ -16498,8 +16564,8 @@ async function descargarConsolidadoIncidenciasPDF(dni, fInicio, fFin) {
             { id: 'GrafAux', nombre: 'Reporte Gráfico Entrada' },
             { id: 'RepFaltas', nombre: 'Reporte de Faltas y Tardanzas' },
             { id: 'Nomina', nombre: 'Nómina de Matrícula' },
-            { id: 'TRASLADO/TERMINO', nombre: 'TRASLADO/TERMINO DE CONTRATO/RENUNCIA' },
-            { id: 'Vacaciones', nombre: 'Vacaciones' }
+            { id: 'TRASLADO/TERMINO', nombre: 'Traslado/T.Contrato' },
+            { id: 'Vacaciones', nombre: 'Vacaciones/T.Virtual' }
         ];
 
         function abrirModalAccesos(hoja, idUsuario) {
@@ -16605,7 +16671,9 @@ async function descargarConsolidadoIncidenciasPDF(dni, fInicio, fFin) {
                 'Permisos': { links: ['link-permisos-doc', 'link-permisos-aux'], btnAdd: 'btn-add-permiso' },
                 'QR': { links: ['link-qr'] },
                 'QRDoc': { links: ['link-qr'] },
-                'Nomina': { links: ['link-nomina'] }
+                'Nomina': { links: ['link-nomina'] },
+                'TRASLADO/TERMINO': { links: ['link-retirados'], btnAdd: 'btn-registrar-tt' },
+                'Vacaciones': { links: ['link-vacaciones'] }
             };
 
             let mostrarDocente = false;
@@ -16633,6 +16701,14 @@ async function descargarConsolidadoIncidenciasPDF(dni, fInicio, fFin) {
                         if(b) {
                             if(nivel === 'RW') b.classList.remove('d-none');
                             else b.classList.add('d-none');
+                        }
+                    }
+                    if (key === 'Vacaciones') {
+                        let b2 = document.getElementById('btn-registrar-vacaciones');
+                        let divB2 = b2 ? b2.parentElement : null;
+                        if (divB2 && divB2.classList.contains('d-flex')) {
+                            if(nivel === 'RW') divB2.classList.remove('d-none');
+                            else divB2.classList.add('d-none');
                         }
                     }
                     if(conf.btnExtra) {
@@ -19035,6 +19111,7 @@ async function descargarConsolidadoIncidenciasPDF(dni, fInicio, fFin) {
         }
 
         function renderizarHistorialVacaciones() {
+            let canEditDelete = (rolActual === 'Administrador') || (window.permisosUsuario && window.permisosUsuario['Vacaciones'] === 'RW');
             let tbody = document.getElementById('tb-historial-vacaciones');
             if (!tbody) return;
             tbody.innerHTML = '';
@@ -19085,9 +19162,7 @@ async function descargarConsolidadoIncidenciasPDF(dni, fInicio, fFin) {
                     <td>${motivo}</td>
                     <td><small class="text-muted">${resp}</small></td>
                     <td>
-                        <button class="btn btn-sm btn-outline-danger py-0 px-2" onclick="eliminarVacacion('${id}', '${dni}')">
-                            <i class="fa-solid fa-trash"></i>
-                        </button>
+                        ${canEditDelete ? `<button class="btn btn-sm btn-outline-danger py-0 px-2" onclick="eliminarVacacion('${id}', '${dni}')"><i class="fa-solid fa-trash"></i></button>` : `-`}
                     </td>
                 `;
                 tbody.appendChild(tr);
@@ -19347,7 +19422,7 @@ async function descargarConsolidadoIncidenciasPDF(dni, fInicio, fFin) {
         if (datosMemoria['TRASLADO/TERMINO'] && datosMemoria['TRASLADO/TERMINO'].length > 0) {
             datos = datosMemoria['TRASLADO/TERMINO'];
             let header = datos[0];
-            if (header && (String(header[2]).toLowerCase().includes('dni') || String(header[1]).toLowerCase() === 'tipo' || String(header[0]).toLowerCase() === 'año' || String(header[0]).toLowerCase() === 'ano')) {
+            if (header && (String(header[2]).toLowerCase().includes('dni') || String(header[1]).toLowerCase() === 'tipo' || String(header[0]).toLowerCase() === 'ao' || String(header[0]).toLowerCase() === 'ano')) {
                 datos = datos.slice(1);
             }
         }
@@ -19364,12 +19439,13 @@ async function descargarConsolidadoIncidenciasPDF(dni, fInicio, fFin) {
         docs.sort((a, b) => new Date(b[5] + "T00:00:00") - new Date(a[5] + "T00:00:00"));
 
         let formatFecha = (f) => f ? String(f).split('T')[0] : '';
+        let canEditDelete = (rolActual === 'Administrador') || (window.permisosUsuario && window.permisosUsuario['TRASLADO/TERMINO'] === 'RW');
         
         if(tE) {
             if(ests.length === 0) {
                 tE.innerHTML = '<tr><td colspan="7" class="text-muted py-3">No hay estudiantes trasladados.</td></tr>';
             } else {
-                tE.innerHTML = ests.map(e => `<tr><td>${e[0]}</td><td>${e[2]}</td><td>${e[3]}</td><td class="text-start">${e[4]}</td><td class="text-danger fw-bold">${formatFecha(e[5])}</td><td>${e[6] || ''}</td><td><button class="btn btn-sm btn-danger py-0 px-2" onclick="eliminarRegistroTT('${e[2]}')"><i class="fa-solid fa-trash"></i></button></td></tr>`).join('');
+                tE.innerHTML = ests.map(e => `<tr><td>${e[0]}</td><td>${e[2]}</td><td>${e[3]}</td><td class="text-start">${e[4]}</td><td class="text-danger fw-bold">${formatFecha(e[5])}</td><td>${e[6] || ''}</td><td>` + (canEditDelete ? `<button class="btn btn-sm btn-danger py-0 px-2" onclick="eliminarRegistroTT('${e[2]}')"><i class="fa-solid fa-trash"></i></button>` : `-`) + `</td></tr>`).join('');
             }
         }
         
@@ -19377,11 +19453,10 @@ async function descargarConsolidadoIncidenciasPDF(dni, fInicio, fFin) {
             if(docs.length === 0) {
                 tD.innerHTML = '<tr><td colspan="6" class="text-muted py-3">No hay docentes con t&eacute;rmino de contrato.</td></tr>';
             } else {
-                tD.innerHTML = docs.map(d => `<tr><td>${d[0]}</td><td>${d[2]}</td><td class="text-start">${d[4]}</td><td class="text-danger fw-bold">${formatFecha(d[5])}</td><td>${d[6] || ''}</td><td><button class="btn btn-sm btn-danger py-0 px-2" onclick="eliminarRegistroTT('${d[2]}')"><i class="fa-solid fa-trash"></i></button></td></tr>`).join('');
+                tD.innerHTML = docs.map(d => `<tr><td>${d[0]}</td><td>${d[2]}</td><td class="text-start">${d[4]}</td><td class="text-danger fw-bold">${formatFecha(d[5])}</td><td>${d[6] || ''}</td><td>` + (canEditDelete ? `<button class="btn btn-sm btn-danger py-0 px-2" onclick="eliminarRegistroTT('${d[2]}')"><i class="fa-solid fa-trash"></i></button>` : `-`) + `</td></tr>`).join('');
             }
         }
     }
-
 
     async function eliminarRegistroTT(dni) {
         const result = await Swal.fire({
@@ -19602,6 +19677,10 @@ async function descargarConsolidadoIncidenciasPDF(dni, fInicio, fFin) {
         }
 </script>
 </body>
+
+
+
+
 
 
 
