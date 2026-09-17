@@ -4836,7 +4836,7 @@
             // Inyectar el token de sesión si existe
             if (!payload.sessionToken) {
                 if (!sessionToken) {
-                    sessionToken = sessionStorage.getItem('sessionToken') || '';
+                    sessionToken = localStorage.getItem('sessionToken') || '';
                 }
                 if (sessionToken) {
                     payload.sessionToken = sessionToken;
@@ -4860,9 +4860,11 @@
                     
                     if (result && result.mensaje && result.mensaje.includes("UNAUTHORIZED")) {
                         // Solo alertar y recargar si realmente hay un token de sesión guardado (sesión previa activa)
-                        if (sessionStorage.getItem('sessionToken')) {
+                        if (localStorage.getItem('sessionToken')) {
                             alert("Su sesión ha expirado o es inválida. Ingrese nuevamente.");
-                            sessionStorage.clear();
+                            localStorage.removeItem('sessionToken');
+                            localStorage.removeItem('rolActual');
+                            localStorage.removeItem('usuarioDniActual');
                             location.reload();
                         }
                         return { exito: false, mensaje: "SESSION_EXPIRED" };
@@ -4938,7 +4940,9 @@
                 cancelButtonText: 'No, cancelar'
             });
             if (result.isConfirmed) {
-                sessionStorage.clear();
+                localStorage.removeItem('sessionToken');
+                localStorage.removeItem('rolActual');
+                localStorage.removeItem('usuarioDniActual');
                 location.reload();
             }
         }
@@ -4964,9 +4968,9 @@
 
             if(r.exito) {
                 sessionToken = r.sessionToken || '';
-                sessionStorage.setItem('sessionToken', sessionToken);
-                sessionStorage.setItem('rolActual', tipo);
-                sessionStorage.setItem('usuarioDniActual', r.usuarioDni || dni.trim().padStart(8, '0'));
+                localStorage.setItem('sessionToken', sessionToken);
+                localStorage.setItem('rolActual', tipo);
+                localStorage.setItem('usuarioDniActual', r.usuarioDni || dni.trim().padStart(8, '0'));
                 
                 if (r.config) window.configuracionSistema = r.config;
 
@@ -5006,6 +5010,7 @@
                             let rHojas = await fetchAPI({ accion: 'obtenerDatosVarios', hojas: hojasParaCargarFiltradas });
                             if (rHojas.exito && rHojas.datos) {
                                 hojasParaCargarFiltradas.forEach(h => datosMemoria[h] = rHojas.datos[h] || []);
+                                guardarDatosMemoriaEnCache(hojasParaCargarFiltradas);
                             }
                         } catch(e) { console.error(e); }
                     }
@@ -6244,8 +6249,8 @@
                 }
                 
                 let selDocente = document.getElementById('rep-doc-docente');
-                let rolUser = sessionStorage.getItem('rolActual') || '';
-                let dniUser = sessionStorage.getItem('usuarioDniActual') || '';
+                let rolUser = localStorage.getItem('rolActual') || '';
+                let dniUser = localStorage.getItem('usuarioDniActual') || '';
                 let divBotonesImpresion = document.querySelector('#v-reporte-docente .d-print-none .d-flex.gap-2.align-items-center');
 
                 if (rolUser === 'Docente') {
@@ -15627,7 +15632,7 @@ async function descargarConsolidadoIncidenciasPDF(dni, fInicio, fFin) {
         window.addEventListener('beforeinstallprompt', (e) => {
             e.preventDefault();
             deferredPrompt = e;
-            if (sessionStorage.getItem('pwa_prompt_shown')) return;
+            if (localStorage.getItem('pwa_prompt_shown')) return;
             setTimeout(() => {
                 mostrarPromptInstalacion();
             }, 3000);
@@ -15670,7 +15675,7 @@ async function descargarConsolidadoIncidenciasPDF(dni, fInicio, fFin) {
                 ? `<img src="${logoB64}" class="rounded-circle shadow mb-3" style="width: 80px; height: 80px; object-fit: cover;">`
                 : `<i class="fa-solid fa-mobile-screen-button text-danger fs-1 mb-3 animate__animated animate__bounce"></i>`;
             let schoolNameNormal = (window.configuracionSistema && window.configuracionSistema.NOMBRE_COLEGIO) ? window.configuracionSistema.NOMBRE_COLEGIO : "I.E. La Victoria";
-            sessionStorage.setItem('pwa_prompt_shown', 'true');
+            localStorage.setItem('pwa_prompt_shown', 'true');
             Swal.fire({
                 title: '¿Deseas instalar la aplicación?',
                 html: `
@@ -15751,7 +15756,7 @@ async function descargarConsolidadoIncidenciasPDF(dni, fInicio, fFin) {
             // ANTES de que hagan clic en "Ingresar". 
             async function precargarDatosSinLogin() {
                 try {
-                    let cachedToken = sessionStorage.getItem('sessionToken');
+                    let cachedToken = localStorage.getItem('sessionToken');
                     if (cachedToken) return; // Si ya hay sesión, el auto-login se encarga
 
                     let hojasPrecarga = ['Estudiantes', 'Docentes', 'Auxiliares', 'Registro_Asistencia', 'Asistencia_Docentes', 'Asistencia_Auxiliar', 'Incidencias', 'Areas', 'Horarios', 'Permisos', 'Apoderados', 'Feriados', 'Horario_Docentes', 'Vacaciones'];
@@ -15759,9 +15764,14 @@ async function descargarConsolidadoIncidenciasPDF(dni, fInicio, fFin) {
                     // No usamos await aquí para no bloquear la ejecución del hilo principal
                     fetchAPI({ accion: 'obtenerDatosVarios', hojas: hojasPrecarga }).then(rHojas => {
                         if (rHojas && rHojas.exito && rHojas.datos) {
+                            let hojasGuardadas = [];
                             hojasPrecarga.forEach(h => {
-                                if (rHojas.datos[h]) datosMemoria[h] = rHojas.datos[h];
+                                if (rHojas.datos[h]) {
+                                    datosMemoria[h] = rHojas.datos[h];
+                                    hojasGuardadas.push(h);
+                                }
                             });
+                            guardarDatosMemoriaEnCache(hojasGuardadas);
                             console.log("Precarga completada antes del login.");
                         }
                     });
@@ -15771,11 +15781,11 @@ async function descargarConsolidadoIncidenciasPDF(dni, fInicio, fFin) {
             // ===============================================
 
             // Recuperar sesión persistida si existe
-            let cachedToken = sessionStorage.getItem('sessionToken');
+            let cachedToken = localStorage.getItem('sessionToken');
             if (cachedToken) {
                 sessionToken = cachedToken;
-                rolActual = sessionStorage.getItem('rolActual') || '';
-                usuarioDniActual = sessionStorage.getItem('usuarioDniActual') || '';
+                rolActual = localStorage.getItem('rolActual') || '';
+                usuarioDniActual = localStorage.getItem('usuarioDniActual') || '';
                 
                 document.getElementById('login-section').classList.add('d-none');
                 document.getElementById('dashboard-section').classList.remove('d-none');
@@ -15792,6 +15802,7 @@ async function descargarConsolidadoIncidenciasPDF(dni, fInicio, fFin) {
                             let rHojas = await fetchAPI({ accion: 'obtenerDatosVarios', hojas: hojasParaCargarFilt });
                             if (rHojas.exito && rHojas.datos) {
                                 hojasParaCargarFilt.forEach(h => datosMemoria[h] = rHojas.datos[h] || []);
+                                guardarDatosMemoriaEnCache(hojasParaCargarFilt);
                             }
                         }
                         aplicarPermisosVisuales();
@@ -15817,8 +15828,8 @@ async function descargarConsolidadoIncidenciasPDF(dni, fInicio, fFin) {
                 navigator.serviceWorker.register('./sw.js').catch(err => console.log("SW Register skipped/failed:", err));
             }
             if (isStandalone()) return;
-            if (isIOS() && !sessionStorage.getItem('pwa_prompt_shown')) {
-                sessionStorage.setItem('pwa_prompt_shown', 'true');
+            if (isIOS() && !localStorage.getItem('pwa_prompt_shown')) {
+                localStorage.setItem('pwa_prompt_shown', 'true');
                 setTimeout(() => {
                     let logoB64 = localStorage.getItem('logoInstBase64') || '';
                     let iconHtml = logoB64.length > 100 
