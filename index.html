@@ -3472,7 +3472,7 @@
         </div>
     </div>
 
-    <div class="modal fade" id="modal-Areas" tabindex="-1"><div class="modal-dialog"><div class="modal-content"><div class="modal-header bg-primary text-white"><h5 class="modal-title"><i class="fa-solid fa-book"></i> Área</h5><button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button></div><div class="modal-body"><input type="text" id="are-0" class="form-control mb-3" placeholder="Nombre del Área"><div id="msg-Areas" class="text-center fw-bold"></div></div><div class="modal-footer"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button><button id="btn-form-Areas" class="btn btn-primary" onclick="guardarDato('Areas', ['are-0'])">Guardar</button></div></div></div></div>
+    <div class="modal fade" id="modal-Areas" tabindex="-1"><div class="modal-dialog"><div class="modal-content"><div class="modal-header bg-primary text-white"><h5 class="modal-title"><i class="fa-solid fa-book"></i> Área</h5><button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button></div><div class="modal-body"><input type="hidden" id="are-0"><input type="text" id="are-1" class="form-control mb-3" placeholder="Nombre del Área"><div id="msg-Areas" class="text-center fw-bold"></div></div><div class="modal-footer"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button><button id="btn-form-Areas" class="btn btn-primary" onclick="guardarDato('Areas', ['are-0', 'are-1'])">Guardar</button></div></div></div></div>
     
     <div class="modal fade" id="modal-Horarios" tabindex="-1"><div class="modal-dialog"><div class="modal-content"><div class="modal-header bg-primary text-white"><h5 class="modal-title"><i class="fa-regular fa-clock"></i> Horario de Alumnos (AM/PM)</h5><button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button></div><div class="modal-body"><input type="hidden" id="hor-0"><label class="text-muted small mb-1">Día de la Semana</label><select id="hor-1" class="form-select mb-2"><option value="">Seleccionar...</option><option value="Lunes">Lunes</option><option value="Martes">Martes</option><option value="Miércoles">Miércoles</option><option value="Jueves">Jueves</option><option value="Viernes">Viernes</option></select><div class="row g-2 mb-2">
     <div class="col"><label class="text-muted small mb-1">Grado</label><select id="hor-2" class="form-select" onchange="actualizarSeccionesHorarios()"><option value="">Grado...</option></select></div>
@@ -5212,7 +5212,7 @@
         }
 
         async function cambiarVista(idVista, btn, nombreHoja) {
-            const vistasControlDocentes = ['v-horario-docente', 'v-asistencia-docente', 'v-permisos-docentes', 'v-extractor-docente', 'v-reporte-docente'];
+            const vistasControlDocentes = ['v-horario-docente', 'v-asistencia-docente', 'v-permisos-docentes', 'v-extractor-docente', 'v-reporte-docente', 'v-vacaciones'];
             if (vistasControlDocentes.includes(idVista) && (!datosMemoria['Asistencia_Docentes'] || datosMemoria['Asistencia_Docentes'].length === 0)) {
                 let conf = await Swal.fire({
                     title: '¿Descargar Control Docentes?',
@@ -5225,7 +5225,7 @@
                 if (!conf.isConfirmed) return; // detiene el cambio de vista
 
                 mostrarCargaConProgreso();
-                let hojas = ['Asistencia_Docentes', 'Horario_Docentes', 'Permisos_Docentes'];
+                let hojas = ['Asistencia_Docentes', 'Horario_Docentes', 'Permisos_Docentes', 'Vacaciones'];
                 let r = await fetchAPI({ accion: 'obtenerDatosVarios', hojas: hojas });
                 cerrarCargaConProgreso();
 
@@ -6108,6 +6108,7 @@
                                  rArea.datos.length === 0 || 
                                  rFer.datos.length === 0 || 
                                  rPerm.datos.length === 0 || 
+                                 !datosMemoria['TRASLADO/TERMINO'] || datosMemoria['TRASLADO/TERMINO'].length === 0 ||
                                  (necesitaDocentes && rDoc.datos.length === 0);
                 
                 if (debeCargar) {
@@ -6148,9 +6149,10 @@
 
                 let selArea = document.getElementById('rep-area'); selArea.innerHTML = '<option value="">Seleccionar</option>'; 
                 reporteGlobalData.areas.forEach(a => {
-                    let nombreArea = a[0].toString().toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "");
+                    let nombre = a.length > 1 ? a[1] : a[0];
+                    let nombreArea = nombre.toString().toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
                     if(rolActual === 'Administrador' || rolActual === 'Auxiliar' || areasPermitidasStr.includes(nombreArea)) {
-                        selArea.innerHTML += `<option value="${a[0]}">${a[0]}</option>`;
+                        selArea.innerHTML += `<option value="${nombre}">${nombre}</option>`;
                     }
                 });
                 
@@ -6184,6 +6186,7 @@
                                  rPerm.datos.length === 0 || 
                                  rVac.datos.length === 0 ||
                                  !datosMemoria['Docentes'] || datosMemoria['Docentes'].length === 0 ||
+                                 !datosMemoria['TRASLADO/TERMINO'] || datosMemoria['TRASLADO/TERMINO'].length === 0 ||
                                  (necesitaAuxiliares && rAux.datos.length === 0);
                 
                 if (debeCargar) {
@@ -6302,7 +6305,7 @@
                     hojasRequeridas.push('Auxiliares');
                 }
                 
-                let debeCargar = rEst.datos.length === 0 || rAsisAux.datos.length === 0 || rFer.datos.length === 0 || rPerm.datos.length === 0 || rVac.datos.length === 0 || (necesitaAuxiliares && rAux.datos.length === 0);
+                let debeCargar = rEst.datos.length === 0 || rAsisAux.datos.length === 0 || rFer.datos.length === 0 || rPerm.datos.length === 0 || rVac.datos.length === 0 || (necesitaAuxiliares && rAux.datos.length === 0) || !datosMemoria['TRASLADO/TERMINO'] || datosMemoria['TRASLADO/TERMINO'].length === 0;
                 
                 if (debeCargar) {
                     let rM = await fetchAPI({ 
@@ -6943,16 +6946,22 @@
                     let esFeriadoDeclarado = (reporteGlobalData.feriados && reporteGlobalData.feriados.includes(fechaDia));
 
                     let tieneTR = false;
+                    let tieneTC = false;
                     let fFmtTR = fechaIteracion.getFullYear() + "-" + String(fechaIteracion.getMonth() + 1).padStart(2, '0') + "-" + String(fechaIteracion.getDate()).padStart(2, '0');
                     (reporteGlobalData['TRASLADO/TERMINO'] || []).forEach(tt => {
-                        if(String(tt[2]) === dni && String(tt[1]) === 'Estudiante') {
+                        if(String(tt[2]) === dni) {
                             let fTT = String(tt[5]).split('T')[0];
-                            if(fFmtTR >= fTT) tieneTR = true; 
+                            if(fFmtTR >= fTT) {
+                                if(String(tt[1]) === 'Docente') tieneTC = true;
+                                else tieneTR = true;
+                            }
                         }
                     });
 
                     if (tieneTR) {
                         checksHTML += `<td style="border: 2px solid black; background-color: #f8f9fa;" class="align-middle text-center"><span class="text-secondary fw-bold" style="font-size: 0.95rem;" title="Traslado">TR</span></td>`;
+                    } else if (tieneTC) {
+                        checksHTML += `<td style="border: 2px solid black; background-color: #f8f9fa;" class="align-middle text-center"><span class="text-secondary fw-bold" style="font-size: 0.95rem;" title="Término de Contrato">TC</span></td>`;
                     } else if (esFeriadoDeclarado) {
                         checksHTML += `<td style="border: 2px solid black; background-color: #ffe0b2; color: #e65100; font-weight: bold; font-size: 0.85rem;" class="align-middle" title="Día Feriado / No Laborable">F</td>`;
                     } else if (esFinDeSemana) {
@@ -7841,32 +7850,19 @@
                     let failureCount = 0;
                     let colaRestante = [];
                     
+                    let matriz = [];
                     for (let i = 0; i < N; i++) {
                         let q = queue[i];
-                        let porc = Math.round((i / N) * 100);
-                        if (bar) {
-                            bar.style.width = porc + '%';
-                            bar.innerText = porc + '%';
-                            bar.setAttribute('aria-valuenow', porc);
-                        }
-                        if (text) text.innerText = `Sincronizando ${i+1} de ${N}: ${q.nombres}...`;
                         
                         let estadoFinal = q.estado;
-                        if (estadoFinal === 'Tarde') {
+                        if (estadoFinal === 'Tarde' || estadoFinal === 'Asistió') {
                             let horaLimite = obtenerHoraLimiteParaEstudiante(q.grado, q.seccion);
                             let diffMin = calcularMinutosDiferencia(q.hora, horaLimite, 'tardanza');
                             if (diffMin > 0) {
                                 let diffMinutos = Math.floor(diffMin / 60);
                                 estadoFinal = "Tarde (T) (" + diffMinutos + " min)";
-                            } else {
+                            } else if (estadoFinal === 'Tarde') {
                                 estadoFinal = "Tarde (T)";
-                            }
-                        } else if (estadoFinal === 'Asistió') {
-                            let horaLimite = obtenerHoraLimiteParaEstudiante(q.grado, q.seccion);
-                            let diffMin = calcularMinutosDiferencia(q.hora, horaLimite, 'tardanza');
-                            if (diffMin > 0) {
-                                let diffMinutos = Math.floor(diffMin / 60);
-                                estadoFinal = "Tarde (T) (" + diffMinutos + " min)";
                             }
                         }
                         
@@ -7884,33 +7880,37 @@
                             q.color || ""
                         ];
                         
-                        let payload = {
-                            accion: 'guardarRegistro',
-                            hoja: 'Asistencia_Auxiliar',
-                            datos: record
-                        };
+                        matriz.push(record);
                         
-                        let guardadoExitoso = false;
-                        try {
-                            let res = await fetchAPI(payload);
-                            if (res && res.exito) {
-                                successCount++;
-                                if (!datosMemoria['Asistencia_Auxiliar']) datosMemoria['Asistencia_Auxiliar'] = [];
-                                datosMemoria['Asistencia_Auxiliar'] = datosMemoria['Asistencia_Auxiliar'].filter(a => !(a[3].toString().trim() === q.dni && a[1].toString().trim() === q.fecha));
-                                datosMemoria['Asistencia_Auxiliar'].push(record);
-                                guardadoExitoso = true;
-                            } else {
-                                failureCount++;
-                            }
-                        } catch (err) {
-                            failureCount++;
-                        }
+                        if (!datosMemoria['Asistencia_Auxiliar']) datosMemoria['Asistencia_Auxiliar'] = [];
+                        datosMemoria['Asistencia_Auxiliar'] = datosMemoria['Asistencia_Auxiliar'].filter(a => !(a[3].toString().trim() === q.dni && a[1].toString().trim() === q.fecha));
+                        datosMemoria['Asistencia_Auxiliar'].push(record);
+                    }
+                    
+                    if (bar) {
+                        bar.style.width = '50%';
+                        bar.innerText = '50%';
+                        bar.setAttribute('aria-valuenow', 50);
+                    }
+                    if (text) text.innerText = 'Enviando ' + N + ' registros al servidor...';
 
-                        if (!guardadoExitoso) {
-                            colaRestante.push(q);
+                    let payload = {
+                        accion: 'guardarMasivo',
+                        hoja: 'Asistencia_Auxiliar',
+                        matriz: matriz
+                    };
+                    
+                    try {
+                        let res = await fetchAPI(payload);
+                        if (res && res.exito) {
+                            successCount = N;
+                        } else {
+                            failureCount = N;
+                            colaRestante = queue;
                         }
-                        
-                        await new Promise(resolve => setTimeout(resolve, 300));
+                    } catch (err) {
+                        failureCount = N;
+                        colaRestante = queue;
                     }
                     
                     if (bar) {
@@ -8859,7 +8859,7 @@
                         }
                         tr.innerHTML = `${cellCheckbox}<td class="fw-bold">${fila[0]}</td><td>${cellCelular || '-'}</td>${apoAcciones}`;
                     }
-                    if(hoja === 'Areas') tr.innerHTML = `<td class="fw-bold">${fila[0]}</td>${cellAcciones}`;
+                    if(hoja === 'Areas') tr.innerHTML = `<td class="fw-bold">${fila[1]}</td>${cellAcciones}`;
                     
                     if(hoja === 'Horario_Docentes') {
                         let hIniDisp = fila[4] === 'dia libre' ? '<span class="badge bg-secondary opacity-75">Día Libre</span>' : `<span class="text-success fw-bold">${fila[4]}</span>`;
@@ -9014,7 +9014,7 @@
 
             if(areas.length > 0) {
                 let options = '<option value="">Seleccione un Área</option>'; 
-                areas.forEach(f => options += `<option value="${f[0]}">${f[0]}</option>`); 
+                areas.forEach(f => { let nombre = f.length > 1 ? f[1] : f[0]; options += `<option value="${nombre}">${nombre}</option>`; }); 
                 if(selectArea1) selectArea1.innerHTML = options; 
                 if(selectArea2) selectArea2.innerHTML = options;
                 if(selectArea3) selectArea3.innerHTML = options;
@@ -10503,7 +10503,7 @@
                     grados.forEach(g => selG.innerHTML += `<option value="${g}">${g}</option>`); 
                     secciones.forEach(s => selS.innerHTML += `<option value="${s}">${s}</option>`);
                     
-                    (datosMemoria['Areas'] || []).forEach(a => selArea.innerHTML += `<option value="${a[0]}">${a[0]}</option>`);
+                    (datosMemoria['Areas'] || []).forEach(a => { let nombre = a.length > 1 ? a[1] : a[0]; selArea.innerHTML += `<option value="${nombre}">${nombre}</option>`; });
                     (datosMemoria['Docentes'] || []).forEach(d => { if(d[5] === 'Activo') selDocente.innerHTML += `<option value="${d[1]}">${d[1]}</option>`; });
 
                     // Llenar datos específicos de la fila
@@ -13989,7 +13989,7 @@
                 let selA = document.getElementById('inc-asignatura');
                 if(selA) {
                     selA.innerHTML = '<option value="">Seleccione...</option>';
-                    if(datosMemoria.Areas) datosMemoria.Areas.forEach(a => selA.innerHTML += `<option value="${a[0]}">${a[0]}</option>`);
+                    if(datosMemoria.Areas) datosMemoria.Areas.forEach(a => { let nombre = a.length > 1 ? a[1] : a[0]; selA.innerHTML += `<option value="${nombre}">${nombre}</option>`; });
                 }
 
                 let grados = datosMemoria.Estudiantes ? [...new Set(datosMemoria.Estudiantes.map(e => e[2]))].filter(Boolean).sort() : [];
@@ -15759,7 +15759,7 @@ async function descargarConsolidadoIncidenciasPDF(dni, fInicio, fFin) {
                     let cachedToken = localStorage.getItem('sessionToken');
                     if (cachedToken) return; // Si ya hay sesión, el auto-login se encarga
 
-                    let hojasPrecarga = ['Estudiantes', 'Docentes', 'Auxiliares', 'Registro_Asistencia', 'Asistencia_Docentes', 'Asistencia_Auxiliar', 'Incidencias', 'Areas', 'Horarios', 'Permisos', 'Apoderados', 'Feriados', 'Horario_Docentes', 'Vacaciones'];
+                    let hojasPrecarga = ['Estudiantes', 'Docentes', 'Auxiliares', 'Registro_Asistencia', 'Asistencia_Auxiliar', 'Incidencias', 'Areas', 'Horarios', 'Permisos', 'Apoderados', 'Feriados'];
                     
                     // No usamos await aquí para no bloquear la ejecución del hilo principal
                     fetchAPI({ accion: 'obtenerDatosVarios', hojas: hojasPrecarga }).then(rHojas => {
@@ -15791,9 +15791,9 @@ async function descargarConsolidadoIncidenciasPDF(dni, fInicio, fFin) {
                 document.getElementById('dashboard-section').classList.remove('d-none');
                 document.getElementById('user-name-display').innerText = rolActual + " - " + usuarioDniActual;
                 
-                let hojasParaCargar = (rolActual === 'Docente') ? ['Docentes', 'Estudiantes', 'Registro_Asistencia', 'Asistencia_Docentes', 'Incidencias', 'Areas', 'Horarios', 'Permisos', 'Apoderados', 'Feriados', 'Vacaciones'] : 
-                                      (rolActual === 'Auxiliar' ? ['Auxiliares', 'Estudiantes', 'Asistencia_Auxiliar', 'Incidencias', 'Areas', 'Horarios', 'Registro_Asistencia', 'Permisos', 'Apoderados', 'Feriados', 'Vacaciones'] : 
-                                      ['Estudiantes', 'Registro_Asistencia', 'Asistencia_Auxiliar', 'Asistencia_Docentes', 'Docentes', 'Auxiliares', 'Apoderados', 'Areas', 'Horarios', 'Feriados', 'Permisos', 'Horario_Docentes', 'Incidencias', 'Administradores', 'Permisos_Docentes', 'Vacaciones']);
+                let hojasParaCargar = (rolActual === 'Docente') ? ['Docentes', 'Estudiantes', 'Registro_Asistencia', 'Incidencias', 'Areas', 'Horarios', 'Permisos', 'Apoderados', 'Feriados'] : 
+                                      (rolActual === 'Auxiliar' ? ['Auxiliares', 'Estudiantes', 'Asistencia_Auxiliar', 'Incidencias', 'Areas', 'Horarios', 'Registro_Asistencia', 'Permisos', 'Apoderados', 'Feriados'] : 
+                                      ['Estudiantes', 'Registro_Asistencia', 'Asistencia_Auxiliar', 'Docentes', 'Auxiliares', 'Apoderados', 'Areas', 'Horarios', 'Feriados', 'Permisos', 'Incidencias', 'Administradores']);
                 let hojasParaCargarFilt = hojasParaCargar.filter(h => !datosMemoria[h] || datosMemoria[h].length === 0);
                 
                 (async () => {
@@ -19136,7 +19136,16 @@ async function descargarConsolidadoIncidenciasPDF(dni, fInicio, fFin) {
         async function cargarVistaVacaciones() {
             if (!datosMemoria['Vacaciones']) datosMemoria['Vacaciones'] = [];
             try {
-                let rVac = await fetchAPI({ accion: 'obtenerDatos', hoja: 'Vacaciones' });
+                let reqData = { accion: 'obtenerDatos', hoja: 'Vacaciones' };
+                let fIniVal = document.getElementById('rep-aux-finicio') ? document.getElementById('rep-aux-finicio').value : null;
+                let fFinVal = document.getElementById('rep-aux-ffin') ? document.getElementById('rep-aux-ffin').value : null;
+                
+                if (fIniVal && fFinVal) {
+                    reqData.fechaInicio = fIniVal;
+                    reqData.fechaFin = fFinVal;
+                }
+                
+                let rVac = await fetchAPI(reqData);
                 if (rVac && rVac.exito && Array.isArray(rVac.datos)) {
                     datosMemoria['Vacaciones'] = rVac.datos;
                 }
