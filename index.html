@@ -1782,7 +1782,7 @@
                 </div>
 
                 <div class="nav-item w-100 menu-admin d-none mb-1" id="menu-personal-container">
-                    <a class="nav-link d-flex justify-content-between align-items-center" data-bs-toggle="collapse" href="#collapsePersonal" role="button" aria-expanded="false">
+                    <a class="nav-link d-flex justify-content-between align-items-center" href="#collapsePersonal" role="button" aria-expanded="false" onclick="toggleControlDocentes(event)">
                         <span><i class="fa-solid fa-user-tie icon-main me-1"></i> Control Docentes</span>
                         <i class="fa-solid fa-chevron-down"></i>
                     </a>
@@ -5001,7 +5001,7 @@
                         } catch(e) { console.error(e); }
                     }
 
-                    let hojasParaCargar = (tipo === 'Docente') ? ['Docentes', 'Estudiantes', 'Registro_Asistencia', 'Asistencia_Docentes', 'Incidencias', 'Areas', 'Horarios', 'Permisos', 'Apoderados', 'Feriados'] : ['Auxiliares', 'Estudiantes', 'Asistencia_Auxiliar', 'Incidencias', 'Areas', 'Horarios', 'Registro_Asistencia', 'Permisos', 'Apoderados', 'Feriados'];
+                    let hojasParaCargar = (tipo === 'Docente') ? ['Docentes', 'Estudiantes', 'Registro_Asistencia', 'Incidencias', 'Areas', 'Horarios', 'Permisos', 'Apoderados', 'Feriados'] : ['Auxiliares', 'Estudiantes', 'Asistencia_Auxiliar', 'Incidencias', 'Areas', 'Horarios', 'Registro_Asistencia', 'Permisos', 'Apoderados', 'Feriados'];
                     let hojasParaCargarFiltradas = hojasParaCargar.filter(h => !datosMemoria[h] || datosMemoria[h].length === 0);
 
                     if (hojasParaCargarFiltradas.length > 0) {
@@ -5100,6 +5100,9 @@
                     aplicarPermisosVisuales();
                     if (window.hojaActualVisible) cargarTabla(window.hojaActualVisible, false, true);
                 }
+                
+                // Llamar a la sincronizacion en segundo plano
+                sincronizacionEnSegundoPlano();
             } else { 
                 btn.innerHTML = 'Ingresar'; btn.disabled = false;
                 document.getElementById('mensaje').innerHTML = '<span class="text-danger">' + r.mensaje + '</span>'; 
@@ -5194,11 +5197,13 @@
                     let bar = Swal.getHtmlContainer().querySelector('.progress-bar');
                     let progress = 0;
                     window.fakeProgressInterval = setInterval(() => {
-                        progress += Math.floor(Math.random() * 15) + 5;
-                        if (progress > 95) progress = 95;
+                        let remaining = 99 - progress;
+                        let increment = Math.max(1, Math.floor(remaining * 0.08));
+                        progress += increment;
+                        if (progress > 99) progress = 99;
                         if (b) b.textContent = progress + '%';
                         if (bar) bar.style.width = progress + '%';
-                    }, 300);
+                    }, 500);
                 }
             });
         }
@@ -5211,32 +5216,58 @@
             setTimeout(() => Swal.close(), 300);
         }
 
+        async function toggleControlDocentes(e) {
+            e.preventDefault();
+            let col = document.getElementById('collapsePersonal');
+            let bsCol = bootstrap.Collapse.getInstance(col);
+            let isExpanded = col.classList.contains('show');
+
+            if (!window.controlDocentesDescargadoSession) {
+                if (!isExpanded) {
+                    let conf = await Swal.fire({
+                        title: '¿Descargar Control Docentes?',
+                        text: 'Desea descargar los datos de todos estos menús?',
+                        icon: 'question',
+                        showCancelButton: true,
+                        confirmButtonText: 'Sí, descargar',
+                        cancelButtonText: 'No'
+                    });
+                    if (conf.isConfirmed) {
+                        window.controlDocentesDescargadoSession = true;
+                        mostrarCargaConProgreso();
+                        let hojas = ['Asistencia_Docentes', 'Horario_Docentes', 'Permisos_Docentes', 'Vacaciones'];
+                        let r = await fetchAPI({ accion: 'obtenerDatosVarios', hojas: hojas });
+                        cerrarCargaConProgreso();
+
+                        if (r.exito && r.datos) {
+                            hojas.forEach(h => datosMemoria[h] = r.datos[h] || []);
+                            guardarDatosMemoriaEnCache(hojas);
+                            if (!bsCol) bsCol = new bootstrap.Collapse(col, {toggle: false});
+                            bsCol.show();
+                            e.currentTarget.setAttribute('aria-expanded', 'true');
+                        } else {
+                            Swal.fire('Error', 'No se pudo descargar.', 'error');
+                        }
+                    } else {
+                        if (!bsCol) bsCol = new bootstrap.Collapse(col, {toggle: false});
+                        bsCol.show();
+                        e.currentTarget.setAttribute('aria-expanded', 'true');
+                    }
+                } else {
+                    if (!bsCol) bsCol = new bootstrap.Collapse(col, {toggle: false});
+                    bsCol.hide();
+                    e.currentTarget.setAttribute('aria-expanded', 'false');
+                }
+            } else {
+                if (!bsCol) bsCol = new bootstrap.Collapse(col, {toggle: false});
+                bsCol.toggle();
+                e.currentTarget.setAttribute('aria-expanded', !isExpanded);
+            }
+        }
+
         async function cambiarVista(idVista, btn, nombreHoja) {
             const vistasControlDocentes = ['v-horario-docente', 'v-asistencia-docente', 'v-permisos-docentes', 'v-extractor-docente', 'v-reporte-docente', 'v-vacaciones'];
-            if (vistasControlDocentes.includes(idVista) && (!datosMemoria['Asistencia_Docentes'] || datosMemoria['Asistencia_Docentes'].length === 0)) {
-                let conf = await Swal.fire({
-                    title: '¿Descargar Control Docentes?',
-                    text: 'Desea descargar esta sección para visualizar el menú?',
-                    icon: 'question',
-                    showCancelButton: true,
-                    confirmButtonText: 'Sí, descargar',
-                    cancelButtonText: 'No'
-                });
-                if (!conf.isConfirmed) return; // detiene el cambio de vista
 
-                mostrarCargaConProgreso();
-                let hojas = ['Asistencia_Docentes', 'Horario_Docentes', 'Permisos_Docentes', 'Vacaciones'];
-                let r = await fetchAPI({ accion: 'obtenerDatosVarios', hojas: hojas });
-                cerrarCargaConProgreso();
-
-                if (r.exito && r.datos) {
-                    hojas.forEach(h => datosMemoria[h] = r.datos[h] || []);
-                    guardarDatosMemoriaEnCache(hojas);
-                } else {
-                    Swal.fire('Error', 'No se pudo descargar.', 'error');
-                    return;
-                }
-            }
 
             window.hojaActualVisible = nombreHoja; // Guardar para autorefresco
             cancelarEdicion(nombreHoja); document.querySelectorAll('.vista-modulo').forEach(v => v.classList.add('d-none')); document.getElementById(idVista).classList.remove('d-none');
@@ -6103,34 +6134,23 @@
                     hojasRequeridas.push('Docentes');
                 }
                 
-                let debeCargar = rEst.datos.length === 0 || 
-                                 rAsis.datos.length === 0 || 
-                                 rArea.datos.length === 0 || 
-                                 rFer.datos.length === 0 || 
-                                 rPerm.datos.length === 0 || 
-                                 !datosMemoria['TRASLADO/TERMINO'] || datosMemoria['TRASLADO/TERMINO'].length === 0 ||
-                                 (necesitaDocentes && rDoc.datos.length === 0);
+                let hojasFaltantes = hojasRequeridas.filter(h => !datosMemoria[h] || datosMemoria[h].length === 0);
                 
-                if (debeCargar) {
-                    let rM = await fetchAPI({ accion: 'obtenerDatosVarios', hojas: hojasRequeridas });
+                if (hojasFaltantes.length > 0) {
+                    let rM = await fetchAPI({ accion: 'obtenerDatosVarios', hojas: hojasFaltantes });
                     if (!rM || !rM.exito || !rM.datos) throw new Error(rM && rM.mensaje ? rM.mensaje : "Error API");
-                    rEst.datos = rM.datos['Estudiantes'] || rEst.datos;
-                    rAsis.datos = rM.datos['Registro_Asistencia'] || rAsis.datos;
-                    rArea.datos = rM.datos['Areas'] || rArea.datos;
-                    rFer.datos = rM.datos['Feriados'] || rFer.datos;
-                    rPerm.datos = rM.datos['Permisos'] || rPerm.datos;
-                    if (rM.datos['TRASLADO/TERMINO']) datosMemoria['TRASLADO/TERMINO'] = rM.datos['TRASLADO/TERMINO'];
-                    if (necesitaDocentes) {
-                        rDoc.datos = rM.datos['Docentes'] || [];
-                        datosMemoria['Docentes'] = rDoc.datos;
-                    }
-                    
-                    datosMemoria['Estudiantes'] = rEst.datos;
-                    datosMemoria['Registro_Asistencia'] = rAsis.datos;
-                    datosMemoria['Areas'] = rArea.datos;
-                    datosMemoria['Feriados'] = rFer.datos;
-                    datosMemoria['Permisos'] = rPerm.datos;
+                    hojasFaltantes.forEach(h => {
+                        datosMemoria[h] = rM.datos[h] || [];
+                    });
+                    guardarDatosMemoriaEnCache(hojasFaltantes);
                 }
+                
+                rEst.datos = datosMemoria['Estudiantes'] || [];
+                rAsis.datos = datosMemoria['Registro_Asistencia'] || [];
+                rArea.datos = datosMemoria['Areas'] || [];
+                rFer.datos = datosMemoria['Feriados'] || [];
+                rPerm.datos = datosMemoria['Permisos'] || [];
+                rDoc.datos = datosMemoria['Docentes'] || [];
                 
                 reporteGlobalData = { 
                     estudiantes: rEst.datos,
@@ -6180,36 +6200,23 @@
                     hojasRequeridas.push('Auxiliares');
                 }
                 
-                let debeCargar = rEst.datos.length === 0 || 
-                                 rAsisAux.datos.length === 0 || 
-                                 rFer.datos.length === 0 || 
-                                 rPerm.datos.length === 0 || 
-                                 rVac.datos.length === 0 ||
-                                 !datosMemoria['Docentes'] || datosMemoria['Docentes'].length === 0 ||
-                                 !datosMemoria['TRASLADO/TERMINO'] || datosMemoria['TRASLADO/TERMINO'].length === 0 ||
-                                 (necesitaAuxiliares && rAux.datos.length === 0);
+                let hojasFaltantes = hojasRequeridas.filter(h => !datosMemoria[h] || datosMemoria[h].length === 0);
                 
-                if (debeCargar) {
-                    let rM = await fetchAPI({ accion: 'obtenerDatosVarios', hojas: hojasRequeridas });
+                if (hojasFaltantes.length > 0) {
+                    let rM = await fetchAPI({ accion: 'obtenerDatosVarios', hojas: hojasFaltantes });
                     if (!rM || !rM.exito || !rM.datos) throw new Error(rM && rM.mensaje ? rM.mensaje : "Error API");
-                    rEst.datos = rM.datos['Estudiantes'] || rEst.datos;
-                    rAsisAux.datos = rM.datos['Asistencia_Auxiliar'] || rAsisAux.datos;
-                    rFer.datos = rM.datos['Feriados'] || rFer.datos;
-                    rPerm.datos = rM.datos['Permisos'] || rPerm.datos;
-                    rVac.datos = rM.datos['Vacaciones'] || rVac.datos;
-                    if (rM.datos['Docentes']) datosMemoria['Docentes'] = rM.datos['Docentes'];
-                    if (rM.datos['TRASLADO/TERMINO']) datosMemoria['TRASLADO/TERMINO'] = rM.datos['TRASLADO/TERMINO'];
-                    if (necesitaAuxiliares) {
-                        rAux.datos = rM.datos['Auxiliares'] || [];
-                        datosMemoria['Auxiliares'] = rAux.datos;
-                    }
-                    
-                    datosMemoria['Estudiantes'] = rEst.datos;
-                    datosMemoria['Asistencia_Auxiliar'] = rAsisAux.datos;
-                    datosMemoria['Feriados'] = rFer.datos;
-                    datosMemoria['Permisos'] = rPerm.datos;
-                    datosMemoria['Vacaciones'] = rVac.datos;
+                    hojasFaltantes.forEach(h => {
+                        datosMemoria[h] = rM.datos[h] || [];
+                    });
+                    guardarDatosMemoriaEnCache(hojasFaltantes);
                 }
+                
+                rEst.datos = datosMemoria['Estudiantes'] || [];
+                rAsisAux.datos = datosMemoria['Asistencia_Auxiliar'] || [];
+                rFer.datos = datosMemoria['Feriados'] || [];
+                rPerm.datos = datosMemoria['Permisos'] || [];
+                rVac.datos = datosMemoria['Vacaciones'] || [];
+                rAux.datos = datosMemoria['Auxiliares'] || [];
                 
                 reporteGlobalData = { 
                     estudiantes: rEst.datos,
@@ -15353,7 +15360,7 @@ async function descargarConsolidadoIncidenciasPDF(dni, fInicio, fFin) {
                     <div class="badge bg-secondary p-2 shadow-sm rounded-pill d-flex align-items-center gap-1 text-white fw-bold" style="font-size: 0.75rem; border: 1px solid rgba(255,255,255,0.15); background-color: #495057 !important;">
                         <i class="fa-solid fa-circle-check text-success"></i>
                         <span>Sistema Activo</span>
-                        <div id="led-sync-status" class="led-indicator-green led-pulse-slow ms-1" title="Estado de Recepción de Datos (Parpadea al recibir nuevos registros)"></div>
+                        <span id="sync-percentage" class="ms-1 fw-bold" style="font-size: 0.75rem; color: #ffeb3b; display: none;">0%</span><div id="led-sync-status" class="led-indicator-green led-pulse-slow ms-1" title="Estado de Recepción de Datos (Parpadea al recibir nuevos registros)"></div>
                         <div id="led-other-sync-status" class="led-indicator-yellow led-pulse-slow-yellow ms-1 d-none" title="Otros usuarios transmitiendo (Detección de recepción)"></div>
                     </div>
                 `;
@@ -15381,7 +15388,7 @@ async function descargarConsolidadoIncidenciasPDF(dni, fInicio, fFin) {
                     <div class="badge bg-danger p-2 shadow-sm rounded-pill d-flex align-items-center gap-1 text-white fw-bold animate__animated animate__flash animate__infinite animate__slow" style="font-size: 0.75rem; border: 1px solid rgba(255,255,255,0.25);">
                         <i class="fa-solid fa-triangle-exclamation"></i>
                         <span>¡Licencia por vencer: ${diffDays} ${diffDays === 1 ? 'día' : 'días'}!</span>
-                        <div id="led-sync-status" class="led-indicator-green led-pulse-slow ms-1" title="Estado de Recepción de Datos (Parpadea al recibir nuevos registros)"></div>
+                        <span id="sync-percentage" class="ms-1 fw-bold" style="font-size: 0.75rem; color: #ffeb3b; display: none;">0%</span><div id="led-sync-status" class="led-indicator-green led-pulse-slow ms-1" title="Estado de Recepción de Datos (Parpadea al recibir nuevos registros)"></div>
                         <div id="led-other-sync-status" class="led-indicator-yellow led-pulse-slow-yellow ms-1 d-none" title="Otros usuarios transmitiendo (Detección de recepción)"></div>
                     </div>
                 `;
@@ -15390,7 +15397,7 @@ async function descargarConsolidadoIncidenciasPDF(dni, fInicio, fFin) {
                     <div class="badge bg-success p-2 shadow-sm rounded-pill d-flex align-items-center gap-1 text-white fw-bold" style="font-size: 0.75rem; background-color: #198754 !important;">
                         <i class="fa-solid fa-clock"></i>
                         <span>Licencia: ${diffDays} días restantes</span>
-                        <div id="led-sync-status" class="led-indicator-green led-pulse-slow ms-1" title="Estado de Recepción de Datos (Parpadea al recibir nuevos registros)"></div>
+                        <span id="sync-percentage" class="ms-1 fw-bold" style="font-size: 0.75rem; color: #ffeb3b; display: none;">0%</span><div id="led-sync-status" class="led-indicator-green led-pulse-slow ms-1" title="Estado de Recepción de Datos (Parpadea al recibir nuevos registros)"></div>
                         <div id="led-other-sync-status" class="led-indicator-yellow led-pulse-slow-yellow ms-1 d-none" title="Otros usuarios transmitiendo (Detección de recepción)"></div>
                     </div>
                 `;
@@ -15751,6 +15758,48 @@ async function descargarConsolidadoIncidenciasPDF(dni, fInicio, fFin) {
             // Iniciar aplicación de logo y configuración de inmediato (más rápido)
             aplicarLogoEnInterfaz();
 
+            async function sincronizacionEnSegundoPlano() {
+                let container = document.getElementById('sync-percentage');
+                if(!container) return;
+                container.style.display = 'inline-block';
+                container.innerText = '0%';
+                container.style.color = '#ffc107'; 
+                
+                let hojasParaCargar = (rolActual === 'Docente') ? ['Docentes', 'Estudiantes', 'Registro_Asistencia', 'Incidencias', 'Areas', 'Horarios', 'Permisos', 'Apoderados', 'Feriados'] : 
+                                      (rolActual === 'Auxiliar' ? ['Auxiliares', 'Estudiantes', 'Asistencia_Auxiliar', 'Incidencias', 'Areas', 'Horarios', 'Registro_Asistencia', 'Permisos', 'Apoderados', 'Feriados', 'TRASLADO/TERMINO', 'Docentes', 'Vacaciones'] : 
+                                      ['Estudiantes', 'Registro_Asistencia', 'Asistencia_Auxiliar', 'Docentes', 'Auxiliares', 'Apoderados', 'Areas', 'Horarios', 'Feriados', 'Permisos', 'Incidencias', 'Administradores', 'TRASLADO/TERMINO', 'Vacaciones']);
+                
+                let total = hojasParaCargar.length;
+                let loaded = 0;
+                let huboCambios = false;
+                
+                for(let i = 0; i < total; i++) {
+                    let h = hojasParaCargar[i];
+                    try {
+                        let rHojas = await fetchAPI({ accion: 'obtenerDatosVarios', hojas: [h] });
+                        if (rHojas && rHojas.exito && rHojas.datos && rHojas.datos[h]) {
+                            let newDataStr = JSON.stringify(rHojas.datos[h]);
+                            let oldDataStr = JSON.stringify(datosMemoria[h] || []);
+                            if(newDataStr !== oldDataStr) {
+                                datosMemoria[h] = rHojas.datos[h];
+                                await guardarDatosMemoriaEnCache([h]);
+                                huboCambios = true;
+                            }
+                        }
+                    } catch(e) { console.error("Error bg sync sheet " + h, e); }
+                    
+                    loaded++;
+                    let pct = Math.round((loaded / total) * 100);
+                    container.innerText = pct + "%";
+                }
+                
+                container.style.color = '#ffffff'; // White/Green text for completion
+                if (huboCambios && window.hojaActualVisible) {
+                    cargarTabla(window.hojaActualVisible, false, true);
+                }
+                setTimeout(() => { container.style.display = 'none'; }, 3000);
+            }
+
             // === NUEVO: PRE-CARGA SILENCIOSA EN EL LOGIN ===
             // Como el usuario solicitó, descargamos la data en segundo plano
             // ANTES de que hagan clic en "Ingresar". 
@@ -15792,8 +15841,8 @@ async function descargarConsolidadoIncidenciasPDF(dni, fInicio, fFin) {
                 document.getElementById('user-name-display').innerText = rolActual + " - " + usuarioDniActual;
                 
                 let hojasParaCargar = (rolActual === 'Docente') ? ['Docentes', 'Estudiantes', 'Registro_Asistencia', 'Incidencias', 'Areas', 'Horarios', 'Permisos', 'Apoderados', 'Feriados'] : 
-                                      (rolActual === 'Auxiliar' ? ['Auxiliares', 'Estudiantes', 'Asistencia_Auxiliar', 'Incidencias', 'Areas', 'Horarios', 'Registro_Asistencia', 'Permisos', 'Apoderados', 'Feriados'] : 
-                                      ['Estudiantes', 'Registro_Asistencia', 'Asistencia_Auxiliar', 'Docentes', 'Auxiliares', 'Apoderados', 'Areas', 'Horarios', 'Feriados', 'Permisos', 'Incidencias', 'Administradores']);
+                                      (rolActual === 'Auxiliar' ? ['Auxiliares', 'Estudiantes', 'Asistencia_Auxiliar', 'Incidencias', 'Areas', 'Horarios', 'Registro_Asistencia', 'Permisos', 'Apoderados', 'Feriados', 'TRASLADO/TERMINO', 'Docentes', 'Vacaciones'] : 
+                                      ['Estudiantes', 'Registro_Asistencia', 'Asistencia_Auxiliar', 'Docentes', 'Auxiliares', 'Apoderados', 'Areas', 'Horarios', 'Feriados', 'Permisos', 'Incidencias', 'Administradores', 'TRASLADO/TERMINO', 'Vacaciones']);
                 let hojasParaCargarFilt = hojasParaCargar.filter(h => !datosMemoria[h] || datosMemoria[h].length === 0);
                 
                 (async () => {
@@ -15807,6 +15856,9 @@ async function descargarConsolidadoIncidenciasPDF(dni, fInicio, fFin) {
                         }
                         aplicarPermisosVisuales();
                         if (window.hojaActualVisible) cargarTabla(window.hojaActualVisible, false, true);
+                        
+                        // Llamar a la sincronizacion en segundo plano para verificar si hay cambios
+                        sincronizacionEnSegundoPlano();
                     } catch(e) { console.error("Error al restaurar datos:", e); }
                 })();
             }
