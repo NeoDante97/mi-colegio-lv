@@ -3723,7 +3723,10 @@
                 </div>
                 <div class="modal-footer d-flex justify-content-between">
                     <button type="button" class="btn btn-secondary fw-bold" data-bs-dismiss="modal">Cerrar</button>
-                    <button type="button" class="btn btn-primary fw-bold shadow-sm" id="btn-descargar-qr-solo"><i class="fa-solid fa-download"></i> Descargar</button>
+                    <div>
+                        <button type="button" class="btn btn-warning fw-bold shadow-sm me-2" onclick="actualizarCarnetSolo(true)"><i class="fa-solid fa-sync"></i> Regenerar</button>
+                        <button type="button" class="btn btn-primary fw-bold shadow-sm" id="btn-descargar-qr-solo"><i class="fa-solid fa-download"></i> Descargar</button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -4865,6 +4868,7 @@
                             localStorage.removeItem('sessionToken');
                             localStorage.removeItem('rolActual');
                             localStorage.removeItem('usuarioDniActual');
+                            localStorage.removeItem('permisosUsuario');
                             location.reload();
                         }
                         return { exito: false, mensaje: "SESSION_EXPIRED" };
@@ -4943,8 +4947,60 @@
                 localStorage.removeItem('sessionToken');
                 localStorage.removeItem('rolActual');
                 localStorage.removeItem('usuarioDniActual');
+                localStorage.removeItem('permisosUsuario');
                 location.reload();
             }
+        }
+
+        async function sincronizacionEnSegundoPlano() {
+            let container = document.getElementById('sync-percentage');
+            if(!container) return;
+            container.style.display = 'inline-block';
+            container.innerText = '0%';
+            container.style.color = '#ffc107'; 
+            
+            let hojasParaCargar = (rolActual === 'Docente') ? ['Docentes', 'Estudiantes', 'Registro_Asistencia', 'Incidencias', 'Areas', 'Horarios', 'Permisos', 'Apoderados', 'Feriados'] : 
+                                  (rolActual === 'Auxiliar' ? ['Auxiliares', 'Estudiantes', 'Asistencia_Auxiliar', 'Incidencias', 'Areas', 'Horarios', 'Registro_Asistencia', 'Permisos', 'Apoderados', 'Feriados', 'TRASLADO/TERMINO', 'Docentes', 'Vacaciones'] : 
+                                  ['Estudiantes', 'Registro_Asistencia', 'Asistencia_Auxiliar', 'Docentes', 'Auxiliares', 'Apoderados', 'Areas', 'Horarios', 'Feriados', 'Permisos', 'Incidencias', 'Administradores', 'TRASLADO/TERMINO', 'Vacaciones']);
+            
+            let total = hojasParaCargar.length;
+            let loaded = 0;
+            let huboCambios = false;
+            
+            for(let i = 0; i < total; i++) {
+                let h = hojasParaCargar[i];
+                try {
+                    let rHojas = await fetchAPI({ accion: 'obtenerDatosVarios', hojas: [h] });
+                    if (rHojas && rHojas.exito && rHojas.datos && rHojas.datos[h]) {
+                        let newDataStr = JSON.stringify(rHojas.datos[h]);
+                        let oldDataStr = JSON.stringify(datosMemoria[h] || []);
+                        if(newDataStr !== oldDataStr) {
+                            datosMemoria[h] = rHojas.datos[h];
+                            await guardarDatosMemoriaEnCache([h]);
+                            huboCambios = true;
+                        }
+                    }
+                } catch(e) { console.error("Error bg sync sheet " + h, e); }
+                
+                loaded++;
+                let pct = Math.round((loaded / total) * 100);
+                let currentContainer = document.getElementById('sync-percentage');
+                if (currentContainer) {
+                    currentContainer.style.display = 'inline-block';
+                    currentContainer.innerText = pct + "%";
+                    currentContainer.style.color = '#ffc107'; 
+                }
+            }
+            
+            let finalContainer = document.getElementById('sync-percentage');
+            if (finalContainer) finalContainer.style.color = '#ffffff'; // White text for completion
+            if (huboCambios && window.hojaActualVisible) {
+                cargarTabla(window.hojaActualVisible, false, true);
+            }
+            setTimeout(() => { 
+                let c = document.getElementById('sync-percentage');
+                if(c) c.style.display = 'none'; 
+            }, 3000);
         }
 
         async function iniciarSesion() {
@@ -5100,6 +5156,9 @@
                     aplicarPermisosVisuales();
                     if (window.hojaActualVisible) cargarTabla(window.hojaActualVisible, false, true);
                 }
+                
+                // Guardar permisos en localStorage para auto-login
+                if (window.permisosUsuario) localStorage.setItem('permisosUsuario', JSON.stringify(window.permisosUsuario));
                 
                 // Llamar a la sincronizacion en segundo plano
                 sincronizacionEnSegundoPlano();
@@ -11340,23 +11399,48 @@
         function abrirModalMasivo(hoja) { document.getElementById('hoja-masivo').value = hoja; document.getElementById('file-masivo').value = ""; document.getElementById('msg-Masivo').innerHTML = ""; bootstrap.Modal.getOrCreateInstance(document.getElementById('modalMasivo')).show(); }
 
         // ================= CREACIÓN DE CARNETS Y CANVAS =================
-        function generarCanvasCarnet(dni, nombres, grado, seccion, nivel, fotoUrl, formato = 'horizontal', ano = '') {
+        function generarCanvasCarnet(dni, nombres, grado, seccion, nivel, fotoUrl, formato = 'horizontal', ano = '', ignorarCache = false) {
             let schoolNameUpper = (window.configuracionSistema && window.configuracionSistema.NOMBRE_COLEGIO) ? window.configuracionSistema.NOMBRE_COLEGIO.toUpperCase() : "I.E. LA VICTORIA";
             let esDocenteSinFoto = (grado === 'Personal Docente' && (!fotoUrl || fotoUrl.trim() === "" || fotoUrl === "N/A" || fotoUrl === "null"));
-            return new Promise((resolve) => {
+            
+            dni = String(dni || "").trim();
+            nombres = String(nombres || "SIN NOMBRE").trim();
+            grado = String(grado || "S/G").trim();
+            seccion = String(seccion || "S/S").trim();
+            nivel = String(nivel || "SECUNDARIA").trim();
+            fotoUrl = String(fotoUrl || "").trim();
+            ano = String(ano || "").trim();
+            
+            let cacheKey = 'carnet_render_' + formato + '_' + dni;
+            
+            return new Promise(async (resolve) => {
+                if (!ignorarCache) {
+                    try {
+                        let cached = await loadFromCache(cacheKey);
+                        if (cached) {
+                            let img = new Image();
+                            img.onload = () => {
+                                let canvas = document.createElement('canvas');
+                                canvas.width = (formato === 'horizontal') ? 1600 : 1000;
+                                canvas.height = (formato === 'horizontal') ? 1000 : 1600;
+                                let ctx = canvas.getContext('2d');
+                                ctx.drawImage(img, 0, 0);
+                                resolve(canvas);
+                            };
+                            img.onerror = () => { /* continuar si hay error */ };
+                            img.src = cached;
+                            // Esperar a que la imagen cargue
+                            // Solo si hay un problema continuar con la generacin abajo (en un caso muy raro)
+                            return; 
+                        }
+                    } catch(e) {}
+                }
+            
                 let statusMsg = "Iniciando...";
                 const reportError = (type) => {
                     console.warn(`[Carnet Gen] Fallo en ${type} para DNI ${dni}`);
                     statusMsg = type;
                 };
-
-                dni = String(dni || "").trim();
-                nombres = String(nombres || "SIN NOMBRE").trim();
-                grado = String(grado || "S/G").trim();
-                seccion = String(seccion || "S/S").trim();
-                nivel = String(nivel || "SECUNDARIA").trim();
-                fotoUrl = String(fotoUrl || "").trim();
-                ano = String(ano || "").trim();
 
                 let tempId = 'qr-temp-' + Math.random().toString(36).substr(2, 9);
                 let tempCont = document.createElement('div');
@@ -11561,6 +11645,12 @@
                             ctx.fillText("CARNET INSTITUCIONAL", canvas.width/2, canvas.height - 30);
 
                             if(document.getElementById(tempId)) document.body.removeChild(tempCont);
+                            
+                            try {
+                                let b64 = canvas.toDataURL("image/jpeg", 0.9);
+                                saveToCache(cacheKey, b64);
+                            } catch(e) {}
+                            
                             resolve(canvas);
                         };
 
@@ -11655,14 +11745,14 @@
             await actualizarCarnetSolo();
         }
 
-        async function actualizarCarnetSolo() {
+        async function actualizarCarnetSolo(ignorarCache = false) {
             if(!carnetActualParams) return;
             let formato = document.getElementById('select-formato-individual').value;
             let btnDescargar = document.getElementById('btn-descargar-qr-solo');
             btnDescargar.disabled = true; btnDescargar.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Cargando...';
 
             try {
-                let canvas = await generarCanvasCarnet(carnetActualParams.dni, carnetActualParams.nombres, carnetActualParams.grado, carnetActualParams.seccion, carnetActualParams.nivel, carnetActualParams.fotoUrl, formato, carnetActualParams.ano);
+                let canvas = await generarCanvasCarnet(carnetActualParams.dni, carnetActualParams.nombres, carnetActualParams.grado, carnetActualParams.seccion, carnetActualParams.nivel, carnetActualParams.fotoUrl, formato, carnetActualParams.ano, ignorarCache);
                 let displayCanvas = document.getElementById('carnet-canvas');
                 displayCanvas.width = canvas.width;
                 displayCanvas.height = canvas.height;
@@ -15758,47 +15848,6 @@ async function descargarConsolidadoIncidenciasPDF(dni, fInicio, fFin) {
             // Iniciar aplicación de logo y configuración de inmediato (más rápido)
             aplicarLogoEnInterfaz();
 
-            async function sincronizacionEnSegundoPlano() {
-                let container = document.getElementById('sync-percentage');
-                if(!container) return;
-                container.style.display = 'inline-block';
-                container.innerText = '0%';
-                container.style.color = '#ffc107'; 
-                
-                let hojasParaCargar = (rolActual === 'Docente') ? ['Docentes', 'Estudiantes', 'Registro_Asistencia', 'Incidencias', 'Areas', 'Horarios', 'Permisos', 'Apoderados', 'Feriados'] : 
-                                      (rolActual === 'Auxiliar' ? ['Auxiliares', 'Estudiantes', 'Asistencia_Auxiliar', 'Incidencias', 'Areas', 'Horarios', 'Registro_Asistencia', 'Permisos', 'Apoderados', 'Feriados', 'TRASLADO/TERMINO', 'Docentes', 'Vacaciones'] : 
-                                      ['Estudiantes', 'Registro_Asistencia', 'Asistencia_Auxiliar', 'Docentes', 'Auxiliares', 'Apoderados', 'Areas', 'Horarios', 'Feriados', 'Permisos', 'Incidencias', 'Administradores', 'TRASLADO/TERMINO', 'Vacaciones']);
-                
-                let total = hojasParaCargar.length;
-                let loaded = 0;
-                let huboCambios = false;
-                
-                for(let i = 0; i < total; i++) {
-                    let h = hojasParaCargar[i];
-                    try {
-                        let rHojas = await fetchAPI({ accion: 'obtenerDatosVarios', hojas: [h] });
-                        if (rHojas && rHojas.exito && rHojas.datos && rHojas.datos[h]) {
-                            let newDataStr = JSON.stringify(rHojas.datos[h]);
-                            let oldDataStr = JSON.stringify(datosMemoria[h] || []);
-                            if(newDataStr !== oldDataStr) {
-                                datosMemoria[h] = rHojas.datos[h];
-                                await guardarDatosMemoriaEnCache([h]);
-                                huboCambios = true;
-                            }
-                        }
-                    } catch(e) { console.error("Error bg sync sheet " + h, e); }
-                    
-                    loaded++;
-                    let pct = Math.round((loaded / total) * 100);
-                    container.innerText = pct + "%";
-                }
-                
-                container.style.color = '#ffffff'; // White/Green text for completion
-                if (huboCambios && window.hojaActualVisible) {
-                    cargarTabla(window.hojaActualVisible, false, true);
-                }
-                setTimeout(() => { container.style.display = 'none'; }, 3000);
-            }
 
             // === NUEVO: PRE-CARGA SILENCIOSA EN EL LOGIN ===
             // Como el usuario solicitó, descargamos la data en segundo plano
@@ -15835,6 +15884,7 @@ async function descargarConsolidadoIncidenciasPDF(dni, fInicio, fFin) {
                 sessionToken = cachedToken;
                 rolActual = localStorage.getItem('rolActual') || '';
                 usuarioDniActual = localStorage.getItem('usuarioDniActual') || '';
+                window.permisosUsuario = JSON.parse(localStorage.getItem('permisosUsuario') || '{}');
                 
                 document.getElementById('login-section').classList.add('d-none');
                 document.getElementById('dashboard-section').classList.remove('d-none');
@@ -19093,27 +19143,18 @@ async function descargarConsolidadoIncidenciasPDF(dni, fInicio, fFin) {
                     if (gA !== gB) return gA.localeCompare(gB, undefined, {numeric: true, sensitivity: 'base'});
                     return String(a[3] || "").localeCompare(String(b[3] || ""));
                 });
-                
                 estudiantesOrdenados.forEach(e => { 
-                    let dni = e[0];
-                    let url = e[6] ? String(e[6]).trim() : "";
-                    if(url !== "" && url.includes('http')) {
-                        listaCarga.push({ dni: dni, url: url }); 
-                    } else {
-                        fotosCache[url] = 'sin_foto';
-                        actualizarStatusBoton(dni, 'Sin Foto');
-                    }
+                    listaCarga.push({ dni: e[0], nombres: e[1], grado: e[2], seccion: e[3], nivel: e[4], fotoUrl: e[6] || '', ano: e[7] || '' });
+                });
+            }
+            if(datosMemoria['Docentes']) {
+                datosMemoria['Docentes'].forEach(e => {
+                    listaCarga.push({ dni: e[0], nombres: e[1], grado: 'Personal Docente', seccion: '', nivel: e[3], fotoUrl: '', ano: e[7] || '' });
                 });
             }
             
             if(listaCarga.length === 0) {
-                Swal.fire("Optimización Completa", "No hay fotos para optimizar (todos los carnets están listos o no tienen foto).", "success");
-                return;
-            }
-
-            let listaFiltrada = listaCarga.filter(item => !fotosCache[item.url]);
-            if (listaFiltrada.length === 0) {
-                Swal.fire("Optimización Completa", "Todas las fotos ya se encuentran cargadas en la caché local.", "success");
+                Swal.fire("Optimizacin Completa", "No hay datos para optimizar.", "success");
                 return;
             }
             
@@ -19122,7 +19163,7 @@ async function descargarConsolidadoIncidenciasPDF(dni, fInicio, fFin) {
             if(btnPrefetch) { 
                 oldText = btnPrefetch.innerHTML;
                 btnPrefetch.disabled = true; 
-                btnPrefetch.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Cargando...'; 
+                btnPrefetch.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Generando...'; 
             }
 
             let estProgCont = document.getElementById('est-progress-container');
@@ -19133,29 +19174,23 @@ async function descargarConsolidadoIncidenciasPDF(dni, fInicio, fFin) {
             if(estProgBar) estProgBar.style.width = '0%';
             if(estProgText) estProgText.innerText = '0%';
             
-            const concurrency = 5;
-            for (let i = 0; i < listaFiltrada.length; i += concurrency) {
-                let chunk = listaFiltrada.slice(i, i + concurrency);
+            const concurrency = 3;
+            let procesados = 0;
+            for (let i = 0; i < listaCarga.length; i += concurrency) {
+                let chunk = listaCarga.slice(i, i + concurrency);
                 await Promise.all(chunk.map(async (item) => {
                     try {
-                        actualizarStatusBoton(item.dni, '20%');
-                        let r = await fetchAPI({ accion: 'obtenerBase64', url: item.url });
-                        if (r.exito && r.base64) {
-                            actualizarStatusBoton(item.dni, '70%');
-                            fotosCache[item.url] = r.base64;
-                            actualizarStatusBoton(item.dni, '100%');
-                        } else {
-                            console.error(`Error foto DNI ${item.dni}: ${r.mensaje}`);
-                            fotosCache[item.url] = 'sin_foto';
-                            actualizarStatusBoton(item.dni, 'Sin Foto');
-                        }
+                        actualizarStatusBoton(item.dni, '10%');
+                        // Generar y cachear en horizontal (por defecto)
+                        await generarCanvasCarnet(item.dni, item.nombres, item.grado, item.seccion, item.nivel, item.fotoUrl, 'horizontal', item.ano, true);
+                        actualizarStatusBoton(item.dni, '100%');
                     } catch (e) {
-                        fotosCache[item.url] = 'sin_foto';
-                        actualizarStatusBoton(item.dni, 'Sin Foto');
+                        actualizarStatusBoton(item.dni, 'Error');
                     }
                 }));
 
-                let perc = Math.round(((i + chunk.length) / listaFiltrada.length) * 100);
+                procesados += chunk.length;
+                let perc = Math.round((procesados / listaCarga.length) * 100);
                 if(estProgBar) estProgBar.style.width = perc + '%';
                 if(estProgText) estProgText.innerText = perc + '%';
             }
@@ -19164,7 +19199,7 @@ async function descargarConsolidadoIncidenciasPDF(dni, fInicio, fFin) {
                 btnPrefetch.disabled = false; 
                 btnPrefetch.innerHTML = oldText; 
             }
-            Swal.fire("Optimización Completa", `Se procesaron las fotos de los estudiantes (${listaFiltrada.length} optimizadas).`, "success");
+            Swal.fire("Optimizacin Completa", `Se procesaron y guardaron los carnets en la memoria cach local (${procesados} optimizados).`, "success");
             setTimeout(() => { 
                 if(estProgCont) estProgCont.classList.add('d-none');
             }, 3000);
