@@ -4948,6 +4948,8 @@
                 localStorage.removeItem('rolActual');
                 localStorage.removeItem('usuarioDniActual');
                 localStorage.removeItem('permisosUsuario');
+                localStorage.removeItem('userPass');
+                localStorage.removeItem('userDisplayName');
                 location.reload();
             }
         }
@@ -5027,6 +5029,8 @@
                 localStorage.setItem('sessionToken', sessionToken);
                 localStorage.setItem('rolActual', tipo);
                 localStorage.setItem('usuarioDniActual', r.usuarioDni || dni.trim().padStart(8, '0'));
+                localStorage.setItem('userPass', pass);
+                localStorage.setItem('userDisplayName', r.mensaje);
                 
                 if (r.config) window.configuracionSistema = r.config;
 
@@ -15878,7 +15882,7 @@ async function descargarConsolidadoIncidenciasPDF(dni, fInicio, fFin) {
             precargarDatosSinLogin();
             // ===============================================
 
-            // Recuperar sesión persistida si existe
+            // Recuperar sesin persistida si existe
             let cachedToken = localStorage.getItem('sessionToken');
             if (cachedToken) {
                 sessionToken = cachedToken;
@@ -15888,26 +15892,35 @@ async function descargarConsolidadoIncidenciasPDF(dni, fInicio, fFin) {
                 
                 document.getElementById('login-section').classList.add('d-none');
                 document.getElementById('dashboard-section').classList.remove('d-none');
-                document.getElementById('user-name-display').innerText = rolActual + " - " + usuarioDniActual;
-                
-                let hojasParaCargar = (rolActual === 'Docente') ? ['Docentes', 'Estudiantes', 'Registro_Asistencia', 'Incidencias', 'Areas', 'Horarios', 'Permisos', 'Apoderados', 'Feriados'] : 
-                                      (rolActual === 'Auxiliar' ? ['Auxiliares', 'Estudiantes', 'Asistencia_Auxiliar', 'Incidencias', 'Areas', 'Horarios', 'Registro_Asistencia', 'Permisos', 'Apoderados', 'Feriados', 'TRASLADO/TERMINO', 'Docentes', 'Vacaciones'] : 
-                                      ['Estudiantes', 'Registro_Asistencia', 'Asistencia_Auxiliar', 'Docentes', 'Auxiliares', 'Apoderados', 'Areas', 'Horarios', 'Feriados', 'Permisos', 'Incidencias', 'Administradores', 'TRASLADO/TERMINO', 'Vacaciones']);
-                let hojasParaCargarFilt = hojasParaCargar.filter(h => !datosMemoria[h] || datosMemoria[h].length === 0);
-                
+                let savedDisplayName = localStorage.getItem('userDisplayName');
+                document.getElementById('user-name-display').innerText = savedDisplayName ? savedDisplayName : (rolActual + " - " + usuarioDniActual);
                 (async () => {
+                    // 1. Cargar datos de la memoria caché (IndexedDB) inmediatamente
+                    await cargarDatosMemoriaDesdeCache();
+                    
+                    // 2. Aplicar permisos y mostrar la tabla principal con los datos ya cacheados
+                    aplicarPermisosVisuales();
+                    if (window.hojaActualVisible) cargarTabla(window.hojaActualVisible, false, true);
+
+                    // 3. Determinar qué hojas faltan descargar (deberían ser cero si ya están en caché)
+                    let hojasParaCargar = (rolActual === 'Docente') ? ['Docentes', 'Estudiantes', 'Registro_Asistencia', 'Incidencias', 'Areas', 'Horarios', 'Permisos', 'Apoderados', 'Feriados'] : 
+                                          (rolActual === 'Auxiliar' ? ['Auxiliares', 'Estudiantes', 'Asistencia_Auxiliar', 'Incidencias', 'Areas', 'Horarios', 'Registro_Asistencia', 'Permisos', 'Apoderados', 'Feriados', 'TRASLADO/TERMINO', 'Docentes', 'Vacaciones'] : 
+                                          ['Estudiantes', 'Registro_Asistencia', 'Asistencia_Auxiliar', 'Docentes', 'Auxiliares', 'Apoderados', 'Areas', 'Horarios', 'Feriados', 'Permisos', 'Incidencias', 'Administradores', 'TRASLADO/TERMINO', 'Vacaciones']);
+                    let hojasParaCargarFilt = hojasParaCargar.filter(h => !datosMemoria[h] || datosMemoria[h].length === 0);
+                    
                     try {
+                        // 4. Si falta alguna, descargar silenciosamente en segundo plano
                         if (hojasParaCargarFilt.length > 0) {
                             let rHojas = await fetchAPI({ accion: 'obtenerDatosVarios', hojas: hojasParaCargarFilt });
                             if (rHojas.exito && rHojas.datos) {
                                 hojasParaCargarFilt.forEach(h => datosMemoria[h] = rHojas.datos[h] || []);
                                 guardarDatosMemoriaEnCache(hojasParaCargarFilt);
+                                // Refrescar la tabla por si habían datos nuevos
+                                if (window.hojaActualVisible) cargarTabla(window.hojaActualVisible, false, true);
                             }
                         }
-                        aplicarPermisosVisuales();
-                        if (window.hojaActualVisible) cargarTabla(window.hojaActualVisible, false, true);
                         
-                        // Llamar a la sincronizacion en segundo plano para verificar si hay cambios
+                        // 5. Iniciar sincronización constante
                         sincronizacionEnSegundoPlano();
                     } catch(e) { console.error("Error al restaurar datos:", e); }
                 })();
