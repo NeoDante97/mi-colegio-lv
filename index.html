@@ -8490,10 +8490,10 @@
         async function cargarTabla(hoja, forzarFetch = true, silencioso = false) {
             let tb = document.getElementById('tb-' + hoja); if(!tb) return;
 
-            // Si no forzamos, dibujamos desde la memoria (pre-cargada al iniciar sesión)
+            // Si no forzamos, dibujamos desde la memoria rápido y actualizamos en silencio
             if (!forzarFetch && datosMemoria[hoja]) {
                 dibujarFilasTabla(hoja, datosMemoria[hoja]);
-                return;
+                silencioso = true; // Activar modo silencioso para que la petición sea en segundo plano
             }
 
             // Si no es silencioso, mostramos el spinner de carga
@@ -11899,6 +11899,27 @@
         let ultimoDniEscaneado = ""; let tiempoUltimoEscaneo = 0;
         let dnisEnProceso = new Set();
 
+        let globalAudioCtx = null;
+        function initAudio() {
+            if (!globalAudioCtx) {
+                globalAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+            if (globalAudioCtx.state === 'suspended') {
+                globalAudioCtx.resume();
+            }
+        }
+        function playTone(freq, type, duration) {
+            try {
+                initAudio();
+                let osc = globalAudioCtx.createOscillator();
+                osc.type = type;
+                osc.frequency.setValueAtTime(freq, globalAudioCtx.currentTime);
+                osc.connect(globalAudioCtx.destination);
+                osc.start();
+                osc.stop(globalAudioCtx.currentTime + duration);
+            } catch(e) {}
+        }
+
         async function iniciarCamara() {
             if (escaneando) return;
             const al = document.getElementById('alerta-qr');
@@ -11921,11 +11942,7 @@
                     tiempoUltimoEscaneo = ahora;
 
                     // Feedback auditivo instantáneo sin bloqueo
-                    try {
-                        let ctxAudio = new (window.AudioContext || window.webkitAudioContext)();
-                        let osc = ctxAudio.createOscillator(); osc.connect(ctxAudio.destination);
-                        osc.frequency.value = 1200; osc.start(); osc.stop(ctxAudio.currentTime + 0.03);
-                    } catch(e) {}
+                    playTone(1200, 'sine', 0.03);
 
                     // PROCESAR Y SUBIR EN SEGUNDO PLANO SIN PAUSAR CÁMARA
                     enviarAsistencia(dniLimpio); 
@@ -12034,12 +12051,19 @@
                 clearTimeout(toast.timeoutId);
             }
             
-            // Eliminar automáticamente tras 4 segundos
+            // Efecto llamativo con brillo
+            let glowColor = colorClass === 'success' ? 'rgba(25, 135, 84, 0.6)' : 
+                            colorClass === 'warning' ? 'rgba(255, 193, 7, 0.6)' : 
+                            colorClass === 'danger' ? 'rgba(220, 53, 69, 0.6)' : 'rgba(13, 202, 240, 0.6)';
+            
+            toast.style.cssText = `background-color: rgba(255,255,255,0.95); backdrop-filter: blur(8px); pointer-events: auto; border-radius: 12px; transition: all 0.5s ease; box-shadow: 0 0 20px ${glowColor}, inset 0 0 10px ${glowColor}; border: 2px solid var(--color-${colorClass})!important; margin-top: 10px; width: 100%;`;
+            
+            // Eliminar automáticamente tras 2 segundos para escanear rápido
             toast.timeoutId = setTimeout(() => {
                 toast.style.opacity = '0';
                 toast.style.transform = 'translateY(-20px)';
                 setTimeout(() => toast.remove(), 500);
-            }, 4000);
+            }, 2000);
         }
 
         async function enviarAsistencia(dni) {
@@ -12059,22 +12083,9 @@
                 let tipoTT = trasladoOtermino[1];
                 let mensajeRetirado = (String(tipoTT).trim().toLowerCase() === 'estudiante') ? 'EL ALUMNO SE TRASLADO A OTRO COLEGIO' : 'TERMINO SU CONTRATO';
                 
-                Swal.fire({
-                    title: '¡ATENCIÓN!',
-                    html: '<div style="font-size: 2rem; font-weight: 900; color: #dc3545; text-transform: uppercase; line-height: 1.2; padding: 20px;">' + mensajeRetirado + '</div>',
-                    icon: 'error',
-                    background: '#fff3f3',
-                    confirmButtonColor: '#dc3545',
-                    confirmButtonText: 'ENTENDIDO',
-                    allowOutsideClick: false
-                });
+                showScanToast("¡ATENCIÓN! " + mensajeRetirado, "danger", {nombres: "DNI: " + dniPadded, gradoSec: "TRASLADO/TERMINO"});
                 
-                try {
-                    let ctxAudio = new (window.AudioContext || window.webkitAudioContext)();
-                    let osc = ctxAudio.createOscillator(); osc.connect(ctxAudio.destination);
-                    osc.type = 'sawtooth'; osc.frequency.setValueAtTime(150, ctxAudio.currentTime);
-                    osc.start(); osc.stop(ctxAudio.currentTime + 0.5);
-                } catch(e) {}
+                playTone(150, 'sawtooth', 0.5);
                 
                 return;
             }
@@ -12464,11 +12475,7 @@
             }
 
             // Audio de éxito instantáneo
-            try {
-                let ctxAudio = new (window.AudioContext || window.webkitAudioContext)();
-                let osc = ctxAudio.createOscillator(); osc.connect(ctxAudio.destination);
-                osc.frequency.value = 1200; osc.start(); osc.stop(ctxAudio.currentTime + 0.08);
-            } catch(e) {}
+            playTone(1200, 'sine', 0.08);
 
             // Reproducción de voz instantánea (nombre completo y confirmación)
             let msgVoz = (alumnoResumen.estadoCalculado || "") + " " + (payload.tipoMarca || "");
@@ -12588,17 +12595,12 @@
             
             let yaExiste = pendientes.find(p => p.dni === payload.dni && p.accion === payload.accion && p.fecha === payload.fecha);
             if(yaExiste) {
-                let ctx = new (window.AudioContext || window.webkitAudioContext)();
-                let osc = ctx.createOscillator(); osc.type = 'square'; osc.connect(ctx.destination); osc.frequency.value = 300; osc.start(); osc.stop(ctx.currentTime + 0.3);
-                
-                document.getElementById('warn-mensaje').innerText = "Ya escaneado en modo Offline hoy. Esperando sincronización."; 
-                let modalWarn = bootstrap.Modal.getOrCreateInstance(document.getElementById('modalYaRegistrado')); 
-                modalWarn.show();
+                playTone(300, 'square', 0.3);
                 
                 let alerta = document.getElementById('alerta-qr');
                 alerta.className = "alert alert-warning text-dark fs-5 fw-bold"; alerta.innerHTML = "⚠️ Ya en cola local."; document.getElementById('dni-manual').value = "";
                 reproducirVoz(obtenerMensajeCortoVoz(alumnoResumen ? alumnoResumen.nombres : 'Estudiante', "Ya en cola local."));
-                setTimeout(() => { modalWarn.hide(); continuarEscaneo(); }, 2000);
+                showScanToast("YA EN COLA LOCAL", "warning", alumnoResumen);
                 return; 
             }
 
@@ -12611,39 +12613,11 @@
             
             actualizarUIOffline();
             
-            // --- NUEVO DISEÑO VISUAL PARA MOSTRAR LA HORA OFFLINE ---
-            document.getElementById('tit-exito').innerText = "Modo Offline Activo";
-            document.getElementById('asis-nombres').innerText = alumnoResumen ? alumnoResumen.nombres : ("DNI: " + payload.dni);
-            document.getElementById('asis-nivel').innerText = alumnoResumen ? (payload.accion === 'registrarAsistenciaDocente' ? 'Docente' : 'Estudiante') : '...';
-            document.getElementById('asis-grado').innerHTML = alumnoResumen ? alumnoResumen.gradoSec : "<span class='text-danger fw-bold'><i class='fa-solid fa-wifi'></i> SIN INTERNET</span>";
-            
-            let estadoFmt = alumnoResumen && alumnoResumen.estadoCalculado ? alumnoResumen.estadoCalculado : "Marcación Local";
-            document.getElementById('asis-area').innerHTML = `
-                <div class="mt-2 p-2 bg-light border border-info rounded text-center shadow-sm">
-                    <strong class="text-dark d-block mb-1" style="font-size: 0.85rem;">MARCACIÓN EXACTA CAPTURADA:</strong>
-                    <span class="fs-5 text-primary fw-bold"><i class="fa-regular fa-calendar"></i> ${fLocal}</span> <br>
-                    <span class="fs-4 text-success fw-bold"><i class="fa-regular fa-clock"></i> ${hLocal}</span> <br>
-                    <span class="fs-6 text-warning fw-bold mt-1 d-block"><i class="fa-solid fa-circle-info"></i> ESTADO: ${estadoFmt}</span>
-                </div>
-            `;
-            
-            let modalContent = document.querySelector('#modalAsistenciaExitosa .modal-content');
-            let iconExito = document.querySelector('#modalAsistenciaExitosa .modal-body i');
-            let titExito = document.getElementById('tit-exito');
-            
-            modalContent.classList.remove('border-success', 'border-warning');
-            modalContent.classList.add('border-info');
-            iconExito.className = "fa-solid fa-hard-drive text-info";
-            titExito.className = "text-info fw-bold mb-4";
-            
-            let ctx = new (window.AudioContext || window.webkitAudioContext)();
-            let osc = ctx.createOscillator(); osc.connect(ctx.destination); osc.frequency.value = 500; osc.start(); osc.stop(ctx.currentTime + 0.1);
+            playTone(500, 'sine', 0.1);
 
-            let modalExito = bootstrap.Modal.getOrCreateInstance(document.getElementById('modalAsistenciaExitosa')); modalExito.show();
             let alerta = document.getElementById('alerta-qr');
             alerta.className = "alert alert-info fs-5 fw-bold"; alerta.innerHTML = "💾 Captura guardada localmente."; document.getElementById('dni-manual').value = "";
             reproducirVoz(obtenerMensajeCortoVoz(alumnoResumen ? alumnoResumen.nombres : 'Estudiante', "Guardado localmente."));
-            setTimeout(() => { modalExito.hide(); continuarEscaneo(); }, 2000);
         }
 
         // Variables globales para modo local y control de sincronización
