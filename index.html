@@ -5350,6 +5350,7 @@
 
             // === NUEVO: Pre-carga de datos para el Escáner QR (Evitar Duplicados) ===
             if(idVista === 'v-qr') {
+                if (typeof initAudio === 'function') initAudio(); // Despertar AudioContext con interacción del usuario
                 cargarTabla('Asistencia_Auxiliar', true, true);
                 cargarTabla('Registro_Asistencia', true, true);
                 cargarTabla('Asistencia_Docentes', true, true);
@@ -11925,7 +11926,18 @@
             const al = document.getElementById('alerta-qr');
             try {
                 if (!scanner) scanner = new Html5Qrcode("reader");
-                const config = { fps: 15, qrbox: { width: 250, height: 250 }, aspectRatio: 1.0 };
+                const config = { 
+                    fps: 25, 
+                    qrbox: function(viewfinderWidth, viewfinderHeight) {
+                        let minEdgePercentage = 0.85; 
+                        let minEdgeSize = Math.min(viewfinderWidth, viewfinderHeight);
+                        let qrboxSize = Math.floor(minEdgeSize * minEdgePercentage);
+                        return { width: qrboxSize, height: qrboxSize };
+                    }, 
+                    aspectRatio: 1.0,
+                    formatsToSupport: [ Html5QrcodeSupportedFormats.QR_CODE ],
+                    experimentalFeatures: { useBarCodeDetectorIfSupported: true }
+                };
                 
                 await scanner.start({ facingMode: "environment" }, config, async (dniDecodificado) => {
                     let ahora = Date.now();
@@ -11941,8 +11953,8 @@
                     ultimoDniEscaneado = dniLimpio;
                     tiempoUltimoEscaneo = ahora;
 
-                    // Feedback auditivo instantáneo sin bloqueo
-                    playTone(1200, 'sine', 0.03);
+                    // Feedback auditivo instantáneo sin bloqueo, un poco más largo y claro para que el usuario escuche
+                    playTone(1500, 'sine', 0.15);
 
                     // PROCESAR Y SUBIR EN SEGUNDO PLANO SIN PAUSAR CÁMARA
                     enviarAsistencia(dniLimpio); 
